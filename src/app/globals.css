@@ -1,27 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Basic CSS Reset */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Additional body styling */
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+    line-height: 1.6;
+    font-size: 16px;
+    font-family: "Roboto", sans-serif;
+    min-height: 100vh;
 }
