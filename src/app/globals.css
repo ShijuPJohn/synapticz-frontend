@@ -1,4 +1,9 @@
 /* Basic CSS Reset */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 *, *::before, *::after {
     margin: 0;
     padding: 0;
@@ -15,4 +20,19 @@ body {
     font-size: 16px;
     font-family: "Roboto", sans-serif;
     min-height: 100vh;
+}
+
+.header-list-item {
+    font-size: 1.125rem;
+    color: #22d3ee;
+    margin: 1rem 2rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    transition: border-color 0.5s ease;
+}
+
+.header-list-item:hover {
+    border-bottom-color: var(--secondary-color-light); /* Tailwind's hover:border-secondary-color-light */
 }

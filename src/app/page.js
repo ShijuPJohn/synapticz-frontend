@@ -1,5 +1,5 @@
-import Image from "next/image";
-import Head from "next/head";
+import ComponentsWrapper from "@/components/ComponentsWrapper";
+
 
 export default function Home() {
     return (
