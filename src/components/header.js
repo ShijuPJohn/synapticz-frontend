@@ -1,22 +1,70 @@
-import React from 'react';
-import {Button} from "@mui/material";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faBars} from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useRef, useEffect } from 'react';
+import { Button } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 
-function Header(props) {
+function Header() {
+    const drawerTimeout = useRef(null);
+    const [openDrawer, setOpenDrawer] = useState(false);
+    const [isAnimating, setIsAnimating] = useState(false);  // Track animation state
+
+    function handleOpenDrawer() {
+        if (openDrawer) {
+            setIsAnimating(true);
+            clearTimeout(drawerTimeout.current);
+            drawerTimeout.current = setTimeout(() => {
+                setOpenDrawer(false);
+                setIsAnimating(false);
+            }, 600);
+        } else {
+            setOpenDrawer(true);
+            drawerTimeout.current = setTimeout(() => {
+                setIsAnimating(true);
+                setTimeout(() => {
+                    setOpenDrawer(false);
+                    setIsAnimating(false);
+                }, 600);
+            }, 3000);
+        }
+    }
+
     return (
-        <header className={"flex flex-row items-center justify-center md:justify-between w-full bg-gray-700 px-4 py-2 h-[calc(4vw+1rem)] relative"}>
-            <button className={"md:hidden absolute left-2 top-0 text-gray-500 text-[calc(3vw+.5rem)] my-auto"}>
+        <header className="flex flex-row items-center justify-center md:justify-between w-full bg-gray-700 px-4 py-2 h-[calc(4vw+1.5rem)] relative">
+            <button className="md:hidden absolute left-2 top-0 text-gray-500 text-[calc(3vw+.5rem)] my-auto" onClick={handleOpenDrawer}>
                 <FontAwesomeIcon icon={faBars} />
             </button>
-            <h1 className=" logo text-[calc(1vw+1rem)] font-[600] text-white">
-                Synapticz
-            </h1>
+
+            {openDrawer && (
+                <div
+                    className={`absolute left-0 top-[calc(4vw+1.5rem)] bg-[rgba(55,56,77,0.95)] h-[90vh] w-[40%] transition-transform duration-500 ease-in-out ${
+                        isAnimating ? 'menu-drawer hide' : 'menu-drawer'
+                    } flex items-center px-4 py-2`}
+                >
+                    <nav className="navLinks ">
+                        <ul className="flex text-white flex-col items-start justify-center">
+                            <li className="drawer-item">
+                                <Link href="/" className="">Home</Link>
+                            </li>
+                            <li className="drawer-item">
+                                <Link href="/contact">Browse Quizzes</Link>
+                            </li>
+                            <li className="drawer-item">
+                                <Link href="/about">LeaderBoard</Link>
+                            </li>
+                            <li className="drawer-item">
+                                <Link href="/login">Login</Link>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            )}
+
+            <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">Synapticz</h1>
             <nav className="navLinks hidden md:block">
                 <ul className="flex items-center text-white">
                     <li className="header-list-item">
-                        <Link href="/" class="text-lg text-cyan-400">Home</Link>
+                        <Link href="/" className="text-lg text-cyan-400">Home</Link>
                     </li>
                     <li className="header-list-item">
                         <Link href="/contact">Browse Quizzes</Link>
@@ -25,13 +73,12 @@ function Header(props) {
                         <Link href="/about">LeaderBoard</Link>
                     </li>
                     <li className="header-list-item">
-                        <Link href="/login">Login</Link>
+                    <Link href="/login">Login</Link>
                     </li>
                 </ul>
             </nav>
         </header>
-    )
-        ;
+    );
 }
 
 export default Header;

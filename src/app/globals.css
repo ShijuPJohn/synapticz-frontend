@@ -34,5 +34,32 @@ body {
 }
 
 .header-list-item:hover {
-    border-bottom-color: var(--secondary-color-light); /* Tailwind's hover:border-secondary-color-light */
+    /*border-bottom-color: var(--secondary-color-light); !* Tailwind's hover:border-secondary-color-light *!*/
+}
+@keyframes moveFromLeftToRight {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+@keyframes moveFromRightToLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+.menu-drawer {
+    animation: moveFromLeftToRight .6s ease-in-out forwards;
+}
+
+.menu-drawer.hide {
+    animation: moveFromRightToLeft .6s ease-in-out forwards;
+}
+.drawer-item{
+    font-size: .8rem;
+    margin: 1rem .5rem;
 }
