@@ -1,16 +1,19 @@
-import {combineReducers, createSlice} from "@reduxjs/toolkit";
+import {createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
-import {HYDRATE} from "next-redux-wrapper";
 import {enqueueSnackbar} from "notistack";
 import {fetchURL} from "@/constants";
 
 function getFromLocalStorage() {
+    if (typeof window === 'undefined') {
+        // Server-side rendering, return default initial state
+        return { loading: false, userInfo: {} };
+    }
     try {
         const serializedStore = localStorage.getItem("store");
         if (serializedStore === null) {
             return {loading: false, userInfo: {}};
         }
-        return JSON.parse(serializedStore).user.user;
+        return JSON.parse(serializedStore).user;
     } catch (e) {
         return {loading: false, userInfo: {}};
     }
@@ -86,16 +89,3 @@ export const signupThunk = (username, email, password) => async (dispatch) => {
         dispatch(loginFail())
     }
 }
-const combinedReducer = combineReducers({
-    user: userReducer
-});
-export const nextReducer = (state, action) => {
-    if (action.type === HYDRATE) {
-        return {
-            ...state, // use previous state
-            ...action.payload, // apply delta from hydration
-        };
-    } else {
-        return combinedReducer(state, action);
-    }
-};

@@ -1,11 +1,11 @@
 // redux/store.js
 import {configureStore} from '@reduxjs/toolkit';
 import {createWrapper} from "next-redux-wrapper";
-import {nextReducer} from "@/redux/authSlice";
+import {nextReducer, userReducer} from "@/redux/authSlice";
 
 const store = configureStore({
     reducer: {
-        user: nextReducer
+        user: userReducer,
     }
 })
 export default store
