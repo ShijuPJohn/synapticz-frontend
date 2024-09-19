@@ -12,6 +12,18 @@
 
 
 :root {
+    --primary-color: #f3285a;
+    --primary-color-light: #02d8f1;
+    --secondary-color-light: #e885c0;
+    --grey-color-light0: #dbdbdb;
+    --grey-color-light1: #fcfcfc;
+    --grey-color-light2: #c8c8c8;
+    --grey-color-light3: #adacac;
+    --grey-color-light4: #898989;
+    --grey-color-dark0: #272727;
+    --grey-color-dark1: #3d3d3d;
+    --grey-color-dark2: #626262;
+    --grey-color-border1: #707070;
 }
 
 /* Additional body styling */
@@ -20,6 +32,8 @@ body {
     font-size: 16px;
     font-family: "Roboto", sans-serif;
     min-height: 100vh;
+    background: linear-gradient(to right bottom, var(--primary-color-light), var(--secondary-color-light));
+
 }
 
 .header-list-item {
@@ -34,5 +48,32 @@ body {
 }
 
 .header-list-item:hover {
-    border-bottom-color: var(--secondary-color-light); /* Tailwind's hover:border-secondary-color-light */
+    /*border-bottom-color: var(--secondary-color-light); !* Tailwind's hover:border-secondary-color-light *!*/
+}
+@keyframes moveFromLeftToRight {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+@keyframes moveFromRightToLeft {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-100%);
+    }
+}
+.menu-drawer {
+    animation: moveFromLeftToRight .6s ease-in-out forwards;
+}
+
+.menu-drawer.hide {
+    animation: moveFromRightToLeft .6s ease-in-out forwards;
+}
+.drawer-item{
+    font-size: .8rem;
+    margin: 1rem .5rem;
 }
