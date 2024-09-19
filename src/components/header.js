@@ -3,7 +3,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faBars} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {logout} from "@/redux/authSlice";
 
 
 function Header() {
@@ -13,6 +14,7 @@ function Header() {
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
     const [hydrated, setHydrated] = useState(false); // Add hydration state
+    const dispatch = useDispatch();
 
     useEffect(() => {
         setHydrated(true);
@@ -85,14 +87,16 @@ function Header() {
                         <li className="header-list-item">
                             <Link href="/about">LeaderBoard</Link>
                         </li>
-                        <li className="header-list-item">
-                            <Link href="/login">Login</Link>
-                        </li>
+
                         {userInfo && Object.keys(userInfo).length !== 0 ?
-                            <>
-                                <button className={"logout-btn"}>Logout</button>
+                            <li className="header-list-item">
+                                <button className={"logout-btn"} onClick={()=>{
+                                    dispatch(logout())
+                                }}>Logout</button>
                                 {/*<li className={styles.main_nav_links_item}><Link href="/dashboard">Dashboard</Link></li>*/}
-                            </> : null}
+                            </li> : <li className="header-list-item">
+                                <Link href="/login">Login</Link>
+                            </li>}
                     </ul>
                 </nav>
             </header>
