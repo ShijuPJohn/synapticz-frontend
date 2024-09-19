@@ -60,7 +60,8 @@ function Header() {
                 </div>
             )}
 
-            <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">Synapticz</h1>
+            {/*<h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">Synapticz</h1>*/}
+            <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">[Placeholder]</h1>
             <nav className="navLinks hidden md:block">
                 <ul className="flex items-center text-white">
                     <li className="header-list-item">

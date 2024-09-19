@@ -4,27 +4,37 @@ import {useForm} from "react-hook-form";
 import {IconButton, InputAdornment, TextField} from "@mui/material";
 import Link from "next/link";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
-import {useDispatch} from "react-redux";
-import {login, loginThunk} from "@/redux/authSlice";
 
 const LoginPage = () => {
     const {register, formState: {errors}, handleSubmit} = useForm();
-    const dispatch = useDispatch();
+
     const [showPassword, setShowPassword] = useState(false);
     const onSubmit = async (data) => {
         console.log("data", data);
-        dispatch(loginThunk(data.email, data.password));
     };
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     return (<>
-        <title>Login | Synapticz.com</title>
+        <title>Signup | Synapticz.com</title>
         <main className="flex justify-center items-center my-4 bg-gray-100 p-6 rounded-lg w-full max-w-md mx-auto">
             <div className="flex flex-col items-center justify-around w-full">
-                <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Login</h3>
+                <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Sign Up</h3>
                 <form
                     onSubmit={handleSubmit(onSubmit)}
                     className="flex flex-col items-center w-full space-y-6">
+                    <div className="w-full">
+                        <TextField
+                            className={`w-full p-3 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                            error={!!errors.username}
+                            helperText={errors.username ? errors.username.message : null}
+                            autoFocus
+                            label="Full Name"
+                            {...register("username", {
+                                required: "Required",
+                                minLength: {value: 3, message: "Username should be at least 3 characters"},
+                            })}
+                        />
+                    </div>
                     <div className="w-full">
                         <TextField
                             className={`w-full p-3 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -39,6 +49,7 @@ const LoginPage = () => {
                             })}
                         />
                     </div>
+
                     <div className="w-full">
                         <TextField
                             className={`w-full p-3 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md`}
@@ -47,7 +58,12 @@ const LoginPage = () => {
                             type={showPassword ? 'text' : 'password'}
                             label="Password"
                             {...register("password", {
-                                required: "Required"
+                                required: "Required",
+                                minLength: {value: 6, message: "Length of password must be atleast 6 characters"},
+                                pattern: {
+                                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                                    message: "Password should consist of an uppercase letter, a lowercase letter, number, and symbol"
+                                }
                             })}
                             InputProps={{
                                 endAdornment: (
@@ -81,8 +97,8 @@ const LoginPage = () => {
                     </div>
                 </form>
                 <div className="my-4 h-[1px] w-3/5 bg-gray-300"></div>
-                <Link href="/signup">
-                    <p className="text-blue-500 text-lg">Create an account</p>
+                <Link href="/login">
+                    <p className="text-blue-500 text-lg">Sign in with credentials</p>
                 </Link>
             </div>
         </main>
