@@ -1,20 +1,32 @@
 'use client';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useForm} from "react-hook-form";
 import {IconButton, InputAdornment, TextField} from "@mui/material";
 import Link from "next/link";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {login, loginThunk} from "@/redux/authSlice";
+import {useRouter} from "next/navigation";
 
 const LoginPage = () => {
+    const router = useRouter();
     const {register, formState: {errors}, handleSubmit} = useForm();
     const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false);
+    const userLogin = useSelector(state => state.user);
+    const {userInfo} = userLogin
     const onSubmit = async (data) => {
         console.log("data", data);
         dispatch(loginThunk(data.email, data.password));
+
     };
+    useEffect(() => {
+        if (userInfo && Object.keys(userInfo).length !== 0){
+            setTimeout(()=>{
+                router.push('/');
+            },500)
+        }
+    }, [userInfo]);
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     return (<>
@@ -72,12 +84,6 @@ const LoginPage = () => {
                         >
                             Submit
                         </button>
-                        {/*<button*/}
-                        {/*    className="bg-gray-500 text-white py-2 px-4 rounded-lg w-24"*/}
-                        {/*    type="reset"*/}
-                        {/*>*/}
-                        {/*    Clear*/}
-                        {/*</button>*/}
                     </div>
                 </form>
                 <div className="my-4 h-[1px] w-3/5 bg-gray-300"></div>

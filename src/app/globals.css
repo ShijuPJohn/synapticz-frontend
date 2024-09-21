@@ -38,7 +38,7 @@ body {
 
 .header-list-item {
     font-size: 1.125rem;
-    color: #22d3ee;
+    color: #e4fbff;
     margin: 1rem 2rem;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
@@ -76,4 +76,7 @@ body {
 .drawer-item{
     font-size: .8rem;
     margin: 1rem .5rem;
+}
+.card-box{
+    box-shadow: 9px 10px 19px -12px rgba(0,0,0,0.2);
 }

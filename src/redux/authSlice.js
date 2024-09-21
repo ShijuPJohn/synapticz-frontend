@@ -1,16 +1,20 @@
-import {combineReducers, createSlice} from "@reduxjs/toolkit";
+"use client"
+import {createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
-import {HYDRATE} from "next-redux-wrapper";
 import {enqueueSnackbar} from "notistack";
 import {fetchURL} from "@/constants";
 
 function getFromLocalStorage() {
+    if (typeof window === 'undefined') {
+        // Server-side rendering, return default initial state
+        return { loading: false, userInfo: {} };
+    }
     try {
         const serializedStore = localStorage.getItem("store");
         if (serializedStore === null) {
             return {loading: false, userInfo: {}};
         }
-        return JSON.parse(serializedStore).user.user;
+        return JSON.parse(serializedStore).user;
     } catch (e) {
         return {loading: false, userInfo: {}};
     }
@@ -31,12 +35,12 @@ export const userSlice = createSlice({
         login: (state, action) => {
             state.loading = false
             state.userInfo = action.payload
-            enqueueSnackbar('Logged In', {variant: "success"})
+            enqueueSnackbar('Logged In. Redirecting to home page.', {variant: "success"})
         },
         logout: (state) => {
             state.loading = false
             state.userInfo = {}
-            enqueueSnackbar('Logged Out')
+            enqueueSnackbar('Logged Out', {variant: "error"})
         }
     }
 })
@@ -61,41 +65,33 @@ export const loginThunk = (email, password) => async (dispatch) => {
         dispatch(login(data))
     } catch (e) {
         dispatch(loginFail())
-        if (e.response.status === 401) {
-            enqueueSnackbar('Incorrect email or password', {variant: "error"})
-        }
+        // if (e.response.status === 401) {
+        //     enqueueSnackbar('Incorrect email or password', {variant: "error"})
+        // }
+        console.log(e);
     }
 }
 
-export const signupThunk = (username, email, password) => async (dispatch) => {
+export const signupThunk = (name, email, password) => async (dispatch) => {
     try {
-        dispatch(loginRequest())
+        console.log("checkpoint1")
+        dispatch(loginRequest());
         const config = {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
         }
+        console.log("checkpoint2")
         const {data} = await axios.post(
-            `${fetchURL}/users`,
-            {username, email, password},
+            `${fetchURL}/auth/signup`,
+            { name, email, password},
             config
         )
-        dispatch(login(data))
+        console.log("checkpoint3")
+        dispatch(login(data));
+        console.log("checkpoint4")
     } catch (e) {
-        dispatch(loginFail())
+        dispatch(loginFail());
     }
 }
-const combinedReducer = combineReducers({
-    user: userReducer
-});
-export const nextReducer = (state, action) => {
-    if (action.type === HYDRATE) {
-        return {
-            ...state, // use previous state
-            ...action.payload, // apply delta from hydration
-        };
-    } else {
-        return combinedReducer(state, action);
-    }
-};
