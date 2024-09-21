@@ -1,5 +1,5 @@
 'use client';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useForm} from "react-hook-form";
 import {IconButton, InputAdornment, TextField} from "@mui/material";
 import Link from "next/link";
@@ -18,12 +18,15 @@ const LoginPage = () => {
     const onSubmit = async (data) => {
         console.log("data", data);
         dispatch(loginThunk(data.email, data.password));
+
+    };
+    useEffect(() => {
         if (userInfo && Object.keys(userInfo).length !== 0){
             setTimeout(()=>{
                 router.push('/');
             },500)
         }
-    };
+    }, [userInfo]);
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     return (<>

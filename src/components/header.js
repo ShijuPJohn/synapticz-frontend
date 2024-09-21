@@ -75,11 +75,11 @@ function Header() {
                 )}
 
                 {/*<h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">Synapticz</h1>*/}
-                <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">[Placeholder]</h1>
+                <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white"><Link href={"/"}>Synapticz</Link></h1>
                 <nav className="navLinks hidden md:block">
                     <ul className="flex items-center text-white">
                         <li className="header-list-item">
-                            <Link href="/" className="text-lg text-cyan-400">Home</Link>
+                            <Link href="/">Home</Link>
                         </li>
                         <li className="header-list-item">
                             <Link href="/contact">Browse Quizzes</Link>
@@ -90,9 +90,10 @@ function Header() {
 
                         {userInfo && Object.keys(userInfo).length !== 0 ?
                             <li className="header-list-item">
-                                <button className={"logout-btn"} onClick={()=>{
+                                <button className={"logout-btn"} onClick={() => {
                                     dispatch(logout())
-                                }}>Logout</button>
+                                }}>Logout
+                                </button>
                                 {/*<li className={styles.main_nav_links_item}><Link href="/dashboard">Dashboard</Link></li>*/}
                             </li> : <li className="header-list-item">
                                 <Link href="/login">Login</Link>

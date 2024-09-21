@@ -1,5 +1,5 @@
 'use client';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useForm} from "react-hook-form";
 import {IconButton, InputAdornment, TextField} from "@mui/material";
 import Link from "next/link";
@@ -18,14 +18,20 @@ const LoginPage = () => {
     const onSubmit = async (data) => {
         console.log("data", data);
         dispatch(signupThunk(data.username, data.email, data.password));
+        // if (userInfo && Object.keys(userInfo).length !== 0){
+        //     setTimeout(()=>{
+        //         router.push('/');
+        //     },500)
+        // }
+    };
+    const handleClickShowPassword = () => setShowPassword(!showPassword);
+    useEffect(() => {
         if (userInfo && Object.keys(userInfo).length !== 0){
             setTimeout(()=>{
                 router.push('/');
             },500)
         }
-    };
-    const handleClickShowPassword = () => setShowPassword(!showPassword);
-
+    }, [userInfo]);
     return (<>
         <title>Signup | Synapticz.com</title>
         <main className="flex justify-center items-center my-4 bg-gray-100 p-6 rounded-lg w-full max-w-md mx-auto">
