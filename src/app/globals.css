@@ -33,6 +33,9 @@ body {
     font-family: "Roboto", sans-serif;
     min-height: 100vh;
     background: linear-gradient(to right bottom, var(--primary-color-light), var(--secondary-color-light));
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    /*align-items: center;*/
 
 }
 
