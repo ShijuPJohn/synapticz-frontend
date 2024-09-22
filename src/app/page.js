@@ -1,4 +1,3 @@
-import ComponentsWrapper from "@/components/ComponentsWrapper";
 import axios from "axios";
 import {fetchURL} from "@/constants";
 import QuestionSetCard from "@/components/question_set_card";
@@ -15,7 +14,9 @@ async function getQuestionSets() {
 }
 
 export default async function Home() {
+
     const questionSets = await getQuestionSets();
+
     return (
         <main className={"flex flex-col p-4 items-center"}>
             {
