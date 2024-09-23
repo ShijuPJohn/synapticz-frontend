@@ -19,7 +19,7 @@ function Page({params}) {
     const [selectedOptions, setSelectedOptions] = useState([])
     const [correctAnswers, setCorrectAnswers] = useState([])
 
-    // const [totalScore, setTotalScore] = useState(0)
+    const [totalScore, setTotalScore] = useState(0)
     // const [selectedButWrong, setSelectedButWrong] = useState([])
     // const [selectedAndRight, setSelectedAndRight] = useState([])
     // const [qNo, setQNo] = useState(1)
@@ -43,6 +43,7 @@ function Page({params}) {
             const response = await axios.get(`${fetchURL}/test_session/${id}`, {headers});
             const data = response.data;
             setTestData(data)
+            setQuestionIds(data.test_session.question_ids_ordered)
             setCurrentQuestion(data.current_question)
             setCurrentQuestionIndex(data.test_session.current_question_num)
             console.log(response.data)
@@ -51,13 +52,20 @@ function Page({params}) {
         }
     }
 
+    async function markQuestionAsAnswered() {
 
-    function checkAnswer() {
+    }
+
+    function checkAndMarkAnswer() {
+        if (currentQuestion.question_type==="m-choice"){
+
+        }
         // setCorrectAnswers(question.correctOptions)
         // setSelectedAndRight(selectedOption.filter(opt => question.correctOptions.includes(opt)))
         // setSelectedButWrong(selectedOption.filter(opt => !question.correctOptions.includes(opt)))
         // setSelectedOption([])
         // setAnswered(true)
+        markQuestionAsAnswered()
     }
 
     function nextQuestion() {
@@ -107,7 +115,7 @@ function Page({params}) {
                 <div className="quiz_box_btn_box flex flex-col items-center mt-4">
                     <button
                         className="quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center cursor-pointer"
-                        onClick={checkAnswer}
+                        onClick={checkAndMarkAnswer}
                         style={!isAnsweredCurrentQuestion ? {cursor: "pointer"} : {cursor: "default"}}>
                         Answer
                     </button>
