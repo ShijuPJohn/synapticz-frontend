@@ -59,6 +59,8 @@ function Page({params}) {
     function checkAndMarkAnswer() {
         if (currentQuestion.question_type==="m-choice"){
 
+        } else if (currentQuestion.question_type==="m-select"){
+
         }
         // setCorrectAnswers(question.correctOptions)
         // setSelectedAndRight(selectedOption.filter(opt => question.correctOptions.includes(opt)))
