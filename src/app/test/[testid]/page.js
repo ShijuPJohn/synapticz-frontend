@@ -61,6 +61,8 @@ function Page({params}) {
 
         } else if (currentQuestion.question_type==="m-select"){
 
+        } else{
+
         }
         // setCorrectAnswers(question.correctOptions)
         // setSelectedAndRight(selectedOption.filter(opt => question.correctOptions.includes(opt)))
