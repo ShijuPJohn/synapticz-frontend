@@ -57,7 +57,7 @@ function Page({params}) {
     }
 
     function checkAndMarkAnswer() {
-        if (currentQuestion.question_type==="m-choice"){
+        if (currentQuestion.question_type==="m-choice1"){
 
         } else if (currentQuestion.question_type==="m-select"){
 
