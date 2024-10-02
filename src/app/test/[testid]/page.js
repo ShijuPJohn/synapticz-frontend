@@ -6,21 +6,20 @@ import axios from "axios";
 import {fetchURL} from "@/constants";
 
 function Page({params}) {
-    const [testData, setTestData] = useState({});
+    const [questions, setQuestions] = useState([]);
     const [currentQuestion, setCurrentQuestion] = useState({});
     const [questionIds, setQuestionIds] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [testSessionId, setTestSessionId] = useState("");
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
     let fetched = false
     const [isCurrentQuestionAnswered, setIsCurrentQuestionAnswered] = useState(false)
-    const [isCurrentQuestionAnsweredRight, setIsCurrentQuestionAnsweredRight] = useState(null);
-    const [isCurrentQuestionAnsweredWrong, setIsCurrentQuestionAnsweredWrong] = useState(null);
-    const [scoredMarkForCurrentQuestion, setScoredMarkForCurrentQuestion] = useState(0);
-    const [selectedOptions, setSelectedOptions] = useState([])
-    const [correctOptions, setCorrectOptions] = useState([])
+    const [selectedOptions, setSelectedOptions] = useState([]);
+    const [correctOptions, setCorrectOptions] = useState([]);
+    const [questionAnswerData, setQuestionAnswerData] = useState({});
 
-    const [totalScore, setTotalScore] = useState(0)
+    const [totalScore, setTotalScore] = useState(0);
 
     useEffect(() => {
         if (!fetched && params.testid) {
@@ -28,9 +27,6 @@ function Page({params}) {
             fetchTestById(params.testid);
         }
     }, []);
-    useEffect(() => {
-        console.log("total score: ", totalScore);
-    }, [totalScore])
 
     async function fetchTestById(id) {
         const headers = {
@@ -39,16 +35,21 @@ function Page({params}) {
         try {
             const response = await axios.get(`${fetchURL}/test_session/${id}`, {headers});
             const data = response.data;
-            console.log(data)
-            setTestData(data)
+            setQuestions(data.questions)
             setQuestionIds(data.test_session.question_ids_ordered)
-            setCurrentQuestion(data.current_question)
-            setCurrentQuestionIndex(data.test_session.current_question_num)
-            setCorrectOptions(data.current_question.correct_options)
+            setCurrentQuestion(data.questions[data.current_question_index])
+            setCurrentQuestionIndex(data.current_question_index)
             setTotalScore(data.test_session.scored_marks)
-            if (currentQuestion.answered){
-                setSelectedOptions(currentQuestion.selected_answer)
-            }
+            setQuestionAnswerData(data.test_session.question_answer_data)
+            setTestSessionId(data.test_session.id)
+            let selectedOptions = []
+            data.test_session.question_ids_ordered.forEach(qid => {
+                let selectedList = data.test_session.question_answer_data[qid].selected_answer_list
+                selectedOptions.push(selectedList ? selectedList : [])
+            })
+            setSelectedOptions(selectedOptions)
+            setCorrectOptions(data.questions.map(question => question.correct_options))
+            setIsCurrentQuestionAnswered(data.test_session.question_answer_data[data.current_question_id].answered)
         } catch (error) {
             console.error('Error:', error.response ? error.response.data : error.message);
         }
@@ -64,9 +65,8 @@ function Page({params}) {
             selected_answer: selectedOptions
         })
         try {
-            const response = await axios.put(`${fetchURL}/test_session/${testData.test_session.id}`, body, {headers});
+            const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
             const data = response.data;
-            console.log(data)
         } catch (error) {
             console.error('Error:', error.response ? error.response.data : error.message);
         }
@@ -74,88 +74,87 @@ function Page({params}) {
 
     function checkAndMarkAnswer() {
         setIsCurrentQuestionAnswered(true)
+        setQuestionAnswerData(prevState => {
+            let prevCopy = {...prevState}
+            prevCopy[questionIds[currentQuestionIndex]].answered = true;
+            return prevCopy
+        })
         if (currentQuestion.question_type === "m-choice") {
-            if (selectedOptions[0] === correctOptions[0]) {
-                setIsCurrentQuestionAnsweredRight(true);
-                setIsCurrentQuestionAnsweredWrong(false);
+            if (selectedOptions[currentQuestionIndex][0] === correctOptions[currentQuestionIndex][0]) {
+                setTotalScore(totalScore => {
+                    return totalScore + questionAnswerData[questionIds[currentQuestionIndex]].questions_total_mark;
+                })
             } else {
-                setIsCurrentQuestionAnsweredWrong(true);
-                setIsCurrentQuestionAnsweredRight(false);
             }
-            setTotalScore(totalScore => {
-                return totalScore + testData.test_session.question_answer_data[currentQuestion.id].questions_total_mark;
-            })
+
         } else if (currentQuestion.question_type === "m-select") {
-            if (selectedOptions.length > 0) {
+            if (selectedOptions[currentQuestionIndex].length > 0) {
                 let answeredWrong = false
-                selectedOptions.forEach((selectedOption) => {
-                    if (!correctOptions.includes(selectedOption)) {
+                selectedOptions[currentQuestionIndex].forEach((selectedOption) => {
+                    if (!correctOptions[currentQuestionIndex].includes(selectedOption)) {
                         answeredWrong = true
                     }
                 })
                 if (answeredWrong) {
-                    setIsCurrentQuestionAnsweredWrong(true)
-                    setIsCurrentQuestionAnsweredRight(false)
                 } else {
-                    setIsCurrentQuestionAnsweredWrong(false)
-                    setIsCurrentQuestionAnsweredRight(true)
                     setTotalScore(totalScore => {
-                        return totalScore +
-                            testData.test_session.question_answer_data[currentQuestion.id].questions_total_mark * selectedOptions.length / correctOptions.length;
+                        return totalScore + questionAnswerData[questionIds[currentQuestionIndex]].questions_total_mark * selectedOptions[currentQuestionIndex].length / correctOptions[currentQuestionIndex].length;
                     })
                 }
             }
         } else {
 
         }
-        markQuestionAsAnswered();
     }
 
-    function nextQuestion() {
-        // setQNo((currQNo) => currQNo + 1)
-        // setAnswered(false)
+    async function nextQuestion() {
+        if (currentQuestionIndex + 1 < questionIds.length) {
+            setCurrentQuestion(questions[currentQuestionIndex + 1])
+            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex + 1]].answered)
+            setCurrentQuestionIndex(presentState => presentState + 1)
+        }
     }
 
-    function prevQuestion() {
-        // setQNo((currQNo) => currQNo - 1)
-        // setAnswered(false)
+    async function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            setCurrentQuestion(questions[currentQuestionIndex - 1])
+            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex - 1]].answered)
+            setCurrentQuestionIndex(presentState => presentState - 1)
+
+        }
     }
 
     function optionsClickHandler(index) {
         if (!isCurrentQuestionAnswered) {
             if (currentQuestion.question_type === "m-choice") {
-                setSelectedOptions([index]);
+                setSelectedOptions(prev => {
+                    const newOptions = [...prev];
+                    newOptions[currentQuestionIndex] = [index];
+                    return newOptions;
+                });
             } else if (currentQuestion.question_type === "m-select") {
-                setSelectedOptions(sel => {
-                    if (sel.includes(index)) {
-                        return sel.filter(option => option !== index)
+                setSelectedOptions(prev => {
+                    const newOptions = [...prev];
+                    const selected = newOptions[currentQuestionIndex];
+
+                    if (selected.includes(index)) {
+                        newOptions[currentQuestionIndex] = selected.filter(option => option !== index);
                     } else {
-                        return [...sel, index]
+                        newOptions[currentQuestionIndex] = [...selected, index];
                     }
-                })
+                    return newOptions;
+                });
             }
         }
     }
 
-    function suffixGenerator(num) {
-        if (num <= 0) {
-            return "th"
-        } else if (num === 1) {
-            return "t"
-        } else if (num === 2) {
-            return "nd"
-        } else if (num === 3) {
-            return "rd"
-        } else {
-            return "th"
-        }
-    }
 
     return (<main className={"flex flex-col p-4 items-center w-full h-full"}>
         <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] bg-white">
             <div className="text-slate-600 flex justify-between border-amber-200 border-[2px] p-2 mb-2">
                 <h4>{currentQuestionIndex + 1}/{questionIds.length}</h4>
-                <h4>Score : {totalScore}</h4>
+                <h4>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
+                <h4>Score : {parseFloat(totalScore.toFixed(2))}</h4>
             </div>
             <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{currentQuestion.question}</h1>
             {currentQuestion.options && (currentQuestion.options.map((option, index) => (
@@ -163,38 +162,41 @@ function Page({params}) {
                     optionsClickHandler(index);
                 }}
                      className={`quiz_box_option_box p-2 border-2 flex justify-between items-center h-10 mb-4 
-                                 ${selectedOptions.includes(index) ? "border-blue-500" : "border-gray-300"} 
-                                 ${isCurrentQuestionAnswered && correctOptions.includes(index) ? "border-green-500" : ""}
-                                 ${isCurrentQuestionAnswered && selectedOptions.includes(index) && !correctOptions.includes(index) ? "bg-red-300 border-red-500" : ""}
-                                 ${isCurrentQuestionAnswered && selectedOptions.includes(index) && correctOptions.includes(index) ? "bg-green-300" : ""}
+                                 ${selectedOptions[currentQuestionIndex].includes(index) ? "border-blue-500" : "border-gray-300"} 
+                                 ${isCurrentQuestionAnswered && correctOptions[currentQuestionIndex].includes(index) ? "border-green-500" : ""}
+                                 ${isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) ? "bg-red-300 border-red-500" : ""}
+                                 ${isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) ? "bg-green-300" : ""}
                                  
                                   `}
                      style={isCurrentQuestionAnswered ? {cursor: "default"} : {cursor: "pointer"}}
                 >
                     <h4 className="quiz_box_option">{option}</h4>
-                    {isCurrentQuestionAnswered && selectedOptions.includes(index) && correctOptions.includes(index) &&
+                    {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) &&
                         <div className="checkMark_main w-5 h-5 bg-green-600 clip-checkmark"/>}
-                    {isCurrentQuestionAnswered && selectedOptions.includes(index) && !correctOptions.includes(index) &&
+                    {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) &&
                         <div className="crossMark_main w-4 h-4 bg-red-700 clip-crossmark"/>}
                 </div>)))}
             <div className="quiz_box_btn_box flex flex-col items-center mt-4">
                 <button
                     className="quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center cursor-pointer"
-                    onClick={checkAndMarkAnswer}
+                    onClick={() => {
+                        checkAndMarkAnswer()
+                        // markQuestionAsAnswered();
+                    }}
                     style={!isCurrentQuestionAnswered ? {cursor: "pointer"} : {cursor: "default"}}>
                     Answer
                 </button>
                 <div className="quiz_box_btn_box_2nd_row flex justify-between w-full h-12 mt-2">
                     <button
-                        className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white mr-1"
+                        className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white mr-1 disabled:bg-orange-400 disabled:cursor-default"
                         onClick={prevQuestion}
-                        style={!isCurrentQuestionAnswered ? {cursor: "pointer"} : {cursor: "default"}}>
+                        disabled={currentQuestionIndex ===0}>
                         Previous
                     </button>
                     <button
-                        className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white ml-1"
+                        className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white ml-1 disabled:bg-teal-400 disabled:cursor-default"
                         onClick={nextQuestion}
-                        style={!isCurrentQuestionAnswered ? {cursor: "pointer"} : {cursor: "default"}}>
+                        disabled={currentQuestionIndex + 1 === questionIds.length}>
                         Next
                     </button>
                 </div>
