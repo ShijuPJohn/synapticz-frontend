@@ -12,7 +12,7 @@ function Page({params}) {
     const [testSessionId, setTestSessionId] = useState("");
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
-    let fetched = false
+    const [fetchedTest, setFetchedTest] = useState(false);
     const [isCurrentQuestionAnswered, setIsCurrentQuestionAnswered] = useState(false)
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [correctOptions, setCorrectOptions] = useState([]);
@@ -21,17 +21,18 @@ function Page({params}) {
     const [totalScore, setTotalScore] = useState(0);
 
     useEffect(() => {
-        if (!fetched && params.testid) {
-            fetched = true;
+        if (!fetchedTest && params.testid) {
             fetchTestById(params.testid);
         }
     }, []);
     useEffect(()=>{
-        update();
+        if (fetchedTest){
+            update();
+        }
+
     },[currentQuestionIndex, questionAnswerData])
 
     useEffect(() => {
-        console.log("question ids new value", questionIds)
     }, [questionIds]);
 
 
@@ -60,6 +61,7 @@ function Page({params}) {
             setSelectedOptions(selectedOptions)
             setCorrectOptions(data.questions.map(question => question.correct_options))
             setIsCurrentQuestionAnswered(data.test_session.question_answer_data[data.current_question_id].answered)
+            setFetchedTest(true);
         } catch (error) {
             console.error('Error:', error.response ? error.response.data : error.message);
         }
@@ -74,7 +76,6 @@ function Page({params}) {
             current_question_index: currentQuestionIndex,
             total_marks_scored: totalScore,
         })
-        console.log("BODY", body)
         try {
             const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
             const data = response.data;
@@ -119,7 +120,6 @@ function Page({params}) {
 
     async function nextQuestion() {
         if (currentQuestionIndex + 1 < questionIds.length) {
-            console.log("questionAnswerData", questionAnswerData);
             setCurrentQuestion(questions[currentQuestionIndex + 1])
             setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex + 1]].answered)
             setCurrentQuestionIndex(presentState => presentState + 1)
@@ -128,7 +128,6 @@ function Page({params}) {
 
     async function prevQuestion() {
         if (currentQuestionIndex > 0) {
-            console.log("questionAnswerData", questionAnswerData);
             setCurrentQuestion(questions[currentQuestionIndex - 1])
             setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex - 1]].answered)
             setCurrentQuestionIndex(presentState => presentState - 1)
