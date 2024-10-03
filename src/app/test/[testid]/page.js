@@ -1,6 +1,5 @@
 "use client"
 import React, {useEffect, useState} from 'react';
-import {useRouter} from "next/navigation";
 import {useSelector} from "react-redux";
 import axios from "axios";
 import {fetchURL} from "@/constants";
@@ -27,6 +26,14 @@ function Page({params}) {
             fetchTestById(params.testid);
         }
     }, []);
+    useEffect(()=>{
+        update();
+    },[currentQuestionIndex, questionAnswerData])
+
+    useEffect(() => {
+        console.log("question ids new value", questionIds)
+    }, [questionIds]);
+
 
     async function fetchTestById(id) {
         const headers = {
@@ -40,6 +47,9 @@ function Page({params}) {
             setCurrentQuestion(data.questions[data.current_question_index])
             setCurrentQuestionIndex(data.current_question_index)
             setTotalScore(data.test_session.scored_marks)
+            data.test_session.question_ids_ordered.forEach((question_id, index) => {
+                data.test_session.question_answer_data[question_id].correct_answer_list = data.questions[index].correct_options
+            })
             setQuestionAnswerData(data.test_session.question_answer_data)
             setTestSessionId(data.test_session.id)
             let selectedOptions = []
@@ -55,15 +65,16 @@ function Page({params}) {
         }
     }
 
-    async function markQuestionAsAnswered() {
+    async function update() {
         const headers = {
             'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
         };
         const body = JSON.stringify({
-            action: "answer",
-            question_id: currentQuestion.id,
-            selected_answer: selectedOptions
+            question_answer_data: questionAnswerData,
+            current_question_index: currentQuestionIndex,
+            total_marks_scored: totalScore,
         })
+        console.log("BODY", body)
         try {
             const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
             const data = response.data;
@@ -77,6 +88,7 @@ function Page({params}) {
         setQuestionAnswerData(prevState => {
             let prevCopy = {...prevState}
             prevCopy[questionIds[currentQuestionIndex]].answered = true;
+            prevCopy[questionIds[currentQuestionIndex]].selected_answer_list = selectedOptions[currentQuestionIndex];
             return prevCopy
         })
         if (currentQuestion.question_type === "m-choice") {
@@ -102,13 +114,12 @@ function Page({params}) {
                     })
                 }
             }
-        } else {
-
         }
     }
 
     async function nextQuestion() {
         if (currentQuestionIndex + 1 < questionIds.length) {
+            console.log("questionAnswerData", questionAnswerData);
             setCurrentQuestion(questions[currentQuestionIndex + 1])
             setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex + 1]].answered)
             setCurrentQuestionIndex(presentState => presentState + 1)
@@ -117,6 +128,7 @@ function Page({params}) {
 
     async function prevQuestion() {
         if (currentQuestionIndex > 0) {
+            console.log("questionAnswerData", questionAnswerData);
             setCurrentQuestion(questions[currentQuestionIndex - 1])
             setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex - 1]].answered)
             setCurrentQuestionIndex(presentState => presentState - 1)
@@ -136,7 +148,6 @@ function Page({params}) {
                 setSelectedOptions(prev => {
                     const newOptions = [...prev];
                     const selected = newOptions[currentQuestionIndex];
-
                     if (selected.includes(index)) {
                         newOptions[currentQuestionIndex] = selected.filter(option => option !== index);
                     } else {
@@ -149,14 +160,23 @@ function Page({params}) {
     }
 
 
-    return (<main className={"flex flex-col p-4 items-center w-full h-full"}>
-        <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] bg-white">
-            <div className="text-slate-600 flex justify-between border-amber-200 border-[2px] p-2 mb-2">
-                <h4>{currentQuestionIndex + 1}/{questionIds.length}</h4>
-                <h4>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
+    return (<main className={"flex flex-col p-4 items-center w-full h-full"} >
+        <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] bg-white outline-none" tabIndex={0}
+             onKeyDown={(e=>{
+                 if (e.key === 'ArrowLeft') {
+                     prevQuestion();
+                 } else if (e.key === 'ArrowRight') {
+                     nextQuestion();
+                 }
+             })}>
+            <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300">
+                <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIds.length}</h4>
+                <h4 className={"text-blue-300"}>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
                 <h4>Score : {parseFloat(totalScore.toFixed(2))}</h4>
             </div>
-            <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{currentQuestion.question}</h1>
+            <div className="h-16">
+                <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{currentQuestion.question}</h1>
+            </div>
             {currentQuestion.options && (currentQuestion.options.map((option, index) => (
                 <div key={index} onClick={() => {
                     optionsClickHandler(index);
@@ -181,7 +201,6 @@ function Page({params}) {
                     className="quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center cursor-pointer"
                     onClick={() => {
                         checkAndMarkAnswer()
-                        // markQuestionAsAnswered();
                     }}
                     style={!isCurrentQuestionAnswered ? {cursor: "pointer"} : {cursor: "default"}}>
                     Answer
@@ -190,7 +209,7 @@ function Page({params}) {
                     <button
                         className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white mr-1 disabled:bg-orange-400 disabled:cursor-default"
                         onClick={prevQuestion}
-                        disabled={currentQuestionIndex ===0}>
+                        disabled={currentQuestionIndex === 0}>
                         Previous
                     </button>
                     <button
