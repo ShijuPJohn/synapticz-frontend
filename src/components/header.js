@@ -88,6 +88,11 @@ function Header() {
                             <Link href="/about">LeaderBoard</Link>
                         </li>
 
+
+                        {(userInfo && Object.keys(userInfo).length) ?
+                            <li className="header-list-item">
+                                <Link href="/history">History</Link>
+                            </li>:null}
                         {userInfo && Object.keys(userInfo).length !== 0 ?
                             <li className="header-list-item">
                                 <button className={"logout-btn"} onClick={() => {
