@@ -168,6 +168,7 @@ function Page({params}) {
                      nextQuestion();
                  }
              })}>
+            <button className={"test-finish-btn"}>Finish test</button>
             <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300">
                 <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIds.length}</h4>
                 <h4 className={"text-blue-300"}>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
