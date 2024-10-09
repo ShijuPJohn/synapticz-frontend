@@ -3,6 +3,18 @@ import React, {useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 import axios from "axios";
 import {fetchURL} from "@/constants";
+import {faFlagCheckered} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    useMediaQuery,
+    useTheme
+} from "@mui/material";
 
 function Page({params}) {
     const [questions, setQuestions] = useState([]);
@@ -19,7 +31,17 @@ function Page({params}) {
     const [questionAnswerData, setQuestionAnswerData] = useState({});
 
     const [totalScore, setTotalScore] = useState(0);
+    const [dialogOpen, setDialogOpen] = React.useState(false);
+    // const theme = useTheme();
+    // const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
+    const handleClickOpen = () => {
+        setDialogOpen(true);
+    };
+
+    const handleClose = () => {
+        setDialogOpen(false);
+    };
     useEffect(() => {
         if (!fetchedTest && params.testid) {
             fetchTestById(params.testid);
@@ -157,22 +179,59 @@ function Page({params}) {
             }
         }
     }
-
+function toggleDialog(){
+        if (dialogOpen){
+            setDialogOpen(false)
+        } else {
+            setDialogOpen(true)
+        }
+}
 
     return (<main className={"flex flex-col p-4 items-center w-full h-full"} >
-        <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] bg-white outline-none" tabIndex={0}
-             onKeyDown={(e=>{
+        <Dialog
+            open={dialogOpen}
+            onClose={handleClose}
+            aria-labelledby="responsive-dialog-title"
+        >
+            <DialogTitle id="responsive-dialog-title" className={"flex gap-2 items-center"}>
+                <FontAwesomeIcon icon={faFlagCheckered} color={"brown"}/>
+                {"Finish the test?"}
+            </DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    You'll be taken to the result page
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button autoFocus onClick={handleClose}>
+                    No
+                </Button>
+                <Button onClick={handleClose} autoFocus>
+                    Yes
+                </Button>
+            </DialogActions>
+        </Dialog>
+
+        <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] outline-none bg-white relative" tabIndex={0}
+             onKeyDown={(e => {
                  if (e.key === 'ArrowLeft') {
                      prevQuestion();
                  } else if (e.key === 'ArrowRight') {
                      nextQuestion();
                  }
              })}>
-            <button className={"test-finish-btn"}>Finish test</button>
-            <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300">
+
+            <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline">
                 <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIds.length}</h4>
                 <h4 className={"text-blue-300"}>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
                 <h4>Score : {parseFloat(totalScore.toFixed(2))}</h4>
+                <p
+                    className={"test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300"}
+                onClick={()=>{
+                    toggleDialog()
+                }}>
+                    <FontAwesomeIcon icon={faFlagCheckered} /> Finish
+                </p>
             </div>
             <div className="h-16">
                 <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{currentQuestion.question}</h1>
