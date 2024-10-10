@@ -6,14 +6,7 @@ import {fetchURL} from "@/constants";
 import {faFlagCheckered} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    useMediaQuery,
-    useTheme
+    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
 } from "@mui/material";
 
 function Page({params}) {
@@ -29,11 +22,11 @@ function Page({params}) {
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [correctOptions, setCorrectOptions] = useState([]);
     const [questionAnswerData, setQuestionAnswerData] = useState({});
+    const [finished, setFinished] = useState(false);
+    const [resultScreen, setResultScreen] = useState(false);
 
     const [totalScore, setTotalScore] = useState(0);
     const [dialogOpen, setDialogOpen] = React.useState(false);
-    // const theme = useTheme();
-    // const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
     const handleClickOpen = () => {
         setDialogOpen(true);
@@ -47,12 +40,12 @@ function Page({params}) {
             fetchTestById(params.testid);
         }
     }, []);
-    useEffect(()=>{
-        if (fetchedTest){
+    useEffect(() => {
+        if (fetchedTest) {
             update();
         }
 
-    },[currentQuestionIndex, questionAnswerData])
+    }, [currentQuestionIndex, questionAnswerData])
 
     useEffect(() => {
     }, [questionIds]);
@@ -63,13 +56,20 @@ function Page({params}) {
             'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
         };
         try {
+            console.log("fetching test session with id: ", id)
             const response = await axios.get(`${fetchURL}/test_session/${id}`, {headers});
             const data = response.data;
+            console.log("fetch response", response.data)
             setQuestions(data.questions)
             setQuestionIds(data.test_session.question_ids_ordered)
             setCurrentQuestion(data.questions[data.current_question_index])
             setCurrentQuestionIndex(data.current_question_index)
             setTotalScore(data.test_session.scored_marks)
+            if(data.test_session.finished){
+                setFinished(true)
+                setResultScreen(true)
+            }
+
             data.test_session.question_ids_ordered.forEach((question_id, index) => {
                 data.test_session.question_answer_data[question_id].correct_answer_list = data.questions[index].correct_options
             })
@@ -90,19 +90,21 @@ function Page({params}) {
     }
 
     async function update() {
-        const headers = {
-            'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
-        };
-        const body = JSON.stringify({
-            question_answer_data: questionAnswerData,
-            current_question_index: currentQuestionIndex,
-            total_marks_scored: totalScore,
-        })
-        try {
-            const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
-            const data = response.data;
-        } catch (error) {
-            console.error('Error:', error.response ? error.response.data : error.message);
+        if (!finished) {
+            const headers = {
+                'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
+            };
+            const body = JSON.stringify({
+                question_answer_data: questionAnswerData,
+                current_question_index: currentQuestionIndex,
+                total_marks_scored: totalScore,
+            })
+            try {
+                const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
+                const data = response.data;
+            } catch (error) {
+                console.error('Error:', error.response ? error.response.data : error.message);
+            }
         }
     }
 
@@ -127,7 +129,7 @@ function Page({params}) {
                 let answeredWrong = false
                 selectedOptions[currentQuestionIndex].forEach((selectedOption) => {
                     if (!correctOptions[currentQuestionIndex].includes(selectedOption)) {
-                        answeredWrong = true
+                        answeredWrong = true;
                     }
                 })
                 if (answeredWrong) {
@@ -142,23 +144,23 @@ function Page({params}) {
 
     async function nextQuestion() {
         if (currentQuestionIndex + 1 < questionIds.length) {
-            setCurrentQuestion(questions[currentQuestionIndex + 1])
-            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex + 1]].answered)
-            setCurrentQuestionIndex(presentState => presentState + 1)
+            setCurrentQuestion(questions[currentQuestionIndex + 1]);
+            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex + 1]].answered);
+            setCurrentQuestionIndex(presentState => presentState + 1);
         }
     }
 
     async function prevQuestion() {
         if (currentQuestionIndex > 0) {
-            setCurrentQuestion(questions[currentQuestionIndex - 1])
-            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex - 1]].answered)
-            setCurrentQuestionIndex(presentState => presentState - 1)
+            setCurrentQuestion(questions[currentQuestionIndex - 1]);
+            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex - 1]].answered);
+            setCurrentQuestionIndex(presentState => presentState - 1);
 
         }
     }
 
     function optionsClickHandler(index) {
-        if (!isCurrentQuestionAnswered) {
+        if (!isCurrentQuestionAnswered && !finished) {
             if (currentQuestion.question_type === "m-choice") {
                 setSelectedOptions(prev => {
                     const newOptions = [...prev];
@@ -179,15 +181,30 @@ function Page({params}) {
             }
         }
     }
-function toggleDialog(){
-        if (dialogOpen){
-            setDialogOpen(false)
-        } else {
-            setDialogOpen(true)
-        }
-}
 
-    return (<main className={"flex flex-col p-4 items-center w-full h-full"} >
+    function toggleDialog() {
+        if (dialogOpen) {
+            setDialogOpen(false);
+        } else {
+            setDialogOpen(true);
+        }
+    }
+
+    async function finishTest() {
+        const headers = {
+            'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
+        };
+        try {
+            const response = await axios.put(`${fetchURL}/test_session/finish/${testSessionId}`, {}, {headers});
+            console.log(response.data)
+            setFinished(true);
+            setResultScreen(true);
+        } catch (error) {
+            console.error('Error:', error.response ? error.response.data : error.message);
+        }
+    }
+
+    return (<main className={"flex flex-col p-4 items-center w-full h-full"}>
         <Dialog
             open={dialogOpen}
             onClose={handleClose}
@@ -206,84 +223,104 @@ function toggleDialog(){
                 <Button autoFocus onClick={handleClose}>
                     No
                 </Button>
-                <Button onClick={handleClose} autoFocus>
+                <Button onClick={() => {
+                    handleClose();
+                    finishTest();
+                }} autoFocus>
                     Yes
                 </Button>
             </DialogActions>
         </Dialog>
 
-        <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] outline-none bg-white relative" tabIndex={0}
-             onKeyDown={(e => {
-                 if (e.key === 'ArrowLeft') {
-                     prevQuestion();
-                 } else if (e.key === 'ArrowRight') {
-                     nextQuestion();
-                 }
-             })}>
+        {resultScreen ? <>
+                <h1>Results</h1>
+            <button onClick={()=>{
+                setResultScreen(false)
+            }}>Analyze Questions</button>
+            </>
+            :
+            <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] outline-none bg-white relative" tabIndex={0}
+                 onKeyDown={(e => {
+                     if (e.key === 'ArrowLeft') {
+                         prevQuestion();
+                     } else if (e.key === 'ArrowRight') {
+                         nextQuestion();
+                     }
+                 })}>
 
-            <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline">
-                <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIds.length}</h4>
-                <h4 className={"text-blue-300"}>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
-                <h4>Score : {parseFloat(totalScore.toFixed(2))}</h4>
-                <p
-                    className={"test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300"}
-                onClick={()=>{
-                    toggleDialog()
-                }}>
-                    <FontAwesomeIcon icon={faFlagCheckered} /> Finish
-                </p>
-            </div>
-            <div className="h-16">
-                <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{currentQuestion.question}</h1>
-            </div>
-            {currentQuestion.options && (currentQuestion.options.map((option, index) => (
-                <div key={index} onClick={() => {
-                    optionsClickHandler(index);
-                }}
-                     className={`quiz_box_option_box p-2 border-2 flex justify-between items-center h-10 mb-4 
+                <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline">
+                    <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIds.length}</h4>
+                    <h4 className={"text-blue-300"}>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
+                    {!finished && <h4>Score : {parseFloat(totalScore.toFixed(2))}</h4>}
+                    {finished ?
+                        <p>Finished</p> : <p
+                            className={"test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300"}
+                            onClick={() => {
+                                toggleDialog()
+                            }}>
+                            <FontAwesomeIcon icon={faFlagCheckered}/> Finish
+                        </p>}
+                </div>
+                <div className="h-16">
+                    <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{currentQuestion.question}</h1>
+                </div>
+                {currentQuestion.options && (currentQuestion.options.map((option, index) => (
+                    <div key={index} onClick={() => {
+                        optionsClickHandler(index);
+                    }}
+                         className={`quiz_box_option_box p-2 border-2 flex justify-between items-center h-10 mb-4 
                                  ${selectedOptions[currentQuestionIndex].includes(index) ? "border-blue-500" : "border-gray-300"} 
-                                 ${isCurrentQuestionAnswered && correctOptions[currentQuestionIndex].includes(index) ? "border-green-500" : ""}
+                                 ${(isCurrentQuestionAnswered || finished) && correctOptions[currentQuestionIndex].includes(index) ? "border-green-500" : ""}
                                  ${isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) ? "bg-red-300 border-red-500" : ""}
                                  ${isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) ? "bg-green-300" : ""}
                                  
                                   `}
-                     style={isCurrentQuestionAnswered ? {cursor: "default"} : {cursor: "pointer"}}
-                >
-                    <h4 className="quiz_box_option">{option}</h4>
-                    {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) &&
-                        <div className="checkMark_main w-5 h-5 bg-green-600 clip-checkmark"/>}
-                    {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) &&
-                        <div className="crossMark_main w-4 h-4 bg-red-700 clip-crossmark"/>}
-                </div>)))}
-            <div className="quiz_box_btn_box flex flex-col items-center mt-4">
-                <button
-                    className="quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center cursor-pointer"
-                    onClick={() => {
-                        checkAndMarkAnswer()
-                    }}
-                    style={!isCurrentQuestionAnswered ? {cursor: "pointer"} : {cursor: "default"}}>
-                    Answer
-                </button>
-                <div className="quiz_box_btn_box_2nd_row flex justify-between w-full h-12 mt-2">
+                         style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
+                    >
+                        <h4 className="quiz_box_option">{option}</h4>
+                        {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) &&
+                            <div className="checkMark_main w-5 h-5 bg-green-600 clip-checkmark"/>}
+                        {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) &&
+                            <div className="crossMark_main w-4 h-4 bg-red-700 clip-crossmark"/>}
+                    </div>)))}
+                <div className="quiz_box_btn_box flex flex-col items-center mt-4">
                     <button
-                        className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white mr-1 disabled:bg-orange-400 disabled:cursor-default"
-                        onClick={prevQuestion}
-                        disabled={currentQuestionIndex === 0}>
-                        Previous
+                        className={`quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center `}
+                        onClick={() => {
+                            checkAndMarkAnswer()
+                        }}
+                        style={(!isCurrentQuestionAnswered && !finished) ? {cursor: "pointer"} : {cursor: "default"}}>
+                        Answer
                     </button>
-                    <button
-                        className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white ml-1 disabled:bg-teal-400 disabled:cursor-default"
-                        onClick={nextQuestion}
-                        disabled={currentQuestionIndex + 1 === questionIds.length}>
-                        Next
-                    </button>
+                    <div className="quiz_box_btn_box_2nd_row flex justify-between w-full h-12 mt-2">
+                        <button
+                            className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white mr-1 disabled:bg-orange-400 disabled:cursor-default"
+                            onClick={prevQuestion}
+                            disabled={currentQuestionIndex === 0}>
+                            Previous
+                        </button>
+                        <button
+                            className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white ml-1 disabled:bg-teal-400 disabled:cursor-default"
+                            onClick={nextQuestion}
+                            disabled={currentQuestionIndex + 1 === questionIds.length}>
+                            Next
+                        </button>
+
+                    </div>
+
                 </div>
-            </div>
-            {isCurrentQuestionAnswered && (<div
-                className="quiz_box_explanation_box border-3 border-green-200 p-2 mt-4 max-h-40 overflow-y-auto text-sm text-gray-700">
-                <p>{currentQuestion.explanation}</p>
-            </div>)}
-        </div>
+                {(isCurrentQuestionAnswered || finished) && (<div
+                    className="quiz_box_explanation_box border-3 border-green-200 p-2 mt-4 max-h-40 overflow-y-auto text-sm text-gray-700">
+                    <p>{currentQuestion.explanation}</p>
+                </div>)}
+                {finished && <button
+                    className={`quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center `}
+                    onClick={() => {
+                        setResultScreen(true)
+                    }}>
+                    See Result
+                </button>}
+            </div>}
 
     </main>)
 }
