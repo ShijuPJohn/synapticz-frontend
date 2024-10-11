@@ -15,6 +15,7 @@ function Page({params}) {
     const [questionIds, setQuestionIds] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [testSessionId, setTestSessionId] = useState("");
+    const [qsetName, setQsetName] = useState("");
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
     const [fetchedTest, setFetchedTest] = useState(false);
@@ -65,7 +66,8 @@ function Page({params}) {
             setCurrentQuestion(data.questions[data.current_question_index])
             setCurrentQuestionIndex(data.current_question_index)
             setTotalScore(data.test_session.scored_marks)
-            if(data.test_session.finished){
+            setQsetName(data.test_session.qset_name)
+            if (data.test_session.finished) {
                 setFinished(true)
                 setResultScreen(true)
             }
@@ -234,9 +236,10 @@ function Page({params}) {
 
         {resultScreen ? <>
                 <h1>Results</h1>
-            <button onClick={()=>{
-                setResultScreen(false)
-            }}>Analyze Questions</button>
+                <button onClick={() => {
+                    setResultScreen(false)
+                }}>Analyze Questions
+                </button>
             </>
             :
             <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] outline-none bg-white relative" tabIndex={0}
@@ -247,7 +250,7 @@ function Page({params}) {
                          nextQuestion();
                      }
                  })}>
-
+                <div className="namebox bg-amber-800 h-4 w-8">{qsetName}</div>
                 <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline">
                     <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIds.length}</h4>
                     <h4 className={"text-blue-300"}>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
