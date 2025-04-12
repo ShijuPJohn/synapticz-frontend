@@ -10,23 +10,31 @@ import {
 } from "@mui/material";
 
 function Page({params}) {
-    const [questions, setQuestions] = useState([]);
+
+    //TODO some states are redundant. Its fine for now. Clean it up later
+    const [questions, setQuestions] = useState({});
     const [currentQuestion, setCurrentQuestion] = useState({});
-    const [questionIds, setQuestionIds] = useState([]);
+    const [questionIdsOrdered, setQuestionIdsOrdered] = useState([]);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [currentQuestionId, setCurrentQuestionId] = useState(0);
     const [testSessionId, setTestSessionId] = useState("");
     const [qsetName, setQsetName] = useState("");
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
-    const [fetchedTest, setFetchedTest] = useState(false);
     const [isCurrentQuestionAnswered, setIsCurrentQuestionAnswered] = useState(false)
     const [selectedOptions, setSelectedOptions] = useState([]);
     const [correctOptions, setCorrectOptions] = useState([]);
     const [questionAnswerData, setQuestionAnswerData] = useState({});
     const [finished, setFinished] = useState(false);
     const [resultScreen, setResultScreen] = useState(false);
-
     const [totalScore, setTotalScore] = useState(0);
+    const didFetch = React.useRef(false);
+    const hasInteracted = React.useRef(false);
+    // const [fetchedTest, setFetchedTest] = useState(false);
+    // const [testSession, setTestSession] = useState({});
+
+
+    const [scoredMark, setScoredMark] = useState(0);
     const [dialogOpen, setDialogOpen] = React.useState(false);
 
     const handleClickOpen = () => {
@@ -36,20 +44,25 @@ function Page({params}) {
     const handleClose = () => {
         setDialogOpen(false);
     };
+
+
     useEffect(() => {
-        if (!fetchedTest && params.testid) {
+        if (!didFetch.current && params.testid) {
+            didFetch.current = true;
             fetchTestById(params.testid);
         }
-    }, []);
+    }, [params.testid]);
+
     useEffect(() => {
-        if (fetchedTest) {
-            update();
+        console.log("New Question Answer Data", questionAnswerData);
+    }, [questionAnswerData]);
+
+
+    useEffect(() => {
+        if (hasInteracted.current) {
+            update()
         }
-
-    }, [currentQuestionIndex, questionAnswerData])
-
-    useEffect(() => {
-    }, [questionIds]);
+    }, [currentQuestionIndex, questionAnswerData]);
 
 
     async function fetchTestById(id) {
@@ -57,41 +70,42 @@ function Page({params}) {
             'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
         };
         try {
-            console.log("fetching test session with id: ", id)
             const response = await axios.get(`${fetchURL}/test_session/${id}`, {headers});
             const data = response.data;
             console.log("fetch response", response.data)
-            setQuestions(data.questions)
-            setQuestionIds(data.test_session.question_ids_ordered)
-            setCurrentQuestion(data.questions[data.current_question_index])
+            setCurrentQuestion(data.questions[data.test_session.current_question_num])
             setCurrentQuestionIndex(data.current_question_index)
-            setTotalScore(data.test_session.scored_marks)
-            setQsetName(data.test_session.qset_name)
+            setCurrentQuestionId(data.current_question_id)
+            setScoredMark(data.test_session.scored_marks)
+            setQsetName(data.test_session.name)
             if (data.test_session.finished) {
                 setFinished(true)
                 setResultScreen(true)
             }
-
-            data.test_session.question_ids_ordered.forEach((question_id, index) => {
-                data.test_session.question_answer_data[question_id].correct_answer_list = data.questions[index].correct_options
+            const questionIdsOrderedTemp = []
+            data.questions.forEach((qs, index) => {
+                questionIdsOrderedTemp.push(qs.id)
+                setQuestions((ov) => ({...ov, [qs.id]: qs}));
+                setQuestionAnswerData((pv) => ({...pv, [qs.id]: qs}))
             })
-            setQuestionAnswerData(data.test_session.question_answer_data)
+            setQuestionIdsOrdered(questionIdsOrderedTemp);
             setTestSessionId(data.test_session.id)
             let selectedOptions = []
-            data.test_session.question_ids_ordered.forEach(qid => {
-                let selectedList = data.test_session.question_answer_data[qid].selected_answer_list
+            questionIdsOrderedTemp.forEach((qid, index) => {
+                let selectedList = data.questions[index].selected_answer_list
                 selectedOptions.push(selectedList ? selectedList : [])
             })
             setSelectedOptions(selectedOptions)
             setCorrectOptions(data.questions.map(question => question.correct_options))
-            setIsCurrentQuestionAnswered(data.test_session.question_answer_data[data.current_question_id].answered)
-            setFetchedTest(true);
+
+            setIsCurrentQuestionAnswered(data.questions[data.test_session.current_question_num].selected_answer_list.length > 0)
         } catch (error) {
             console.error('Error:', error.response ? error.response.data : error.message);
         }
     }
 
     async function update() {
+        console.log("Update called");
         if (!finished) {
             const headers = {
                 'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
@@ -99,7 +113,7 @@ function Page({params}) {
             const body = JSON.stringify({
                 question_answer_data: questionAnswerData,
                 current_question_index: currentQuestionIndex,
-                total_marks_scored: totalScore,
+                total_marks_scored: scoredMark,
             })
             try {
                 const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
@@ -111,22 +125,23 @@ function Page({params}) {
     }
 
     function checkAndMarkAnswer() {
+        hasInteracted.current = true;
         setIsCurrentQuestionAnswered(true)
         setQuestionAnswerData(prevState => {
             let prevCopy = {...prevState}
-            prevCopy[questionIds[currentQuestionIndex]].answered = true;
-            prevCopy[questionIds[currentQuestionIndex]].selected_answer_list = selectedOptions[currentQuestionIndex];
+            prevCopy[questionIdsOrdered[currentQuestionIndex]].answered = true;
+            prevCopy[questionIdsOrdered[currentQuestionIndex]].selected_answer_list = selectedOptions[currentQuestionIndex];
             return prevCopy
         })
-        if (currentQuestion.question_type === "m-choice") {
+        if (questionAnswerData[currentQuestionId].question_type === "m-choice") {
             if (selectedOptions[currentQuestionIndex][0] === correctOptions[currentQuestionIndex][0]) {
                 setTotalScore(totalScore => {
-                    return totalScore + questionAnswerData[questionIds[currentQuestionIndex]].questions_total_mark;
+                    return totalScore + questionAnswerData[questionIdsOrdered[currentQuestionIndex]].questions_total_mark;
                 })
             } else {
             }
 
-        } else if (currentQuestion.question_type === "m-select") {
+        } else if (questionAnswerData[currentQuestionId].question_type === "m-select") {
             if (selectedOptions[currentQuestionIndex].length > 0) {
                 let answeredWrong = false
                 selectedOptions[currentQuestionIndex].forEach((selectedOption) => {
@@ -137,7 +152,7 @@ function Page({params}) {
                 if (answeredWrong) {
                 } else {
                     setTotalScore(totalScore => {
-                        return totalScore + questionAnswerData[questionIds[currentQuestionIndex]].questions_total_mark * selectedOptions[currentQuestionIndex].length / correctOptions[currentQuestionIndex].length;
+                        return totalScore + questionAnswerData[questionIdsOrdered[currentQuestionIndex]].questions_total_mark * selectedOptions[currentQuestionIndex].length / correctOptions[currentQuestionIndex].length;
                     })
                 }
             }
@@ -145,23 +160,29 @@ function Page({params}) {
     }
 
     async function nextQuestion() {
-        if (currentQuestionIndex + 1 < questionIds.length) {
-            setCurrentQuestion(questions[currentQuestionIndex + 1]);
-            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex + 1]].answered);
+        hasInteracted.current = true;
+        if (currentQuestionIndex + 1 < questionIdsOrdered.length) {
+            setCurrentQuestion(questions[questionIdsOrdered[currentQuestionIndex + 1]]);
+            setIsCurrentQuestionAnswered(questionAnswerData[questionIdsOrdered[currentQuestionIndex + 1]].answered);
+            setCurrentQuestionId(questionIdsOrdered[currentQuestionIndex + 1])
             setCurrentQuestionIndex(presentState => presentState + 1);
+
         }
     }
 
     async function prevQuestion() {
+        hasInteracted.current = true;
         if (currentQuestionIndex > 0) {
-            setCurrentQuestion(questions[currentQuestionIndex - 1]);
-            setIsCurrentQuestionAnswered(questionAnswerData[questionIds[currentQuestionIndex - 1]].answered);
+            setCurrentQuestion(questions[questionIdsOrdered[currentQuestionIndex - 1]]);
+            setIsCurrentQuestionAnswered(questionAnswerData[questionIdsOrdered[currentQuestionIndex - 1]].answered);
+            setCurrentQuestionId(questionIdsOrdered[currentQuestionIndex - 1])
             setCurrentQuestionIndex(presentState => presentState - 1);
 
         }
     }
 
     function optionsClickHandler(index) {
+        hasInteracted.current = true;
         if (!isCurrentQuestionAnswered && !finished) {
             if (currentQuestion.question_type === "m-choice") {
                 setSelectedOptions(prev => {
@@ -185,6 +206,7 @@ function Page({params}) {
     }
 
     function toggleDialog() {
+        hasInteracted.current = true;
         if (dialogOpen) {
             setDialogOpen(false);
         } else {
@@ -193,12 +215,14 @@ function Page({params}) {
     }
 
     async function finishTest() {
+        hasInteracted.current = true;
         const headers = {
             'Content-Type': 'application/json', 'Authorization': `Bearer ${userInfo.token}`
         };
         try {
             const response = await axios.put(`${fetchURL}/test_session/finish/${testSessionId}`, {}, {headers});
             console.log(response.data)
+            setTestSession(response.data.testSession)
             setFinished(true);
             setResultScreen(true);
         } catch (error) {
@@ -236,13 +260,14 @@ function Page({params}) {
 
         {resultScreen ? <>
                 <h1>Results</h1>
+                <h2>{testSession.scored_marks}</h2>
                 <button onClick={() => {
                     setResultScreen(false)
                 }}>Analyze Questions
                 </button>
             </>
             :
-            <div className="quiz_box shadow-lg p-8 w-[35%] h-[95vh] outline-none bg-white relative" tabIndex={0}
+            <div className="quiz_box shadow-lg p-4 w-[35%] h-[95vh] outline-none bg-white relative" tabIndex={0}
                  onKeyDown={(e => {
                      if (e.key === 'ArrowLeft') {
                          prevQuestion();
@@ -250,10 +275,13 @@ function Page({params}) {
                          nextQuestion();
                      }
                  })}>
-                <div className="namebox bg-amber-800 h-4 w-8">{qsetName}</div>
+                <div
+                    className="namebox text-slate-600 text-[1.2rem] flex justify-center items-center mb-2">{qsetName}</div>
                 <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline">
-                    <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIds.length}</h4>
-                    <h4 className={"text-blue-300"}>{currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
+                    <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
+                    {Object.keys(questionAnswerData).length > 0 &&
+                        <h4 className={"text-blue-300"}>{questionAnswerData[currentQuestionId].question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
+                    }
                     {!finished && <h4>Score : {parseFloat(totalScore.toFixed(2))}</h4>}
                     {finished ?
                         <p>Finished</p> : <p
@@ -265,9 +293,10 @@ function Page({params}) {
                         </p>}
                 </div>
                 <div className="h-16">
-                    <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{currentQuestion.question}</h1>
+                    {Object.keys(questionAnswerData).length > 0 &&
+                        <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{questionAnswerData[currentQuestionId].question}</h1>}
                 </div>
-                {currentQuestion.options && (currentQuestion.options.map((option, index) => (
+                {currentQuestion && currentQuestion.options && (currentQuestion.options.map((option, index) => (
                     <div key={index} onClick={() => {
                         optionsClickHandler(index);
                     }}
@@ -304,9 +333,16 @@ function Page({params}) {
                         </button>
                         <button
                             className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white ml-1 disabled:bg-teal-400 disabled:cursor-default"
-                            onClick={nextQuestion}
-                            disabled={currentQuestionIndex + 1 === questionIds.length}>
-                            Next
+                            onClick={() => {
+                                if ((currentQuestionIndex + 1) === questionIdsOrdered.length) {
+                                    toggleDialog()
+                                } else {
+                                    nextQuestion()
+                                }
+                            }}
+                            // disabled={currentQuestionIndex + 1 === questionIdsOrdered.length}
+                        >
+                            {((currentQuestionIndex + 1) === questionIdsOrdered.length) ? "Finish" : "Next"}
                         </button>
 
                     </div>
