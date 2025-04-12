@@ -14,8 +14,8 @@ async function createTest(questionSetID, token, mode, router) {
         'Authorization': `Bearer ${token}`
     };
     const data = {
-        question_set: questionSetID,
-        test_mode: mode,
+        question_set_id: questionSetID,
+        mode: mode,
         randomize_questions: false
 
     }
@@ -24,7 +24,7 @@ async function createTest(questionSetID, token, mode, router) {
         console.log(response);
         setTimeout(()=>{
             enqueueSnackbar("test session successfully created!")
-            router.push(`/test/${response.data.test_session_id}`)
+            router.push(`/test/${response.data.test_session}`)
         },500)
 
     } catch (error) {
@@ -45,7 +45,7 @@ function QuestionSetCard({questionSet}) {
                 <p>{questionSet.explanation}</p>
             </div>
             <div className="info-block">
-                <p><span>Number of Questions:</span>{questionSet.qid_list.length}</p>
+                <p><span>Number of Questions:</span>{questionSet.total_questions}</p>
             </div>
             <div className="action-block">
                 <Select className={"w-[10rem] mx-4"} label="Mode" value={mode}>

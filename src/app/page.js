@@ -7,13 +7,15 @@ async function getQuestionSets() {
     let response = null;
     try {
         response = await axios.get(`${fetchURL}/questionsets`);
+        console.log(response)
     } catch (error) {
         console.error('Error:', error.response ? error.response.data : error.message);
     }
-    return response.data.question_sets
+    return response.data
 }
 
 export default async function Home() {
+    console.log("Home page");
 
     const questionSets = await getQuestionSets();
 
