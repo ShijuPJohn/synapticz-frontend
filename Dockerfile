@@ -11,7 +11,7 @@ COPY package-lock.json /usr/src/app
 # Production use node instead of root
 # USER node
 
-RUN npm install --production
+RUN npm install
 
 COPY . /usr/src/app
 
