@@ -135,8 +135,8 @@ function Page({params}) {
         })
         if (questionAnswerData[currentQuestionId].question_type === "m-choice") {
             if (selectedOptions[currentQuestionIndex][0] === correctOptions[currentQuestionIndex][0]) {
-                setTotalScore(totalScore => {
-                    return totalScore + questionAnswerData[questionIdsOrdered[currentQuestionIndex]].questions_total_mark;
+                setScoredMark(ts => {
+                    return ts + questionAnswerData[questionIdsOrdered[currentQuestionIndex]].questions_total_mark;
                 })
             } else {
             }
@@ -151,8 +151,8 @@ function Page({params}) {
                 })
                 if (answeredWrong) {
                 } else {
-                    setTotalScore(totalScore => {
-                        return totalScore + questionAnswerData[questionIdsOrdered[currentQuestionIndex]].questions_total_mark * selectedOptions[currentQuestionIndex].length / correctOptions[currentQuestionIndex].length;
+                    setScoredMark(ts => {
+                        return ts + questionAnswerData[questionIdsOrdered[currentQuestionIndex]].questions_total_mark * selectedOptions[currentQuestionIndex].length / correctOptions[currentQuestionIndex].length;
                     })
                 }
             }
@@ -222,7 +222,7 @@ function Page({params}) {
         try {
             const response = await axios.put(`${fetchURL}/test_session/finish/${testSessionId}`, {}, {headers});
             console.log(response.data)
-            setTestSession(response.data.testSession)
+            setCurrentQuestionIndex(0)
             setFinished(true);
             setResultScreen(true);
         } catch (error) {
@@ -260,7 +260,7 @@ function Page({params}) {
 
         {resultScreen ? <>
                 <h1>Results</h1>
-                <h2>{testSession.scored_marks}</h2>
+                <h2>{scoredMark}</h2>
                 <button onClick={() => {
                     setResultScreen(false)
                 }}>Analyze Questions
@@ -282,7 +282,7 @@ function Page({params}) {
                     {Object.keys(questionAnswerData).length > 0 &&
                         <h4 className={"text-blue-300"}>{questionAnswerData[currentQuestionId].question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
                     }
-                    {!finished && <h4>Score : {parseFloat(totalScore.toFixed(2))}</h4>}
+                    {!finished && <h4>Score : {parseFloat(scoredMark.toFixed(2))}</h4>}
                     {finished ?
                         <p>Finished</p> : <p
                             className={"test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300"}
