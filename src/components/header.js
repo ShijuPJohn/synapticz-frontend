@@ -5,6 +5,7 @@ import {faBars} from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import {useDispatch, useSelector} from "react-redux";
 import {logout} from "@/redux/authSlice";
+import Image from 'next/image';
 
 
 function Header() {
@@ -43,7 +44,7 @@ function Header() {
     return (
         <>
             {hydrated && <header
-                className="flex flex-row items-center justify-center md:justify-between w-full bg-gray-700 px-4 py-2 h-[calc(4vw+1.5rem)] relative">
+                className="flex flex-row items-center justify-center md:justify-between w-full bg-[#021222] px-4 py-2 h-[calc(4vw+1.5rem)] relative">
                 <button className="md:hidden absolute left-2 top-0 text-gray-500 text-[calc(3vw+.5rem)] my-auto"
                         onClick={handleOpenDrawer}>
                     <FontAwesomeIcon icon={faBars}/>
@@ -61,7 +62,7 @@ function Header() {
                                     <Link href="/" className="">Home</Link>
                                 </li>
                                 <li className="drawer-item">
-                                    <Link href="/contact">Browse Quizzes</Link>
+                                    <Link href="/quizzes">Browse Quizzes</Link>
                                 </li>
                                 <li className="drawer-item">
                                     <Link href="/about">LeaderBoard</Link>
@@ -75,14 +76,20 @@ function Header() {
                 )}
 
                 {/*<h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">Synapticz</h1>*/}
-                <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white"><Link href={"/"}>Synapticz</Link></h1>
+                <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white"><Link href={"/"}><Image
+                    src="/images/logo.jpg"
+                    alt="Logo"
+                    width={270}
+                    height={50}
+                    priority
+                /></Link></h1>
                 <nav className="navLinks hidden md:block">
                     <ul className="flex items-center text-white">
                         <li className="header-list-item">
                             <Link href="/">Home</Link>
                         </li>
                         <li className="header-list-item">
-                            <Link href="/contact">Browse Quizzes</Link>
+                            <Link href="/quizzes">Browse Quizzes</Link>
                         </li>
                         <li className="header-list-item">
                             <Link href="/about">LeaderBoard</Link>
