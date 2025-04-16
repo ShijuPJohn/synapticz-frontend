@@ -1,0 +1,6 @@
+.cover-image-container{
+    position: relative;
+    overflow: hidden;
+    width: 5rem;
+    height: 5rem;
+}

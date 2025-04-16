@@ -4,24 +4,36 @@ import {fetchURL} from "@/constants";
 import QuestionSetCard from "@/components/question_set_card";
 
 async function getQuestionSets() {
+    let questionSetsModified=[]
     let response = null;
     try {
         response = await axios.get(`${fetchURL}/questionsets`);
-        console.log(response)
+        const questionSets = response.data;
+        questionSetsModified = questionSets.map((item) => {
+            if (item.coverImage === "") {
+                return {...item, coverImage: "/images/placeholder_book.png"}
+            }
+            return item;
+        })
+        console.log(questionSetsModified)
     } catch (error) {
         console.error('Error:', error.response ? error.response.data : error.message);
     }
-    return response.data
+    return questionSetsModified
 }
 
 async function Page(props) {
     const questionSets = await getQuestionSets();
+    console.log(questionSets);
 
     return (
         <main className={"flex flex-col p-4 items-center"}>
             {
                 questionSets.map(set => (
-                    <QuestionSetCard key={set.id} questionSet={set}/>
+
+                        <QuestionSetCard key={set.id} questionSet={set}/>
+
+
                 ))
             }
         </main>
