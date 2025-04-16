@@ -7,6 +7,8 @@ import {fetchURL} from "@/constants";
 import axios from "axios";
 import {useRouter} from "next/navigation";
 import {enqueueSnackbar} from "notistack";
+import Image from "next/image";
+import "./components_common_styles.css"
 
 async function createTest(questionSetID, token, mode, router) {
     const headers = {
@@ -40,6 +42,9 @@ function QuestionSetCard({questionSet}) {
     return (
         <div
             className={"questionset-card card-box bg-[rgba(0,0,0,.05)] w-[60%] p-4 my-2 flex flex-row items-center justify-between border-[1px] border-slate-500 text-slate-800 rounded-[3px]"}>
+           <div className="cover-image-container">
+               <Image src={questionSet.coverImage} fill />
+           </div>
             <div className="title-block flex flex-col">
                 <h2 className={"text-xl text-red-900"}>{questionSet.name}</h2>
                 <p>{questionSet.explanation}</p>
