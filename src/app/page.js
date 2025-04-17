@@ -1,5 +1,4 @@
 import Image from "next/image";
-import {redirect} from 'next/navigation'
 import Link from "next/link";
 
 export default function Home() {
@@ -37,30 +36,29 @@ export default function Home() {
             contentTitle: "Bookmark What Matters",
             contentText: "Found a tricky question or a brilliant explanation? Just bookmark it.\n" + "\n" + "With Synapticz, you can save important questions and their explanations to revisit anytime — perfect for quick reviews or deep dives later. Learning at your own pace just got easier."
         },]
-    return (<main className={"flex flex-col p-4 items-center"}>
+    return (<main>
         <div
-            className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4 w-full min-h-[calc(200vh)] md:min-h-[calc(110vh)] lg:min-h-[calc(100vh-8rem)]">
+            className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-2 md:p4 w-full min-h-[calc(200vh)] md:min-h-[calc(110vh)] lg:min-h-[calc(100vh-8rem)]">
             {arrayOfCardContent.map((cardContent, index) => (<div
                 key={index}
-                className="border border-gray-500 h-full w-full flex flex-col gap-0 items-center p-4"
+                className="rounded-xl h-full w-full flex flex-col gap-0 items-center p-2 md:p-4 bg-[rgba(255,255,255,.3)]"
             >
 
                 {/* Image Container - 1/3 width */}
-                <div className="card-main-body flex gap-2 h-full">
-                    <div className="w-1/3 h-[100%] flex justify-center items-center overflow-hidden">
+                <div className="card-main-body flex flex-col md:flex-row gap-2 h-full">
+                    <div className="w-full md:h-full h-40 md:w-1/3 flex relative  border bg-[rgba(0,0,0,.3)] border-gray-400 rounded-xl border-none">
                         <Image
-                            className="object-contain w-full h-full"
+                            className="object-contain h-full"
                             src={cardContent.image}
                             alt={cardContent.imageDescription}
-                            width={300}
-                            height={300}
+                            fill
                         />
                     </div>
 
                     {/* Content Container - 2/3 width */}
-                    <div className="w-2/3 h-full p-4  flex flex-col justify-center items-center overflow-hidden">
-                        <h1 className={"content-title text-[1.1rem] text-gray-700 uppercase mb-2 font-bold"}>{cardContent.contentTitle}</h1>
-                        <p className={"content-body text-gray-600"}>
+                    <div className="w-full md:w-2/3 p-2 md:pl-4  flex flex-col justify-center items-center overflow-hidden">
+                        <h1 className={"content-title text-[1.1rem] text-gray-700 uppercase mb-2 font-bold "}>{cardContent.contentTitle}</h1>
+                        <p className={"content-body text-gray-600 text-[.8rem] md:text-[.85rem] lg:text-[.9rem]"}>
                             {cardContent.contentText}
                         </p>
                     </div>
@@ -68,7 +66,7 @@ export default function Home() {
             </div>))}
         </div>
         <div
-            className="button-containe w-full flex justify-center items-center border-[1px] border-gray-500 p-4 ml-16 mr-16">
+            className="button-container w-full flex justify-center items-center border-[1px] border-gray-500 p-4 ml-16 mr-16">
             <Link href={"/quizzes"} className={"browse-quiz-button bg-blue-800 p-4 text-white uppercase w-[25rem] flex items-center justify-center"}>Browse
                 Quizzes
             </Link>

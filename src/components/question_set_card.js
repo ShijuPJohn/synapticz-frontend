@@ -36,7 +36,7 @@ function QuestionSetCard({ questionSet }) {
     const router = useRouter();
 
     return (
-        <div className="w-full max-w-5xl mx-auto bg-[rgba(0,0,0,.1)]  rounded-xl shadow-md my-4 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 hover:shadow-lg transition-all">
+        <div className="w-full max-w-5xl mx-auto bg-[rgba(0,0,0,.1)]  rounded-xl shadow-md my-4 px-5 py-4 flex flex-col justify-center items-center sm:flex-row items-start sm:items-center gap-4 hover:shadow-lg transition-all">
             {/* Image */}
             <div className="w-[5.5rem] h-[5.5rem] relative rounded-md overflow-hidden border border-slate-300 flex-shrink-0">
                 <Image
@@ -57,7 +57,7 @@ function QuestionSetCard({ questionSet }) {
                     </Link>
                 </div>
 
-                <div className="text-slate-700 flex gap-4 mt-1 flex-wrap text-[0.95rem] font-medium">
+                <div className="text-slate-700 flex gap-4 mt-1 flex-wrap text-[0.95rem]">
                     <p>
                         <span className="text-slate-500">Subject:</span> {questionSet.subject}
                     </p>
@@ -78,9 +78,9 @@ function QuestionSetCard({ questionSet }) {
             </div>
 
             {/* CTA */}
-            <div className="flex-shrink-0 w-full sm:w-auto">
+            <div className="flex-shrink-0 w-full sm:w-auto flex justify-center">
                 <button
-                    className="text-base font-semibold px-5 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition w-full sm:w-auto"
+                    className="text-base bg-blue-800 p-4 text-white uppercase flex items-center justify-center h-12 min-w-32 text-[.7rem]"
                     onClick={() => {
                         createTest(questionSet.id, userInfo.token, router);
                     }}
