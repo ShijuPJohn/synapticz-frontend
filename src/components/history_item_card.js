@@ -19,7 +19,7 @@ function HistoryItemCard({ testSession }) {
     return (
         <div className="w-full max-w-5xl mx-auto bg-[rgba(0,0,0,.1)]  border-gray-200 rounded-lg shadow-sm my-3 p-4 flex items-center gap-4 hover:shadow-md transition">
             {/* Image */}
-            <div className="w-24 h-24 relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
+            <div className="w-[5rem] h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
                 <Image
                     src={testSession.coverImage}
                     alt="Cover"
