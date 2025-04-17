@@ -7,7 +7,7 @@ import {fetchURL} from "@/constants";
 function getFromLocalStorage() {
     if (typeof window === 'undefined') {
         // Server-side rendering, return default initial state
-        return { loading: false, userInfo: {} };
+        return {loading: false, userInfo: {}};
     }
     try {
         const serializedStore = localStorage.getItem("store");
@@ -37,6 +37,10 @@ export const userSlice = createSlice({
             state.userInfo = action.payload
             enqueueSnackbar('Logged In. Redirecting to home page.', {variant: "success"})
         },
+        signupFail: (state, action) => {
+            state.loading = false
+            enqueueSnackbar('Signup Error '+ action.payload, {variant: "error"})
+        },
         logout: (state) => {
             state.loading = false
             state.userInfo = {}
@@ -44,7 +48,7 @@ export const userSlice = createSlice({
         }
     }
 })
-export const {signup, loginRequest, login, logout, loginFail} = userSlice.actions
+export const {signup, loginRequest, login, logout, loginFail, signupFail} = userSlice.actions
 export const userReducer = userSlice.reducer
 
 export const loginThunk = (email, password) => async (dispatch) => {
@@ -74,7 +78,6 @@ export const loginThunk = (email, password) => async (dispatch) => {
 
 export const signupThunk = (name, email, password) => async (dispatch) => {
     try {
-        console.log("checkpoint1")
         dispatch(loginRequest());
         const config = {
             headers: {
@@ -82,16 +85,13 @@ export const signupThunk = (name, email, password) => async (dispatch) => {
                 'Content-Type': 'application/json'
             }
         }
-        console.log("checkpoint2")
         const {data} = await axios.post(
-            `${fetchURL}/auth/signup`,
-            { name, email, password},
+            `${fetchURL}/auth/users`,
+            {name, email, password},
             config
         )
-        console.log("checkpoint3")
         dispatch(login(data));
-        console.log("checkpoint4")
     } catch (e) {
-        dispatch(loginFail());
+        dispatch(signupFail(e));
     }
 }

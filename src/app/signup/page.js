@@ -16,13 +16,7 @@ const LoginPage = () => {
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
     const onSubmit = async (data) => {
-        console.log("data", data);
         dispatch(signupThunk(data.username, data.email, data.password));
-        // if (userInfo && Object.keys(userInfo).length !== 0){
-        //     setTimeout(()=>{
-        //         router.push('/');
-        //     },500)
-        // }
     };
     const handleClickShowPassword = () => setShowPassword(!showPassword);
     useEffect(() => {

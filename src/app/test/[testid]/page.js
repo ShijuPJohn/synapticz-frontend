@@ -72,7 +72,6 @@ function Page({params}) {
         try {
             const response = await axios.get(`${fetchURL}/test_session/${id}`, {headers});
             const data = response.data;
-            console.log("fetch response", response.data)
             setCurrentQuestion(data.questions[data.test_session.current_question_num])
             setCurrentQuestionIndex(data.current_question_index)
             setCurrentQuestionId(data.current_question_id)
