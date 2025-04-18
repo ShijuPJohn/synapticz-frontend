@@ -1,14 +1,14 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
+import {useSelector} from "react-redux";
+import {useRouter} from "next/navigation";
 import axios from "axios";
-import { fetchURL } from "@/constants";
-import { enqueueSnackbar } from "notistack";
+import {fetchURL} from "@/constants";
+import {enqueueSnackbar} from "notistack";
 import Image from "next/image";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import {faPlay} from '@fortawesome/free-solid-svg-icons';
 
 async function createTest(questionSetID, token, router) {
     const headers = {
@@ -33,23 +33,28 @@ async function createTest(questionSetID, token, router) {
     }
 }
 
-function QuestionSetCard({ questionSet }) {
-    const { userInfo } = useSelector((state) => state.user);
+function QuestionSetCard({questionSet}) {
+    const userLogin = useSelector(state => state.user);
+    const {userInfo} = userLogin
     const router = useRouter();
 
 
     return (
-        <div className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap hover:shadow-md transition ">
+        <div
+            className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap hover:shadow-md transition ">
             {/* Image */}
             <Link href={`/quizzes/${questionSet.id}`}>
-            <div className="w-[3rem] h-[3rem] md:w-[5rem] md:h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
-                <Image
-                    src={questionSet.coverImage || "/images/placeholder.png"}
-                    alt="Cover"
-                    fill
-                    className="object-cover"
-                />
-            </div>
+                <div
+                    className="w-[3rem] h-[3rem] md:w-[5rem] md:h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
+                    <Image
+                        src={questionSet.coverImage || "/images/placeholder.png"}
+                        alt="Cover"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority
+                        className="object-cover"
+                    />
+                </div>
             </Link>
 
             {/* Info */}
@@ -62,7 +67,8 @@ function QuestionSetCard({ questionSet }) {
                     </Link>
                 </div>
 
-                <div className="text-slate-600 flex mt-1 text-[.7rem] md:text-[.9rem] flex-wrap justify-between w-full md:w-[50%]">
+                <div
+                    className="text-slate-600 flex mt-1 text-[.7rem] md:text-[.9rem] flex-wrap justify-between w-full md:w-[50%]">
                     <p>
                         <span className="font-medium text-slate-500">Sub:</span>{" "}
                         {questionSet.subject}
@@ -81,9 +87,16 @@ function QuestionSetCard({ questionSet }) {
             {/* CTA */}
             <div className="flex-shrink-0">
 
-                    <FontAwesomeIcon icon={faPlay} className="text-pink-900 hover:text-pink-700  text-xl cursor-pointer transition" onClick={() => {
-                        createTest(questionSet.id, userInfo.token, router);
-                    }} />
+                <FontAwesomeIcon icon={faPlay}
+                                 className="text-pink-900 hover:text-pink-700  text-xl cursor-pointer transition"
+                                 onClick={() => {
+                                     if (Object.keys(userInfo).length === 0) {
+                                         enqueueSnackbar("Sign in with an account or create a new account", {variant:"warning"})
+                                         router.push("/login");
+                                     } else {
+                                         createTest(questionSet.id, userInfo.token, router);
+                                     }
+                                 }}/>
             </div>
         </div>
     );

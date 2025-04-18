@@ -7,6 +7,7 @@ import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {signupThunk} from "@/redux/authSlice";
 import {useDispatch, useSelector} from "react-redux";
 import {useRouter} from "next/navigation";
+import Image from "next/image";
 
 const LoginPage = () => {
     const {register, formState: {errors}, handleSubmit} = useForm();
@@ -29,12 +30,22 @@ const LoginPage = () => {
     return (<>
         <title>Signup | Synapticz.com</title>
         <main>
-            <div className="signup-form-main-container flex justify-center items-center rounded-lg p-4 bg-[rgba(255,255,255,.8)] w-[calc(130%-30vw)] g md:w-[55vw] lg:w-[30%] lg:min-h-[25rem]">
-                <div className="flex flex-col items-center justify-around w-full">
+            <div className="signup-form-main-container flex flex-col md:flex-row rounded-lg bg-[rgba(255,255,255,.8)] p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflo">
+                <div className="hidden md:flex md:w-1/3 relative">
+                    <Image
+                        src="/images/neural_network.jpg"
+                        alt="Neural Network"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover"
+                        priority
+                    />
+                </div>
+                <div className="w-full md:w-2/3 flex flex-col items-center justify-around">
                     <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Sign Up</h3>
                     <form
                         onSubmit={handleSubmit(onSubmit)}
-                        className="flex flex-col items-center w-full space-y-6">
+                        className="flex flex-col items-center w-full space-y-6 p-4">
                         <div className="w-full">
                             <TextField
                                 className={`w-full p-3 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md`}
