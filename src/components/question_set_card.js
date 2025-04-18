@@ -7,6 +7,8 @@ import axios from "axios";
 import { fetchURL } from "@/constants";
 import { enqueueSnackbar } from "notistack";
 import Image from "next/image";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faPlay } from '@fortawesome/free-solid-svg-icons';
 
 async function createTest(questionSetID, token, router) {
     const headers = {
@@ -35,10 +37,12 @@ function QuestionSetCard({ questionSet }) {
     const { userInfo } = useSelector((state) => state.user);
     const router = useRouter();
 
+
     return (
-        <div className="w-full max-w-5xl mx-auto bg-[rgba(0,0,0,.1)]  rounded-xl shadow-md my-4 px-5 py-4 flex flex-col justify-center items-center sm:flex-row items-start sm:items-center gap-4 hover:shadow-lg transition-all">
+        <div className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap hover:shadow-md transition ">
             {/* Image */}
-            <div className="w-[5.5rem] h-[5.5rem] relative rounded-md overflow-hidden border border-slate-300 flex-shrink-0">
+            <Link href={`/quizzes/${questionSet.id}`}>
+            <div className="w-[3rem] h-[3rem] md:w-[5rem] md:h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
                 <Image
                     src={questionSet.coverImage || "/images/placeholder.png"}
                     alt="Cover"
@@ -46,47 +50,40 @@ function QuestionSetCard({ questionSet }) {
                     className="object-cover"
                 />
             </div>
+            </Link>
 
             {/* Info */}
-            <div className="flex-1 flex flex-col gap-1 text-[0.95rem] text-slate-800 w-full">
+            <div className="flex-1 flex flex-col gap-1 text-sm text-slate-800">
                 <div className="flex items-start justify-between w-full">
                     <Link href={`/quizzes/${questionSet.id}`}>
-                        <h2 className="text-xl font-bold text-cyan-800 hover:text-cyan-600 transition uppercase">
+                        <h2 className="text-sm md:text-[1rem] font-semibold  uppercase hover:text-cyan-600 transition text-pink-900">
                             {questionSet.name}
                         </h2>
                     </Link>
                 </div>
 
-                <div className="text-slate-700 flex gap-4 mt-1 flex-wrap text-[0.95rem]">
+                <div className="text-slate-600 flex mt-1 text-[.7rem] md:text-[.9rem] flex-wrap justify-between w-full md:w-[50%]">
                     <p>
-                        <span className="text-slate-500">Subject:</span> {questionSet.subject}
+                        <span className="font-medium text-slate-500">Sub:</span>{" "}
+                        {questionSet.subject}
                     </p>
                     <p>
-                        <span className="text-slate-500">Language:</span> {questionSet.language}
+                        <span className="font-medium text-slate-500">Lang:</span>{" "}
+                        {questionSet.language}
                     </p>
                     <p>
-                        <span className="text-slate-500">Questions:</span>{" "}
+                        <span className="font-medium text-slate-500">Questions:</span>{" "}
                         {questionSet.total_questions}
                     </p>
                 </div>
-
-                {/*{questionSet.description && (*/}
-                {/*    <p className="text-[0.9rem] mt-2 text-slate-600 font-normal">*/}
-                {/*        {questionSet.description}*/}
-                {/*    </p>*/}
-                {/*)}*/}
             </div>
 
             {/* CTA */}
-            <div className="flex-shrink-0 w-full sm:w-auto flex justify-center">
-                <button
-                    className="text-base bg-blue-800 p-4 text-white uppercase flex items-center justify-center h-12 min-w-32 text-[.7rem]"
-                    onClick={() => {
+            <div className="flex-shrink-0">
+
+                    <FontAwesomeIcon icon={faPlay} className="text-pink-900 hover:text-pink-700  text-xl cursor-pointer transition" onClick={() => {
                         createTest(questionSet.id, userInfo.token, router);
-                    }}
-                >
-                    Start Test
-                </button>
+                    }} />
             </div>
         </div>
     );

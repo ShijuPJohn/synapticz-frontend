@@ -27,7 +27,7 @@ async function Page(props) {
     const questionSets = await getQuestionSets();
     console.log(questionSets);
 
-    return (<main className={"flex flex-col p-4 items-center"}>
+    return (<main>
         {questionSets.map(set => (
             <QuestionSetCard key={set.id} questionSet={set}/>
         ))}

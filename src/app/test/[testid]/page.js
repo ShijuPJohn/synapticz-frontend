@@ -229,7 +229,7 @@ function Page({params}) {
         }
     }
 
-    return (<main className={"flex flex-col p-4 items-center w-full h-full"}>
+    return (<main>
         <Dialog
             open={dialogOpen}
             onClose={handleClose}
@@ -266,72 +266,94 @@ function Page({params}) {
                 </button>
             </>
             :
-            <div className="quiz_box shadow-lg p-4 w-[35%] h-[95vh] outline-none bg-white relative" tabIndex={0}
-                 onKeyDown={(e => {
-                     if (e.key === 'ArrowLeft') {
-                         prevQuestion();
-                     } else if (e.key === 'ArrowRight') {
-                         nextQuestion();
-                     }
-                 })}>
-                <div
-                    className="namebox text-slate-600 text-[1.2rem] flex justify-center items-center mb-2">{qsetName}</div>
-                <div className="flex justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline">
-                    <h4 className={"text-red-200"}>{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
+            <div
+                className="quiz_box shadow-lg w-full md:w-[35%] h-[95vh] max-h-screen outline-none p-2 rounded-xl bg-white relative overflow-y-auto"
+                tabIndex={0}
+                onKeyDown={(e => {
+                    if (e.key === 'ArrowLeft') {
+                        prevQuestion();
+                    } else if (e.key === 'ArrowRight') {
+                        nextQuestion();
+                    }
+                })}
+            >
+                <div className="namebox text-slate-600 text-base md:text-[1.2rem] flex justify-center items-center mb-2">
+                    {qsetName}
+                </div>
+
+                <div className="flex flex-wrap justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline gap-1 text-sm md:text-base">
+                    <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
                     {Object.keys(questionAnswerData).length > 0 &&
-                        <h4 className={"text-blue-300"}>{questionAnswerData[currentQuestionId].question_type === "m-select" ? "Multi-Select" : "MCQ"}</h4>
+                        <h4 className="text-blue-300">
+                            {questionAnswerData[currentQuestionId].question_type === "m-select" ? "Multi-Select" : "MCQ"}
+                        </h4>
                     }
                     {!finished && <h4>Score : {parseFloat(scoredMark.toFixed(2))}</h4>}
-                    {finished ?
-                        <p>Finished</p> : <p
-                            className={"test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300"}
-                            onClick={() => {
-                                toggleDialog()
-                            }}>
+                    {finished ? (
+                        <p>Finished</p>
+                    ) : (
+                        <p
+                            className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap"
+                            onClick={toggleDialog}
+                        >
                             <FontAwesomeIcon icon={faFlagCheckered}/> Finish
-                        </p>}
+                        </p>
+                    )}
                 </div>
-                <div className="h-16">
+
+                <div className="min-h-16 mb-4">
                     {Object.keys(questionAnswerData).length > 0 &&
-                        <h1 className="quiz_box_quest_title text-xl font-medium text-gray-700 mb-4">{questionAnswerData[currentQuestionId].question}</h1>}
+                        <h1 className="quiz_box_quest_title text-lg md:text-xl font-medium text-gray-700">
+                            {questionAnswerData[currentQuestionId].question}
+                        </h1>
+                    }
                 </div>
-                {currentQuestion && currentQuestion.options && (currentQuestion.options.map((option, index) => (
-                    <div key={index} onClick={() => {
-                        optionsClickHandler(index);
-                    }}
-                         className={`quiz_box_option_box p-2 border-2 flex justify-between items-center h-10 mb-4 
-                                 ${selectedOptions[currentQuestionIndex].includes(index) ? "border-blue-500" : "border-gray-300"} 
-                                 ${(isCurrentQuestionAnswered || finished) && correctOptions[currentQuestionIndex].includes(index) ? "border-green-500" : ""}
-                                 ${isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) ? "bg-red-300 border-red-500" : ""}
-                                 ${isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) ? "bg-green-300" : ""}
-                                 
-                                  `}
-                         style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
-                    >
-                        <h4 className="quiz_box_option">{option}</h4>
-                        {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) &&
-                            <div className="checkMark_main w-5 h-5 bg-green-600 clip-checkmark"/>}
-                        {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) &&
-                            <div className="crossMark_main w-4 h-4 bg-red-700 clip-crossmark"/>}
-                    </div>)))}
-                <div className="quiz_box_btn_box flex flex-col items-center mt-4">
+
+                <div className="space-y-3 mb-4">
+                    {currentQuestion && currentQuestion.options && (currentQuestion.options.map((option, index) => (
+                        <div
+                            key={index}
+                            onClick={() => optionsClickHandler(index)}
+                            className={`quiz_box_option_box p-2 border-2 flex justify-between items-center min-h-10 ${
+                                selectedOptions[currentQuestionIndex].includes(index) ? "border-blue-500" : "border-gray-300"
+                            } ${
+                                (isCurrentQuestionAnswered || finished) && correctOptions[currentQuestionIndex].includes(index) ? "border-green-500" : ""
+                            } ${
+                                isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) ? "bg-red-300 border-red-500" : ""
+                            } ${
+                                isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) ? "bg-green-300" : ""
+                            }`}
+                            style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
+                        >
+                            <h4 className="quiz_box_option text-sm md:text-base">{option}</h4>
+                            {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && correctOptions[currentQuestionIndex].includes(index) &&
+                                <div className="checkMark_main w-5 h-5 bg-green-600 clip-checkmark"/>}
+                            {isCurrentQuestionAnswered && selectedOptions[currentQuestionIndex].includes(index) && !correctOptions[currentQuestionIndex].includes(index) &&
+                                <div className="crossMark_main w-4 h-4 bg-red-700 clip-crossmark"/>}
+                        </div>
+                    )))}
+                </div>
+
+                <div className="quiz_box_btn_box flex flex-col items-center mt-4 space-y-2">
                     <button
-                        className={`quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center `}
-                        onClick={() => {
-                            checkAndMarkAnswer()
-                        }}
-                        style={(!isCurrentQuestionAnswered && !finished) ? {cursor: "pointer"} : {cursor: "default"}}>
+                        className={`quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center text-sm md:text-base ${
+                            (!isCurrentQuestionAnswered && !finished) ? "cursor-pointer" : "cursor-default"
+                        }`}
+                        onClick={checkAndMarkAnswer}
+                    >
                         Answer
                     </button>
-                    <div className="quiz_box_btn_box_2nd_row flex justify-between w-full h-12 mt-2">
+
+                    <div className="quiz_box_btn_box_2nd_row flex justify-between w-full gap-2">
                         <button
-                            className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white mr-1 disabled:bg-orange-400 disabled:cursor-default"
+                            className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white py-2 text-sm md:text-base disabled:bg-orange-400 disabled:cursor-default"
                             onClick={prevQuestion}
-                            disabled={currentQuestionIndex === 0}>
+                            disabled={currentQuestionIndex === 0}
+                        >
                             Previous
                         </button>
                         <button
-                            className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white ml-1 disabled:bg-teal-400 disabled:cursor-default"
+                            className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white py-2 text-sm md:text-base disabled:bg-teal-400 disabled:cursor-default"
                             onClick={() => {
                                 if ((currentQuestionIndex + 1) === questionIdsOrdered.length) {
                                     toggleDialog()
@@ -339,25 +361,26 @@ function Page({params}) {
                                     nextQuestion()
                                 }
                             }}
-                            // disabled={currentQuestionIndex + 1 === questionIdsOrdered.length}
                         >
                             {((currentQuestionIndex + 1) === questionIdsOrdered.length) ? "Finish" : "Next"}
                         </button>
-
                     </div>
-
                 </div>
-                {(isCurrentQuestionAnswered || finished) && (<div
-                    className="quiz_box_explanation_box border-3 border-green-200 p-2 mt-4 max-h-40 overflow-y-auto text-sm text-gray-700">
-                    <p>{currentQuestion.explanation}</p>
-                </div>)}
-                {finished && <button
-                    className={`quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center `}
-                    onClick={() => {
-                        setResultScreen(true)
-                    }}>
-                    See Result
-                </button>}
+
+                {(isCurrentQuestionAnswered || finished) && (
+                    <div className="quiz_box_explanation_box border-3 border-green-200 p-2 mt-4 max-h-40 overflow-y-auto text-xs md:text-sm text-gray-700">
+                        <p>{currentQuestion.explanation}</p>
+                    </div>
+                )}
+
+                {finished && (
+                    <button
+                        className="quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center mt-4 text-sm md:text-base"
+                        onClick={() => setResultScreen(true)}
+                    >
+                        See Result
+                    </button>
+                )}
             </div>}
 
     </main>)

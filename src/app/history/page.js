@@ -37,7 +37,7 @@ function Page() {
         if (token) getTestHistory();
     }, [token]);
 
-    return (<main className="flex flex-col p-4 items-center">
+    return (<main>
             {testSessions && testSessions.map((testSession, index) => (
                 <HistoryItemCard testSession={testSession} key={index}/>
 

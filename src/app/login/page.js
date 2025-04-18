@@ -32,7 +32,7 @@ const LoginPage = () => {
     return (<>
         <title>Login | Synapticz.com</title>
         <main>
-            <div className="login-box-main-container flex justify-center items-center my-4 bg-gray-100 p-6 w-[calc(120%-30vw)] md:w-[55vw] lg:w-[30rem] lg:min-h-[25rem]">
+            <div className="login-box-main-container flex justify-center items-center p-4 rounded-lg bg-[rgba(255,255,255,.8)] w-[calc(130%-30vw)] md:w-[55vw] lg:w-[30rem] lg:min-h-[25rem]">
                 <div className="flex flex-col items-center justify-around w-full">
                     <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Login</h3>
                     <form

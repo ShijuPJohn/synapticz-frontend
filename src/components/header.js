@@ -42,33 +42,54 @@ function Header() {
     function handleCloseDrawer() {
         setIsAnimating(true);
         clearTimeout(drawerTimeout.current);
+        drawerTimeout.current = setTimeout(() => {
+            setOpenDrawer(false);
+            setIsAnimating(false);
+        }, 500); // duration must match your CSS transition
     }
 
     function handleOpenDrawer() {
         if (openDrawer) {
-            handleCloseDrawer();
+            setIsAnimating(true);
+            clearTimeout(drawerTimeout.current);
+            drawerTimeout.current = setTimeout(() => {
+                setOpenDrawer(false);
+                setIsAnimating(false);
+            }, 600);
         } else {
             setOpenDrawer(true);
+            drawerTimeout.current = setTimeout(() => {
+                setIsAnimating(true);
+                setTimeout(() => {
+                    setOpenDrawer(false);
+                    setIsAnimating(false);
+                }, 600);
+            }, 10000);
         }
     }
+
 
     const arrayOfNavElements = [<li className="header-list-item">
         <Link href="/" className="">Home</Link>
     </li>, <li className="header-list-item">
         <Link href="/quizzes">Quizzes</Link>
-    </li>, <li className="header-list-item">
-        <Link href="/about">LeaderBoard</Link>
-    </li>, (userInfo && Object.keys(userInfo).length) ? <li className="header-list-item">
-        <Link href="/history">History</Link>
-    </li> : null, userInfo && Object.keys(userInfo).length !== 0 ? <li className="header-list-item">
-        <button className={"logout-btn"} onClick={() => {
-            dispatch(logout())
-        }}>Logout
-        </button>
-        {/*<li className={styles.main_nav_links_item}><Link href="/dashboard">Dashboard</Link></li>*/}
-    </li> : <li className="header-list-item">
-        <Link href="/login">Login</Link>
-    </li>]
+    </li>,
+        //     <li className="header-list-item">
+        //     <Link href="/about">LeaderBoard</Link>
+        // </li>,
+        (userInfo && Object.keys(userInfo).length) ? <li className="header-list-item">
+            <Link href="/history">History</Link>
+        </li> : null, userInfo && Object.keys(userInfo).length !== 0 ? <li className="header-list-item">
+            <button className="logout-btn" onClick={() => {
+                dispatch(logout());
+                handleCloseDrawer(); // close with animation
+            }}>
+                Logout
+            </button>
+            {/*<li className={styles.main_nav_links_item}><Link href="/dashboard">Dashboard</Link></li>*/}
+        </li> : <li className="header-list-item">
+            <Link href="/login">Login</Link>
+        </li>]
 
     return (<>
         {hydrated && <header
@@ -83,7 +104,7 @@ function Header() {
                 ref={drawerRef} // Attach the ref here
                 className={`absolute z-10 left-0 top-[calc(4vw+1.8rem)] bg-[rgba(2,18,34,.8)] h-[90vh] w-[40%] transition-transform duration-500 ease-in-out ${isAnimating ? 'menu-drawer hide' : 'menu-drawer'} flex items-center px-4 py-2`}
             >
-                <nav className="navLinks ">
+                <nav className="navLinks" onClick={handleCloseDrawer}>
                     <ul className="flex text-white flex-col items-start justify-center">
                         {arrayOfNavElements}
                     </ul>

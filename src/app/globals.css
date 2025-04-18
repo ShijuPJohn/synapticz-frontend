@@ -127,4 +127,12 @@ main{
     min-height: 100%;
     width: 100%;
     color: #04203a;
+    padding: 1rem;
+    gap: 1rem;
+}
+@media (max-width: 640px) {
+   main{
+       padding: .5rem;
+       gap: .7rem;
+   }
 }

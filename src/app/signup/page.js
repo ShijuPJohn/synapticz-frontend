@@ -29,7 +29,7 @@ const LoginPage = () => {
     return (<>
         <title>Signup | Synapticz.com</title>
         <main>
-            <div className="signup-form-main-container flex justify-center items-center my-4 bg-gray-100 p-6 w-[calc(120%-30vw)] g md:w-[55vw] lg:w-[30%] lg:min-h-[25rem]">
+            <div className="signup-form-main-container flex justify-center items-center rounded-lg p-4 bg-[rgba(255,255,255,.8)] w-[calc(130%-30vw)] g md:w-[55vw] lg:w-[30%] lg:min-h-[25rem]">
                 <div className="flex flex-col items-center justify-around w-full">
                     <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Sign Up</h3>
                     <form
