@@ -19,17 +19,15 @@ const LoginPage = () => {
     const searchParams = useSearchParams();
     const returnUrl = searchParams.get('returnUrl');
     const onSubmit = async (data) => {
-        console.log("data", data);
         dispatch(loginThunk(data.email, data.password));
 
     };
 
-    // Redirect if already logged in
-    // useEffect(() => {
-    //     if (userInfo) {
-    //
-    //     }
-    // }, [userInfo, returnUrl]);
+    useEffect(() => {
+        if (userInfo) {
+
+        }
+    }, [userInfo, returnUrl]);
 
     useEffect(() => {
         console.log(returnUrl);
