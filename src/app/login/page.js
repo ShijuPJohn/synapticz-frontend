@@ -5,8 +5,8 @@ import {IconButton, InputAdornment, TextField} from "@mui/material";
 import Link from "next/link";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {useDispatch, useSelector} from "react-redux";
-import {login, loginThunk} from "@/redux/authSlice";
-import {useRouter, useSearchParams} from "next/navigation";
+import {loginThunk} from "@/redux/authSlice";
+import {useRouter} from "next/navigation";
 import Image from "next/image";
 
 const LoginPage = () => {
@@ -14,63 +14,57 @@ const LoginPage = () => {
     const {register, formState: {errors}, handleSubmit} = useForm();
     const dispatch = useDispatch();
     const [showPassword, setShowPassword] = useState(false);
+    const [returnUrl, setReturnUrl] = useState('/');
     const userLogin = useSelector(state => state.user);
-    const {userInfo} = userLogin
-    const searchParams = useSearchParams();
-    const returnUrl = searchParams.get('returnUrl');
+    const {userInfo} = userLogin;
+
+    useEffect(() => {
+        // Client-side only URL parsing
+        const params = new URLSearchParams(window.location.search);
+        setReturnUrl(params.get('returnUrl') || '/');
+    }, []);
+
     const onSubmit = async (data) => {
         dispatch(loginThunk(data.email, data.password));
-
     };
 
     useEffect(() => {
-        if (userInfo) {
-
+        if (userInfo && Object.keys(userInfo).length !== 0) {
+            router.replace(returnUrl);
         }
-    }, [userInfo, returnUrl]);
+    }, [userInfo, returnUrl, router]);
 
-    useEffect(() => {
-        console.log(returnUrl);
-        if (userInfo && Object.keys(userInfo).length !== 0){
-            setTimeout(()=>{
-                router.replace(returnUrl || '/');
-            },500)
-        }
-    }, [userInfo]);
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-    return (<>
-        <title>Login | Synapticz.com</title>
-        <main>
-            <div className="login-container flex flex-col md:flex-row rounded-lg bg-[rgba(255,255,255,.8)] p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflow-hidden">
-                {/* Image Banner - Takes 1/3 width on desktop, hidden on mobile */}
-                <div className="hidden md:flex md:w-1/3 relative">
-                    <Image
-                        src="/images/neural_network.jpg"
-                        alt="Neural Network"
-                        fill
-                        className="object-cover"
-                        priority
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                </div>
+    return (
+        <>
+            <title>Login | Synapticz.com</title>
+            <main>
+                <div className="login-container flex flex-col md:flex-row rounded-lg bg-[rgba(255,255,255,.8)] p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflow-hidden">
+                    {/* Image Banner */}
+                    <div className="hidden md:flex md:w-1/3 relative">
+                        <Image
+                            src="/images/neural_network.jpg"
+                            alt="Neural Network"
+                            fill
+                            className="object-cover"
+                            priority
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                    </div>
 
-                {/* Form Section - Takes full width on mobile, 2/3 on desktop */}
-                <div className="w-full md:w-2/3 p-8 flex flex-col items-center justify-center">
-                    <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-6">
-                        Login
-                    </h3>
+                    {/* Form Section */}
+                    <div className="w-full md:w-2/3 p-8 flex flex-col items-center justify-center">
+                        <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-6">
+                            Login
+                        </h3>
 
-                    <form
-                        onSubmit={handleSubmit(onSubmit)}
-                        className="w-full space-y-6"
-                    >
-                        <div className="w-full">
+                        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
+                            {/* Email Field */}
                             <TextField
                                 className="w-full"
                                 error={!!errors.email}
-                                helperText={errors.email ? errors.email.message : null}
-                                autoFocus
+                                helperText={errors.email?.message}
                                 label="Email"
                                 variant="outlined"
                                 {...register("email", {
@@ -81,24 +75,20 @@ const LoginPage = () => {
                                     }
                                 })}
                             />
-                        </div>
 
-                        <div className="w-full">
+                            {/* Password Field */}
                             <TextField
                                 className="w-full"
                                 error={!!errors.password}
-                                helperText={errors.password ? errors.password.message : null}
+                                helperText={errors.password?.message}
                                 type={showPassword ? 'text' : 'password'}
                                 label="Password"
                                 variant="outlined"
-                                {...register("password", {
-                                    required: "Required"
-                                })}
+                                {...register("password", { required: "Required" })}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
                                             <IconButton
-                                                aria-label="toggle password visibility"
                                                 onClick={handleClickShowPassword}
                                                 edge="end"
                                             >
@@ -108,29 +98,24 @@ const LoginPage = () => {
                                     ),
                                 }}
                             />
-                        </div>
 
-                        <div className="flex justify-center w-full mt-6">
                             <button
                                 className="bg-[var(--primary-color)] hover:bg-[var(--primary-color-light)] text-white py-2 px-6 rounded-md w-full max-w-xs h-12 transition-colors duration-200"
                                 type="submit"
                             >
                                 Submit
                             </button>
-                        </div>
-                    </form>
+                        </form>
 
-                    <div className="my-6 h-[1px] w-4/5 bg-gray-300"></div>
-
-                    <Link href="/signup">
-                        <p className="text-blue-500 hover:text-blue-700 text-lg transition-colors duration-200">
+                        <div className="my-6 h-[1px] w-4/5 bg-gray-300"></div>
+                        <Link href="/signup" className="text-blue-500 hover:text-blue-700 text-lg">
                             Create an account
-                        </p>
-                    </Link>
+                        </Link>
+                    </div>
                 </div>
-            </div>
-        </main>
-    </>);
+            </main>
+        </>
+    );
 };
 
 export default LoginPage;
