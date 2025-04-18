@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import {useSelector} from "react-redux";
-import {useRouter} from "next/navigation";
+import {usePathname, useRouter} from "next/navigation";
 import axios from "axios";
 import {fetchURL} from "@/constants";
 import {enqueueSnackbar} from "notistack";
@@ -37,6 +37,7 @@ function QuestionSetCard({questionSet}) {
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
     const router = useRouter();
+    const pathname = usePathname(); // Get current path
 
 
     return (
@@ -92,7 +93,7 @@ function QuestionSetCard({questionSet}) {
                                  onClick={() => {
                                      if (Object.keys(userInfo).length === 0) {
                                          enqueueSnackbar("Sign in with an account or create a new account", {variant:"warning"})
-                                         router.push("/login");
+                                         router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
                                      } else {
                                          createTest(questionSet.id, userInfo.token, router);
                                      }

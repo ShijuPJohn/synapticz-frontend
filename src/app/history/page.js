@@ -28,7 +28,6 @@ function Page() {
                     return item;
                 })
                 setTestSessions(testHistoryModified);
-                console.log(testHistoryModified)
             } catch (error) {
                 console.error('Error:', error.response ? error.response.data : error.message);
             }

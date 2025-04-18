@@ -82,7 +82,7 @@ function Header() {
                         dispatch(logout());
                         handleCloseDrawer();
                     }}>
-                        Logout
+                        LOGOUT
                     </button>
                 </li> }
         ] : [

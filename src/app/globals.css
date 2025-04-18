@@ -17,9 +17,10 @@
     --breakpoint-cl: 120rem;
 }
 :root {
-    --primary-color: #f3285a;
-    --primary-color-light: #02d8f1;
-    --secondary-color-light: #e885c0;
+    --primary-color: #02d8f1;
+    --primary-color-light: #77d4ed;
+    --secondary-color: #e885c0;
+    --secondary-color-light: #ef97db;
     --grey-color-light0: #dbdbdb;
     --grey-color-light1: #fcfcfc;
     --grey-color-light2: #c8c8c8;
@@ -37,7 +38,7 @@ body {
     font-size: 16px;
     font-family: "Roboto", sans-serif;
     min-height: 100vh;
-    background: linear-gradient(to right bottom, var(--primary-color-light), var(--secondary-color-light));
+    background: linear-gradient(to right bottom, var(--primary-color), var(--secondary-color));
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -6,7 +6,7 @@ import Link from "next/link";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {useDispatch, useSelector} from "react-redux";
 import {login, loginThunk} from "@/redux/authSlice";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
 import Image from "next/image";
 
 const LoginPage = () => {
@@ -16,15 +16,26 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
+    const searchParams = useSearchParams();
+    const returnUrl = searchParams.get('returnUrl');
     const onSubmit = async (data) => {
         console.log("data", data);
         dispatch(loginThunk(data.email, data.password));
 
     };
+
+    // Redirect if already logged in
+    // useEffect(() => {
+    //     if (userInfo) {
+    //
+    //     }
+    // }, [userInfo, returnUrl]);
+
     useEffect(() => {
+        console.log(returnUrl);
         if (userInfo && Object.keys(userInfo).length !== 0){
             setTimeout(()=>{
-                router.push('/');
+                router.replace(returnUrl || '/');
             },500)
         }
     }, [userInfo]);
@@ -103,7 +114,7 @@ const LoginPage = () => {
 
                         <div className="flex justify-center w-full mt-6">
                             <button
-                                className="bg-[var(--primary-color-light)] hover:bg-[var(--primary-color-dark)] text-white py-2 px-6 rounded-md w-full max-w-xs h-12 transition-colors duration-200"
+                                className="bg-[var(--primary-color)] hover:bg-[var(--primary-color-light)] text-white py-2 px-6 rounded-md w-full max-w-xs h-12 transition-colors duration-200"
                                 type="submit"
                             >
                                 Submit
