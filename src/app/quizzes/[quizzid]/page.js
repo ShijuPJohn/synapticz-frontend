@@ -39,7 +39,7 @@ function Page({ params }) {
 
     return (
         <main >
-            <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-8 mt-4 md:p-12 border border-purple-100">
+            <div className="w-[98%] md:w-[80%] lg:w-[50%] mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-12 border border-purple-100">
 
                 {/* Top Section: Image + Metadata */}
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -54,7 +54,7 @@ function Page({ params }) {
 
                     {/* Info */}
                     <div className="flex-1">
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-purple-700 mb-2">
+                        <h1 className="text-3xl md:text-4xl font-extrabold text-pink-900 mb-4 uppercase">
                             {quiz.name}
                         </h1>
                         <p className="text-sm text-gray-600 mb-4">
@@ -125,7 +125,7 @@ function Page({ params }) {
                 {/* Start Test Button */}
                 {quiz.can_start_test && (
                     <div className="flex justify-center">
-                        <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-3 rounded-xl text-lg font-semibold shadow-lg transition-all duration-300">
+                        <button className="bg-[#167e82] uppercase text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-300">
                             Start Test
                         </button>
                     </div>

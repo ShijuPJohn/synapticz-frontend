@@ -6,7 +6,8 @@ import Link from "next/link";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {useDispatch, useSelector} from "react-redux";
 import {login, loginThunk} from "@/redux/authSlice";
-import {useRouter} from "next/navigation";
+import {useRouter, useSearchParams} from "next/navigation";
+import Image from "next/image";
 
 const LoginPage = () => {
     const router = useRouter();
@@ -15,15 +16,26 @@ const LoginPage = () => {
     const [showPassword, setShowPassword] = useState(false);
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
+    const searchParams = useSearchParams();
+    const returnUrl = searchParams.get('returnUrl');
     const onSubmit = async (data) => {
         console.log("data", data);
         dispatch(loginThunk(data.email, data.password));
 
     };
+
+    // Redirect if already logged in
+    // useEffect(() => {
+    //     if (userInfo) {
+    //
+    //     }
+    // }, [userInfo, returnUrl]);
+
     useEffect(() => {
+        console.log(returnUrl);
         if (userInfo && Object.keys(userInfo).length !== 0){
             setTimeout(()=>{
-                router.push('/');
+                router.replace(returnUrl || '/');
             },500)
         }
     }, [userInfo]);
@@ -32,33 +44,55 @@ const LoginPage = () => {
     return (<>
         <title>Login | Synapticz.com</title>
         <main>
-            <div className="login-box-main-container flex justify-center items-center my-4 bg-gray-100 p-6 w-[calc(120%-30vw)] md:w-[55vw] lg:w-[30rem] lg:min-h-[25rem]">
-                <div className="flex flex-col items-center justify-around w-full">
-                    <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Login</h3>
+            <div className="login-container flex flex-col md:flex-row rounded-lg bg-[rgba(255,255,255,.8)] p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflow-hidden">
+                {/* Image Banner - Takes 1/3 width on desktop, hidden on mobile */}
+                <div className="hidden md:flex md:w-1/3 relative">
+                    <Image
+                        src="/images/neural_network.jpg"
+                        alt="Neural Network"
+                        fill
+                        className="object-cover"
+                        priority
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
+                </div>
+
+                {/* Form Section - Takes full width on mobile, 2/3 on desktop */}
+                <div className="w-full md:w-2/3 p-8 flex flex-col items-center justify-center">
+                    <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-6">
+                        Login
+                    </h3>
+
                     <form
                         onSubmit={handleSubmit(onSubmit)}
-                        className="flex flex-col items-center w-full space-y-6">
+                        className="w-full space-y-6"
+                    >
                         <div className="w-full">
                             <TextField
-                                className={`w-full p-3 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                                className="w-full"
                                 error={!!errors.email}
                                 helperText={errors.email ? errors.email.message : null}
                                 autoFocus
                                 label="Email"
+                                variant="outlined"
                                 {...register("email", {
-                                    required: "Required", pattern: {
-                                        value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/i, message: "Invalid email"
+                                    required: "Required",
+                                    pattern: {
+                                        value: /^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/i,
+                                        message: "Invalid email"
                                     }
                                 })}
                             />
                         </div>
+
                         <div className="w-full">
                             <TextField
-                                className={`w-full p-3 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md`}
+                                className="w-full"
                                 error={!!errors.password}
                                 helperText={errors.password ? errors.password.message : null}
                                 type={showPassword ? 'text' : 'password'}
                                 label="Password"
+                                variant="outlined"
                                 {...register("password", {
                                     required: "Required"
                                 })}
@@ -75,21 +109,25 @@ const LoginPage = () => {
                                         </InputAdornment>
                                     ),
                                 }}
-
                             />
                         </div>
-                        <div className="flex justify-around w-full mt-4">
+
+                        <div className="flex justify-center w-full mt-6">
                             <button
-                                className="bg-[var(--primary-color-light)] text-white py-2 px-4 rounded-[5px] w-36 h-12"
+                                className="bg-[var(--primary-color)] hover:bg-[var(--primary-color-light)] text-white py-2 px-6 rounded-md w-full max-w-xs h-12 transition-colors duration-200"
                                 type="submit"
                             >
                                 Submit
                             </button>
                         </div>
                     </form>
-                    <div className="my-4 h-[1px] w-3/5 bg-gray-300"></div>
+
+                    <div className="my-6 h-[1px] w-4/5 bg-gray-300"></div>
+
                     <Link href="/signup">
-                        <p className="text-blue-500 text-lg">Create an account</p>
+                        <p className="text-blue-500 hover:text-blue-700 text-lg transition-colors duration-200">
+                            Create an account
+                        </p>
                     </Link>
                 </div>
             </div>
