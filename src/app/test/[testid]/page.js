@@ -55,7 +55,7 @@ function Page({params}) {
         if (hasInteracted.current) {
             update();
         }
-    }, [currentQuestionIndex, questionAnswerData]);
+    }, [questionAnswerData]);
 
     async function fetchTestById(id) {
         const headers = {

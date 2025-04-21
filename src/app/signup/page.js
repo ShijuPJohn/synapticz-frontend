@@ -30,7 +30,7 @@ const LoginPage = () => {
     return (<>
         <title>Signup | Synapticz.com</title>
         <main>
-            <div className="signup-form-main-container flex flex-col md:flex-row rounded-lg bg-[rgba(255,255,255,.8)] p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflo">
+            <div className="signup-form-main-container flex flex-col md:flex-row rounded-lg bg-white p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflo">
                 <div className="hidden md:flex md:w-1/3 relative">
                     <Image
                         src="/images/neural_network.jpg"
@@ -107,7 +107,7 @@ const LoginPage = () => {
                         </div>
                         <div className="flex justify-around w-full mt-4">
                             <button
-                                className="bg-[var(--primary-color-light)] text-white py-2 px-4 rounded-[5px] w-36 h-12"
+                                className="bg-[var(--primary-color)] hover:bg-[var(--primary-color-light)] text-white py-2 px-6 rounded-md w-full max-w-xs h-12 transition-colors duration-200"
                                 type="submit"
                             >
                                 Submit

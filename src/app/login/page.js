@@ -40,7 +40,7 @@ const LoginPage = () => {
         <>
             <title>Login | Synapticz.com</title>
             <main>
-                <div className="login-container flex flex-col md:flex-row rounded-lg bg-[rgba(255,255,255,.8)] p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflow-hidden">
+                <div className="login-container flex flex-col md:flex-row rounded-lg bg-white p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflow-hidden">
                     {/* Image Banner */}
                     <div className="hidden md:flex md:w-1/3 relative">
                         <Image
@@ -59,10 +59,10 @@ const LoginPage = () => {
                             Login
                         </h3>
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
+                        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6 flex flex-col justify-center items-center">
                             {/* Email Field */}
                             <TextField
-                                className="w-full"
+                                className={`w-full p-3 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                                 error={!!errors.email}
                                 helperText={errors.email?.message}
                                 label="Email"
@@ -78,7 +78,7 @@ const LoginPage = () => {
 
                             {/* Password Field */}
                             <TextField
-                                className="w-full"
+                                className={`w-full p-3 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                                 error={!!errors.password}
                                 helperText={errors.password?.message}
                                 type={showPassword ? 'text' : 'password'}

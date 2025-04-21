@@ -67,15 +67,15 @@ function Header() {
     }
 
     const navElements = [
-        { id: 'home', element: <li key="home" className="header-list-item">
-                <Link href="/">Home</Link>
-            </li> },
         { id: 'quizzes', element: <li key="quizzes" className="header-list-item">
                 <Link href="/quizzes">Quizzes</Link>
             </li> },
         ...(userInfo && Object.keys(userInfo).length ? [
             { id: 'history', element: <li key="history" className="header-list-item">
                     <Link href="/history">History</Link>
+                </li> },
+            { id: 'overview', element: <li key="overview" className="header-list-item">
+                    <Link href="/overview">Profile</Link>
                 </li> },
             { id: 'logout', element: <li key="logout" className="header-list-item">
                     <button className="logout-btn" onClick={() => {
@@ -111,7 +111,7 @@ function Header() {
                         className={`absolute z-10 left-0 top-[calc(4vw+1.8rem)] bg-[rgba(2,18,34,.8)] h-[90vh] w-[40%] transition-transform duration-500 ease-in-out ${isAnimating ? 'menu-drawer hide' : 'menu-drawer'} flex items-center px-4 py-2`}
                     >
                         <nav className="navLinks" onClick={handleCloseDrawer}>
-                            <ul className="flex text-white flex-col items-start justify-center">
+                            <ul className="flex text-white flex-col items-start justify-center uppercase">
                                 {navElements.map(item => item.element)}
                             </ul>
                         </nav>
@@ -143,5 +143,3 @@ function Header() {
 }
 
 export default Header;
-
-//a small change
