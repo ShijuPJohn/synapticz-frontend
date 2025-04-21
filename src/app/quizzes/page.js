@@ -1,38 +1,32 @@
 import React from 'react';
 import axios from "axios";
-import {fetchURL} from "@/constants";
+import { fetchURL } from "@/constants";
 import QuestionSetCard from "@/components/question_set_card";
-import Link from "next/link";
+import QuestionSetSearch from "@/components/question_set_search";
 
-async function getQuestionSets() {
-    let questionSetsModified = []
-    let response = null;
+async function Page({ searchParams }) {
+    const searchTerm = searchParams?.search?.toLowerCase() || "";
+
+    let questionSets = [];
+
     try {
-        response = await axios.get(`${fetchURL}/questionsets`);
-        const questionSets = response.data;
-        questionSetsModified = questionSets.map((item) => {
-            if (item.coverImage === "") {
-                return {...item, coverImage: "/images/placeholder_book.png"}
-            }
-            return item;
-        })
-        console.log(questionSetsModified)
-    } catch (error) {
-        console.error('Error:', error.response ? error.response.data : error.message);
+        const res = await axios.get(`${fetchURL}/questionsets?search=${searchTerm}`);
+        questionSets = res.data.map((item) => ({
+            ...item,
+            coverImage: item.coverImage || "/images/placeholder_book.png",
+        }));
+    } catch (err) {
+        console.error("Failed to fetch sets:", err);
     }
-    return questionSetsModified
-}
 
-async function Page(props) {
-    const questionSets = await getQuestionSets();
-    console.log(questionSets);
-
-    return (<main>
-        {questionSets.map(set => (
-            <QuestionSetCard key={set.id} questionSet={set}/>
-        ))}
-
-    </main>);
+    return (
+        <main>
+            <QuestionSetSearch searchTerm={searchTerm} />
+            {questionSets.map(set => (
+                <QuestionSetCard key={set.id} questionSet={set} />
+            ))}
+        </main>
+    );
 }
 
 export default Page;
