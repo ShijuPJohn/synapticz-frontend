@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {useRouter} from "next/navigation";
 import {format, parseISO} from "date-fns";
@@ -22,6 +22,8 @@ const CalendarHeatmap = dynamic(() => import("react-calendar-heatmap"), {
     ssr: false,
 });
 import "react-calendar-heatmap/dist/styles.css";
+import Image from "next/image";
+import {CircularProgress} from "@mui/material";
 
 export default function UserActivityPage() {
     const [data, setData] = useState(null);
@@ -61,8 +63,8 @@ export default function UserActivityPage() {
 
     if (loading)
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <p className="animate-pulse text-xl text-cyan-600">Loading your profile...</p>
+            <div>
+                <CircularProgress size="3rem"/>
             </div>
         );
 
@@ -113,8 +115,15 @@ export default function UserActivityPage() {
                     {/* Profile Card */}
                     <div className="bg-white rounded-xl shadow-sm border border-cyan-100 p-5 flex flex-col gap-4">
                         <div className="flex items-start gap-4">
-                            <div className="bg-cyan-100 p-3 rounded-full">
-                                <User className="w-6 h-6 text-cyan-700"/>
+                            <div className="bg-cyan-100 p-3 rounded-full overflow-hidden relative w-24 h-24">
+                                {profile.profile_pic? <Image
+                                        src={profile.profile_pic}
+                                        alt={"profile picture"}
+                                        fill
+                                        priority
+                                        className="object-cover w-full h-full"
+                                    />
+                                    :<User className="w-6 h-6 text-cyan-700"/>}
                             </div>
                             <div className="flex-1">
                                 <h2 className="text-lg font-bold text-slate-800">{profile.name}</h2>
@@ -129,7 +138,7 @@ export default function UserActivityPage() {
                             </div>
                         </div>
                         <button
-                            onClick={() => router.push("/edit-profile")}
+                            onClick={() => router.push("/profile/edit")}
                             className="mt-auto ml-auto text-sm text-cyan-700 border border-cyan-200 px-3 py-1.5 rounded-md hover:bg-cyan-50 transition flex items-center gap-1"
                         >
                             <Pencil className="w-4 h-4"/> Edit

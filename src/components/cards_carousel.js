@@ -46,6 +46,7 @@ const SwiperCarousel = ({ cards }) => {
                                         src={card.image}
                                         alt={card.imageDescription}
                                         fill
+                                        priority
                                         className="object-cover"
                                         sizes="(max-width: 768px) 100vw, 33vw"
                                     />

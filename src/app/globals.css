@@ -141,5 +141,5 @@ main{
 .react-calendar-heatmap .color-scale-5 { fill: #042a3e; }
 
 .hero-section {
-    clip-path: polygon(1% 0, 99% 0, 100% 50%, 99% 100%, 1% 100%, 0 50%);
+    /*border-radius: 500px;*/
 }

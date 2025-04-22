@@ -8,23 +8,40 @@ import Image from "next/image";
 import {fetchURL} from "@/constants";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faEdit} from "@fortawesome/free-solid-svg-icons";
-import {TextField} from "@mui/material";
+import {
+    CircularProgress,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem
+} from "@mui/material";
+import {enqueueSnackbar} from "notistack";
+import countries from 'world-countries';
 
 export default function EditProfilePage() {
     const {userInfo} = useSelector((state) => state.user);
     const [profilePicPreview, setProfilePicPreview] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [email, setEmail] = useState("");
+
+    const countryList = countries.map((country) => ({
+        label: country.name.common,
+        value: country.cca2,
+    }));
 
     const {
         register,
         handleSubmit,
         reset,
         setValue,
+        watch,
         formState: {errors},
     } = useForm();
 
-    // Fetch current user profile on load
+    const selectedCountry = watch("country");
+
     useEffect(() => {
         async function fetchProfile() {
             try {
@@ -33,29 +50,35 @@ export default function EditProfilePage() {
                         Authorization: `Bearer ${userInfo.token}`,
                     },
                 });
-                console.log(res.data);
-                const data = res.data.user;
+
+                const user = res.data.user;
                 reset({
-                    name: data.name,
-                    email: data.email,
-                    about: data.about || "",
+                    name: user.name || "",
+                    about: user.about || "",
+                    goal: user.goal || "",
+                    linkedin: user.linkedin || "",
+                    facebook: user.facebook || "",
+                    instagram: user.instagram || "",
+                    country: user.country || "",
                 });
-                setUploadedUrl(data.profile_pic || null);
-                setProfilePicPreview(data.profile_pic || null);
+                setEmail(user.email || "");
+                setProfilePicPreview(user.profile_pic || null);
+                setUploadedUrl(user.profile_pic || null);
             } catch (err) {
                 console.error("Failed to fetch user data", err);
+            } finally {
+                setLoading(false);
             }
         }
 
         fetchProfile();
-    }, [reset, userInfo.token]);
+    }, [reset, setValue, userInfo.token]);
 
-    // Upload Image to GCS
     const handleImageUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        setProfilePicPreview(URL.createObjectURL(file)); // For preview
+        setProfilePicPreview(URL.createObjectURL(file));
 
         const formData = new FormData();
         formData.append("file", file);
@@ -67,7 +90,7 @@ export default function EditProfilePage() {
                     Authorization: `Bearer ${userInfo.token}`,
                 },
             });
-
+            enqueueSnackbar("Image uploaded successfully.", {variant: "success"});
             setUploadedUrl(res.data.url);
         } catch (err) {
             console.error("Failed to upload image", err);
@@ -78,7 +101,7 @@ export default function EditProfilePage() {
         setLoading(true);
         try {
             await axios.put(
-                `${fetchURL}/auth/users/`,
+                `${fetchURL}/auth/users`,
                 {
                     ...formData,
                     profile_pic: uploadedUrl,
@@ -89,7 +112,7 @@ export default function EditProfilePage() {
                     },
                 }
             );
-            alert("Profile updated!");
+            enqueueSnackbar("Profile updated", {variant: "success"});
         } catch (err) {
             console.error("Update failed", err);
             alert("Failed to update profile");
@@ -99,127 +122,161 @@ export default function EditProfilePage() {
     };
 
     return (
-      <main>
-          <div className="sm:w-[50%] mx-auto px-24 py-10 bg-white">
-              <h1 className="text-3xl font-bold text-slate-800 mb-6">Edit Profile</h1>
+        <main>
+            {loading ? (
+                <div className="w-full h-[80vh] flex justify-center items-center">
+                    <CircularProgress size={"lg"}/>
+                </div>
+            ) : (
+                <div className="sm:w-[50%] mx-auto px-6 py-10 bg-white">
+                    <h1 className="text-3xl font-bold text-slate-800 mb-6">Edit Profile</h1>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Profile Picture Upload */}
-                  <div className="flex items-center gap-4">
-                      <div className="w-36 h-36 rounded-full overflow-hidden border border-slate-200 shadow">
-                          {profilePicPreview ? (
-                              <Image
-                                  src={profilePicPreview}
-                                  alt="Profile"
-                                  width={96}
-                                  height={96}
-                                  priority
-                                  className="object-cover w-full h-full"
-                              />
-                          ) : (
-                              <div className="w-full h-full bg-gray-200"/>
-                          )}
-                      </div>
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex flex-col justify-center items-center">
+                        <div className="flex items-center gap-4">
+                            <div className="w-36 h-36 rounded-full overflow-hidden border border-slate-200 shadow">
+                                {profilePicPreview ? (
+                                    <Image
+                                        src={profilePicPreview}
+                                        alt="Profile"
+                                        width={144}
+                                        height={144}
+                                        priority
+                                        className="object-cover w-full h-full"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full bg-gray-200"/>
+                                )}
+                            </div>
+                            <label className="cursor-pointer text-blue-600 text-lg">
+                                <FontAwesomeIcon icon={faEdit}/> Change Photo
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleImageUpload}
+                                />
+                            </label>
+                        </div>
 
-                      <label className="cursor-pointer text-blue-600 text-xl">
-                          <FontAwesomeIcon icon={faEdit}/>
-                          &nbsp; Change Photo
-                          <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={handleImageUpload}
-                          />
-                      </label>
-                  </div>
+                        <TextField
+                            label="Full Name"
+                            fullWidth
+                            {...register("name", {
+                                required: "Name is required",
+                                minLength: {value: 3, message: "At least 3 characters"},
+                            })}
+                            error={!!errors.name}
+                            helperText={errors.name?.message}
+                            slotProps={{
+                                inputLabel: {
+                                    shrink: true
+                                }
+                            }}
+                        />
 
-                  {/* Name */}
-                  <div>
-                      <TextField
-                          error={!!errors.username}
-                          helperText={errors.username ? errors.username.message : null}
-                          autoFocus
-                          value={name}
-                          label="Full Name"
-                          {...register("username", {
-                              required: "Required",
-                              minLength: {value: 3, message: "Username should be at least 3 characters"},
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                      />
-                      {errors.name && (
-                          <p className="text-red-500 text-sm mt-1">Name is required</p>
-                      )}
-                  </div>
+                        <TextField
+                            label="Email"
+                            fullWidth
+                            disabled
+                            value={email}
+                        />
 
-                  {/* Email (disabled) */}
-                  <div>
-                      <TextField
-                          disabled
-                          label="Email"
-                          {...register("email")}
-                          className="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm"
-                      />
-                  </div>
+                        <TextField
+                            label="About"
+                            fullWidth
+                            multiline
+                            rows={3}
+                            {...register("about")}
+                            error={!!errors.about}
+                            helperText={errors.about?.message}
+                            slotProps={{
+                                inputLabel: {
+                                    shrink: true
+                                }
+                            }}
+                        />
 
-                  {/* About */}
-                      <TextField
-                          error={!!errors.about}
-                          helperText={errors.about ? errors.about.message : null}
-                          autoFocus
-                          label="About"
-                          {...register("about", {
-                              required: "Required",
-                              minLength: {value: 3, message: "About should be at least 3 characters"},
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                      />
-                      <TextField
-                          error={!!errors.goal}
-                          helperText={errors.goal ? errors.goal.message : null}
-                          autoFocus
-                          label="Goal"
-                          {...register("goal", {
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                      />
-                      <TextField
-                          error={!!errors.linkedin}
-                          helperText={errors.linkedin ? errors.linkedin.message : null}
-                          autoFocus
-                          label="LinkedIn"
-                          {...register("linkedin", {
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                      />
-                      <TextField
-                          error={!!errors.instagram}
-                          helperText={errors.instagram ? errors.instagram.message : null}
-                          autoFocus
-                          label="Instagram"
-                          {...register("instagram", {
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                      />
-                      <TextField
-                          error={!!errors.facebook}
-                          helperText={errors.facebook ? errors.facebook.message : null}
-                          autoFocus
-                          label="Facebook"
-                          {...register("facebook", {
-                          })}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-cyan-500 focus:border-cyan-500"
-                      />
+                        <TextField
+                            label="Goal"
+                            fullWidth
+                            {...register("goal")}
+                            error={!!errors.goal}
+                            helperText={errors.goal?.message}
+                            slotProps={{
+                                inputLabel: {
+                                    shrink: true
+                                }
+                            }}
+                        />
 
-                  <button
-                      type="submit"
-                      disabled={loading}
-                      className="bg-cyan-600 text-white py-2 px-6 rounded-md hover:bg-cyan-700 disabled:opacity-50 transition"
-                  >
-                      {loading ? "Submitting..." : "Submit"}
-                  </button>
-              </form>
-          </div>
-      </main>
+                        <TextField
+                            label="LinkedIn"
+                            fullWidth
+                            {...register("linkedin")}
+                            error={!!errors.linkedin}
+                            helperText={errors.linkedin?.message}
+                            slotProps={{
+                                inputLabel: {
+                                    shrink: true
+                                }
+                            }}
+                        />
+
+                        <TextField
+                            label="Instagram"
+                            fullWidth
+                            {...register("instagram")}
+                            error={!!errors.instagram}
+                            helperText={errors.instagram?.message}
+                            slotProps={{
+                                inputLabel: {
+                                    shrink: true
+                                }
+                            }}
+                        />
+
+                        <TextField
+                            label="Facebook"
+                            fullWidth
+                            {...register("facebook")}
+                            error={!!errors.facebook}
+                            helperText={errors.facebook?.message}
+                            slotProps={{
+                                inputLabel: {
+                                    shrink: true
+                                }
+                            }}
+                        />
+
+                        <FormControl fullWidth error={!!errors.country}>
+                            <InputLabel shrink id="country-label">Country</InputLabel>
+                            <Select
+                                labelId="country-label"
+                                displayEmpty
+                                defaultValue=""
+                                {...register("country", { required: "Country is required" })}
+                                value={selectedCountry || ""}
+                                onChange={(e) => setValue("country", e.target.value)}
+                            >
+                                {countryList.map((country) => (
+                                    <MenuItem key={country.value} value={country.label}>
+                                        {country.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                            {errors.country && <p className="text-red-600 text-sm mt-1">{errors.country.message}</p>}
+                        </FormControl>
+
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="bg-cyan-600 text-white py-2 px-6 rounded-md hover:bg-cyan-700 disabled:opacity-50 transition"
+                        >
+                            {loading ? "Submitting..." : "Update Profile"}
+                        </button>
+                    </form>
+                </div>
+            )}
+        </main>
     );
 }

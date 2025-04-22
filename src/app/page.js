@@ -62,7 +62,7 @@ export default function Home() {
                 </p>
             </section>
 
-            <section className={"w-full"}>
+            <section className={"w-full z-[-1]"} >
                 <CardsCarousel cards={cardContentData}/>
             </section>
 

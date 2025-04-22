@@ -6,7 +6,7 @@ import {fetchURL} from "@/constants";
 import {faFlagCheckered} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
-    Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
+    Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
 } from "@mui/material";
 import ResultScreen from "@/components/resultScreen";
 
@@ -32,6 +32,7 @@ function Page({params}) {
     const [rawFetchedData, setRawFetchedData] = useState(null);
     const [scoredMark, setScoredMark] = useState(0);
     const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [fetched, setFetched] = useState(false);
 
     const handleClickOpen = () => {
         setDialogOpen(true);
@@ -106,6 +107,8 @@ function Page({params}) {
             }
         } catch (error) {
             console.error('Error:', error.response ? error.response.data : error.message);
+        } finally {
+            setFetched(true)
         }
     }
 
@@ -271,141 +274,146 @@ function Page({params}) {
                     </Button>
                 </DialogActions>
             </Dialog>
-
-            {resultScreen ? (
-                <ResultScreen resObject={rawFetchedData} toggleResult={setResultScreen}/>
-            ) : (
-                <div
-                    className="quiz_box shadow-lg w-full md:w-[35%] h-[95vh] max-h-screen outline-none p-3 md:p-6 rounded-xl bg-white relative overflow-y-auto"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                        if (e.key === 'ArrowLeft') {
-                            prevQuestion();
-                        } else if (e.key === 'ArrowRight') {
-                            nextQuestion();
-                        }
-                    }}
-                >
+            {fetched ?
+                resultScreen ? (
+                    <ResultScreen resObject={rawFetchedData} toggleResult={setResultScreen}/>
+                ) : (
                     <div
-                        className="namebox text-slate-600 text-base md:text-[1.2rem] flex justify-center items-center mb-2">
-                        {qsetName}
-                    </div>
-
-                    <div
-                        className="flex flex-wrap justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline gap-1 text-sm md:text-base">
-                        <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
-                        {currentQuestion && (
-                            <h4 className="text-blue-300">
-                                {currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}
-                            </h4>
-                        )}
-                        {!finished && <h4>Score: {parseFloat(scoredMark.toFixed(2))}</h4>}
-                        {finished ? (
-                            <p>Finished</p>
-                        ) : (
-                            <p
-                                className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap"
-                                onClick={handleClickOpen}
-                            >
-                                <FontAwesomeIcon icon={faFlagCheckered}/> Finish
-                            </p>
-                        )}
-                    </div>
-
-                    <div className="min-h-16 mb-4">
-                        {currentQuestion && (
-                            <h1 className="quiz_box_quest_title text-lg md:text-xl font-medium text-gray-700">
-                                {currentQuestion.question}
-                            </h1>
-                        )}
-                    </div>
-
-                    <div className="space-y-3 mb-4">
-                        {currentQuestion?.options?.map((option, index) => (
-                            <div
-                                key={index}
-                                onClick={() => optionsClickHandler(index)}
-                                className={`quiz_box_option_box p-2 border-2 flex justify-between items-center min-h-10 ${
-                                    selectedOptions[currentQuestionIndex]?.includes(index) ? "border-blue-500" : "border-gray-300"
-                                } ${
-                                    (isCurrentQuestionAnswered || finished) && correctOptions[currentQuestionIndex]?.includes(index) ? "border-green-500" : ""
-                                } ${
-                                    isCurrentQuestionAnswered &&
-                                    selectedOptions[currentQuestionIndex]?.includes(index) &&
-                                    !correctOptions[currentQuestionIndex]?.includes(index) ? "bg-red-300 border-red-500" : ""
-                                } ${
-                                    isCurrentQuestionAnswered &&
-                                    selectedOptions[currentQuestionIndex]?.includes(index) &&
-                                    correctOptions[currentQuestionIndex]?.includes(index) ? "bg-green-300" : ""
-                                }`}
-                                style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
-                            >
-                                <h4 className="quiz_box_option text-sm md:text-base">{option}</h4>
-                                {isCurrentQuestionAnswered &&
-                                    selectedOptions[currentQuestionIndex]?.includes(index) &&
-                                    correctOptions[currentQuestionIndex]?.includes(index) && (
-                                        <div className="checkMark_main w-5 h-5 bg-green-600 clip-checkmark"/>
-                                    )}
-                                {isCurrentQuestionAnswered &&
-                                    selectedOptions[currentQuestionIndex]?.includes(index) &&
-                                    !correctOptions[currentQuestionIndex]?.includes(index) && (
-                                        <div className="crossMark_main w-4 h-4 bg-red-700 clip-crossmark"/>
-                                    )}
-                            </div>
-                        ))}
-                    </div>
-
-                    <div className="quiz_box_btn_box flex flex-col items-center mt-4 space-y-2">
-                        <button
-                            className={`quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center text-sm md:text-base ${
-                                (!isCurrentQuestionAnswered && !finished) ? "cursor-pointer" : "cursor-default"
-                            }`}
-                            onClick={checkAndMarkAnswer}
-                            disabled={isCurrentQuestionAnswered || finished}
-                        >
-                            Answer
-                        </button>
-
-                        <div className="quiz_box_btn_box_2nd_row flex justify-between w-full gap-2">
-                            <button
-                                className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white py-2 text-sm md:text-base disabled:bg-orange-400 disabled:cursor-default"
-                                onClick={prevQuestion}
-                                disabled={currentQuestionIndex === 0}
-                            >
-                                Previous
-                            </button>
-                            <button
-                                className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white py-2 text-sm md:text-base disabled:bg-teal-400 disabled:cursor-default"
-                                onClick={() => {
-                                    if ((currentQuestionIndex + 1) === questionIdsOrdered.length) {
-                                        handleClickOpen();
-                                    } else {
-                                        nextQuestion();
-                                    }
-                                }}
-                            >
-                                {((currentQuestionIndex + 1) === questionIdsOrdered.length) ? "Finish" : "Next"}
-                            </button>
-                        </div>
-                    </div>
-
-                    {(isCurrentQuestionAnswered || finished) && currentQuestion?.explanation && (
+                        className="quiz_box shadow-lg w-full md:w-[35%] h-[95vh] max-h-screen outline-none p-3 md:p-6 rounded-xl bg-white relative overflow-y-auto"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                            if (e.key === 'ArrowLeft') {
+                                prevQuestion();
+                            } else if (e.key === 'ArrowRight') {
+                                nextQuestion();
+                            }
+                        }}
+                    >
                         <div
-                            className="quiz_box_explanation_box border-3 border-green-200 p-2 mt-4 max-h-40 overflow-y-auto text-xs md:text-sm text-gray-700">
-                            <p>{currentQuestion.explanation}</p>
+                            className="namebox text-slate-600 text-base md:text-[1.2rem] flex justify-center items-center mb-2">
+                            {qsetName}
                         </div>
-                    )}
 
-                    {finished && (
-                        <button
-                            className="quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center mt-4 text-sm md:text-base"
-                            onClick={() => setResultScreen(true)}
-                        >
-                            See Result
-                        </button>
-                    )}
+                        <div
+                            className="flex flex-wrap justify-between p-2 mb-2 bg-gray-500 text-amber-300 align-baseline gap-1 text-sm md:text-base">
+                            <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
+                            {currentQuestion && (
+                                <h4 className="text-blue-300">
+                                    {currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}
+                                </h4>
+                            )}
+                            {!finished && <h4>Score: {parseFloat(scoredMark.toFixed(2))}</h4>}
+                            {finished ? (
+                                <p>Finished</p>
+                            ) : (
+                                <p
+                                    className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap"
+                                    onClick={handleClickOpen}
+                                >
+                                    <FontAwesomeIcon icon={faFlagCheckered}/> Finish
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="min-h-16 mb-4">
+                            {currentQuestion && (
+                                <h1 className="quiz_box_quest_title text-lg md:text-xl font-medium text-gray-700">
+                                    {currentQuestion.question}
+                                </h1>
+                            )}
+                        </div>
+
+                        <div className="space-y-3 mb-4">
+                            {currentQuestion?.options?.map((option, index) => (
+                                <div
+                                    key={index}
+                                    onClick={() => optionsClickHandler(index)}
+                                    className={`quiz_box_option_box p-2 border-2 flex justify-between items-center min-h-10 ${
+                                        selectedOptions[currentQuestionIndex]?.includes(index) ? "border-blue-500" : "border-gray-300"
+                                    } ${
+                                        (isCurrentQuestionAnswered || finished) && correctOptions[currentQuestionIndex]?.includes(index) ? "border-green-500" : ""
+                                    } ${
+                                        isCurrentQuestionAnswered &&
+                                        selectedOptions[currentQuestionIndex]?.includes(index) &&
+                                        !correctOptions[currentQuestionIndex]?.includes(index) ? "bg-red-300 border-red-500" : ""
+                                    } ${
+                                        isCurrentQuestionAnswered &&
+                                        selectedOptions[currentQuestionIndex]?.includes(index) &&
+                                        correctOptions[currentQuestionIndex]?.includes(index) ? "bg-green-300" : ""
+                                    }`}
+                                    style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
+                                >
+                                    <h4 className="quiz_box_option text-sm md:text-base">{option}</h4>
+                                    {isCurrentQuestionAnswered &&
+                                        selectedOptions[currentQuestionIndex]?.includes(index) &&
+                                        correctOptions[currentQuestionIndex]?.includes(index) && (
+                                            <div className="checkMark_main w-5 h-5 bg-green-600 clip-checkmark"/>
+                                        )}
+                                    {isCurrentQuestionAnswered &&
+                                        selectedOptions[currentQuestionIndex]?.includes(index) &&
+                                        !correctOptions[currentQuestionIndex]?.includes(index) && (
+                                            <div className="crossMark_main w-4 h-4 bg-red-700 clip-crossmark"/>
+                                        )}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="quiz_box_btn_box flex flex-col items-center mt-4 space-y-2">
+                            <button
+                                className={`quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center text-sm md:text-base ${
+                                    (!isCurrentQuestionAnswered && !finished) ? "cursor-pointer" : "cursor-default"
+                                }`}
+                                onClick={checkAndMarkAnswer}
+                                disabled={isCurrentQuestionAnswered || finished}
+                            >
+                                Answer
+                            </button>
+
+                            <div className="quiz_box_btn_box_2nd_row flex justify-between w-full gap-2">
+                                <button
+                                    className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white py-2 text-sm md:text-base disabled:bg-orange-400 disabled:cursor-default"
+                                    onClick={prevQuestion}
+                                    disabled={currentQuestionIndex === 0}
+                                >
+                                    Previous
+                                </button>
+                                <button
+                                    className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white py-2 text-sm md:text-base disabled:bg-teal-400 disabled:cursor-default"
+                                    onClick={() => {
+                                        if ((currentQuestionIndex + 1) === questionIdsOrdered.length) {
+                                            handleClickOpen();
+                                        } else {
+                                            nextQuestion();
+                                        }
+                                    }}
+                                >
+                                    {((currentQuestionIndex + 1) === questionIdsOrdered.length) ? "Finish" : "Next"}
+                                </button>
+                            </div>
+                        </div>
+
+                        {(isCurrentQuestionAnswered || finished) && currentQuestion?.explanation && (
+                            <div
+                                className="quiz_box_explanation_box border-3 border-green-200 p-2 mt-4 max-h-40 overflow-y-auto text-xs md:text-sm text-gray-700">
+                                <p>{currentQuestion.explanation}</p>
+                            </div>
+                        )}
+
+                        {finished && (
+                            <button
+                                className="quiz_box_answer_btn w-full h-12 bg-blue-500 text-white flex justify-center items-center mt-4 text-sm md:text-base"
+                                onClick={() => setResultScreen(true)}
+                            >
+                                See Result
+                            </button>
+                        )}
+                    </div>
+                )
+                : <div>
+                    <CircularProgress size="3rem"/>
                 </div>
-            )}
+            }
+
         </main>
     );
 }

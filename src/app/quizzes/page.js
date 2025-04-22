@@ -6,7 +6,6 @@ import QuestionSetSearch from "@/components/question_set_search";
 
 async function Page({ searchParams }) {
     const searchTerm = searchParams?.search?.toLowerCase() || "";
-
     let questionSets = [];
 
     try {

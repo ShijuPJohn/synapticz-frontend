@@ -7,12 +7,12 @@ import {fetchURL} from "@/constants";
 function getFromLocalStorage() {
     if (typeof window === 'undefined') {
         // Server-side rendering, return default initial state
-        return {loading: false, userInfo: {}};
+        return {loading: false, userInfo: {}, pendingSignupEmail: null};
     }
     try {
         const serializedStore = localStorage.getItem("store");
         if (serializedStore === null) {
-            return {loading: false, userInfo: {}};
+            return {loading: false, userInfo: {}, pendingSignupEmail: null};
         }
         return JSON.parse(serializedStore).user;
     } catch (e) {
@@ -37,6 +37,11 @@ export const userSlice = createSlice({
             state.userInfo = action.payload
             enqueueSnackbar('Logged In. Redirecting to home page.', {variant: "success"})
         },
+        signup: (state, action) => {
+            state.loading = false
+            state.userInfo = action.payload
+            enqueueSnackbar('Logged In. Add profile details', {variant: "success"})
+        },
         signupFail: (state, action) => {
             state.loading = false
             enqueueSnackbar('Signup Error '+ action.payload, {variant: "error"})
@@ -45,10 +50,17 @@ export const userSlice = createSlice({
             state.loading = false
             state.userInfo = {}
             enqueueSnackbar('Logged Out', {variant: "error"})
+        },
+        setPendingSignup: (state, action) => {
+            state.pendingSignupEmail = action.payload;
+            state.loading = false;
+        },
+        clearPendingSignup: (state) => {
+            state.pendingSignupEmail = null;
         }
     }
 })
-export const {signup, loginRequest, login, logout, loginFail, signupFail} = userSlice.actions
+export const {setPendingSignup, clearPendingSignup, signup, loginRequest, login, logout, loginFail, signupFail} = userSlice.actions
 export const userReducer = userSlice.reducer
 
 export const loginThunk = (email, password) => async (dispatch) => {
@@ -84,14 +96,22 @@ export const signupThunk = (name, email, password) => async (dispatch) => {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
-        }
-        const {data} = await axios.post(
-            `${fetchURL}/auth/users`,
-            {name, email, password},
-            config
-        )
-        dispatch(login(data));
+        };
+        await axios.post(`${fetchURL}/auth/users`, { name, email, password }, config);
+        dispatch(setPendingSignup(email));
+        enqueueSnackbar('Verification code sent to your email', { variant: "info" });
     } catch (e) {
-        dispatch(signupFail(e));
+        dispatch(signupFail(e.message || "Signup error"));
     }
 }
+
+export const verifyEmailThunk = ({ email, code }) => async (dispatch) => {
+    try {
+        const { data } = await axios.post(`${fetchURL}/auth/users/verify`, { email, code });
+        dispatch(signup(data));
+        dispatch(clearPendingSignup());
+    } catch (e) {
+        enqueueSnackbar('Verification failed. Check the code.', { variant: "error" });
+        console.log("Verification error:", e);
+    }
+};
