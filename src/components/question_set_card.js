@@ -23,7 +23,7 @@ async function createTest(questionSetID, token, router) {
 
     try {
         const response = await axios.post(`${fetchURL}/test_session`, data, {
-            headers,
+            withCredentials: true,
         });
 
         enqueueSnackbar("Test session successfully created!");

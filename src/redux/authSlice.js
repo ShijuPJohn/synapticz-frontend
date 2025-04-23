@@ -44,11 +44,15 @@ export const userSlice = createSlice({
         },
         signupFail: (state, action) => {
             state.loading = false
-            enqueueSnackbar('Signup Error '+ action.payload, {variant: "error"})
+            enqueueSnackbar('Signup Error ' + action.payload, {variant: "error"})
         },
         logout: (state) => {
-            state.loading = false
-            state.userInfo = {}
+            state.loading = false;
+            state.userInfo = {};
+            state.pendingSignupEmail = null;
+            if (typeof window !== 'undefined') {
+                localStorage.removeItem("store");
+            }
             enqueueSnackbar('Logged Out', {variant: "error"})
         },
         setPendingSignup: (state, action) => {
@@ -60,7 +64,16 @@ export const userSlice = createSlice({
         }
     }
 })
-export const {setPendingSignup, clearPendingSignup, signup, loginRequest, login, logout, loginFail, signupFail} = userSlice.actions
+export const {
+    setPendingSignup,
+    clearPendingSignup,
+    signup,
+    loginRequest,
+    login,
+    logout,
+    loginFail,
+    signupFail
+} = userSlice.actions
 export const userReducer = userSlice.reducer
 
 export const loginThunk = (email, password) => async (dispatch) => {
@@ -97,21 +110,21 @@ export const signupThunk = (name, email, password) => async (dispatch) => {
                 'Content-Type': 'application/json'
             }
         };
-        await axios.post(`${fetchURL}/auth/users`, { name, email, password }, config);
+        await axios.post(`${fetchURL}/auth/users`, {name, email, password}, config);
         dispatch(setPendingSignup(email));
-        enqueueSnackbar('Verification code sent to your email', { variant: "info" });
+        enqueueSnackbar('Verification code sent to your email', {variant: "info"});
     } catch (e) {
         dispatch(signupFail(e.message || "Signup error"));
     }
 }
 
-export const verifyEmailThunk = ({ email, code }) => async (dispatch) => {
+export const verifyEmailThunk = ({email, code}) => async (dispatch) => {
     try {
-        const { data } = await axios.post(`${fetchURL}/auth/users/verify`, { email, code });
+        const {data} = await axios.post(`${fetchURL}/auth/users/verify`, {email, code});
         dispatch(signup(data));
         dispatch(clearPendingSignup());
     } catch (e) {
-        enqueueSnackbar('Verification failed. Check the code.', { variant: "error" });
+        enqueueSnackbar('Verification failed. Check the code.', {variant: "error"});
         console.log("Verification error:", e);
     }
 };
