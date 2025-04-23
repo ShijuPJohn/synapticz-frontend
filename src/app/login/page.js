@@ -40,7 +40,8 @@ const LoginPage = () => {
         <>
             <title>Login | Synapticz.com</title>
             <main>
-                <div className="login-container flex flex-col md:flex-row rounded-lg bg-white p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflow-hidden">
+                <div
+                    className="login-container flex flex-col md:flex-row rounded-lg bg-white p-2 w-full md:w-[45%] md:min-h-[30rem] shadow-lg overflow-hidden">
                     {/* Image Banner */}
                     <div className="hidden md:flex md:w-1/3 relative">
                         <Image
@@ -54,13 +55,22 @@ const LoginPage = () => {
                     </div>
 
                     {/* Form Section */}
-                    <div className="w-full md:w-2/3 p-8 flex flex-col items-center justify-center">
+                    <div className="w-full md:w-2/3 p-8 flex flex-col gap-2 items-center justify-center">
                         <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-6">
                             Login
                         </h3>
+                        <button className={`w-full p-3 border border-gray-300 rounded-md bg-white text-slate-800 flex gap-2 justify-center items-center`}
+                                onClick={() => window.location.href = 'http://localhost:8080/api/auth/google-login'}
+                        >
+                            <Image src={"/images/google_icon.png"} alt={"Google"} width={25} height={25} />
+                            Login with Google
+                        </button>
+                        <div className="my-6 h-[1px] w-4/5 bg-amber-500"></div>
 
-                        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6 flex flex-col justify-center items-center">
+                        <form onSubmit={handleSubmit(onSubmit)}
+                              className="w-full space-y-6 flex flex-col justify-center items-center">
                             {/* Email Field */}
+
                             <TextField
                                 className={`w-full p-3 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md`}
                                 error={!!errors.email}
@@ -84,7 +94,7 @@ const LoginPage = () => {
                                 type={showPassword ? 'text' : 'password'}
                                 label="Password"
                                 variant="outlined"
-                                {...register("password", { required: "Required" })}
+                                {...register("password", {required: "Required"})}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
@@ -111,6 +121,7 @@ const LoginPage = () => {
                         <Link href="/signup" className="text-blue-500 hover:text-blue-700 text-lg">
                             Create an account
                         </Link>
+
                     </div>
                 </div>
             </main>

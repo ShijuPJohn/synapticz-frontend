@@ -66,7 +66,7 @@ const LoginPage = () => {
                 verifyEmailThunk({email: emailForVerification, code: verificationCode})
             );
         } catch (err) {
-            enqueueSnackbar("Verification failed. Please check the code and try again.",{variant:"error"});
+            enqueueSnackbar("Verification failed. Please check the code and try again.", {variant: "error"});
         }
     };
 
@@ -124,9 +124,16 @@ const LoginPage = () => {
                     <div className="w-full md:w-2/3 flex flex-col items-center justify-around">
                         <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Sign
                             Up</h3>
+                        <button
+                            className={`w-full p-3 border border-gray-300 rounded-md bg-white text-slate-800 flex gap-2 justify-center items-center`}>
+                            <Image src={"/images/google_icon.png"} alt={"Google"} width={25} height={25}/>
+                            Signup with Google
+                        </button>
+                        <div className="my-4 h-[1px] w-2/3 bg-amber-500"></div>
                         <form
                             onSubmit={handleSubmit(onSubmit)}
                             className="flex flex-col items-center w-full space-y-6 p-4">
+
                             <TextField
                                 className="w-full"
                                 error={!!errors.username}
@@ -138,6 +145,7 @@ const LoginPage = () => {
                                     minLength: {value: 3, message: "Username should be at least 3 characters"},
                                 })}
                             />
+
                             <TextField
                                 className="w-full"
                                 error={!!errors.email}

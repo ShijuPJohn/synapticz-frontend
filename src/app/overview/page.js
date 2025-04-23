@@ -40,13 +40,9 @@ export default function UserActivityPage() {
         const fetchData = async () => {
             try {
                 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                const headers = {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${userInfo.token}`,
-                };
 
                 const res = await axios.get(`${fetchURL}/auth/users/overview?tz=${timezone}`, {
-                    headers,
+                    withCredentials: true,
                 });
                 console.log("user overview data", res.data);
                 setData(res.data);
