@@ -8,6 +8,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {loginThunk} from "@/redux/authSlice";
 import {useRouter} from "next/navigation";
 import Image from "next/image";
+import {fetchURL} from "@/constants";
 
 const LoginPage = () => {
     const router = useRouter();
@@ -60,7 +61,7 @@ const LoginPage = () => {
                             Login
                         </h3>
                         <button className={`w-full p-3 border border-gray-300 rounded-md bg-white text-slate-800 flex gap-2 justify-center items-center`}
-                                onClick={() => window.location.href = 'http://localhost:8080/api/auth/google-login'}
+                                onClick={() => window.location.href = `${fetchURL}/auth/google-login`}
                         >
                             <Image src={"/images/google_icon.png"} alt={"Google"} width={25} height={25} />
                             Login with Google
