@@ -60,6 +60,8 @@ export default function EditProfilePage() {
                     facebook: user.facebook || "",
                     instagram: user.instagram || "",
                     country: user.country || "",
+                    country_code: user.country_code || "",
+                    mobile_number: user.mobile_number || "",
                 });
                 setEmail(user.email || "");
                 setProfilePicPreview(user.profile_pic || null);
@@ -105,6 +107,8 @@ export default function EditProfilePage() {
                 {
                     ...formData,
                     profile_pic: uploadedUrl,
+                    mobile_number: formData.mobile_number,
+                    country_code: formData.country_code,
                 },
                 {
                     headers: {
@@ -112,6 +116,12 @@ export default function EditProfilePage() {
                     },
                 }
             );
+            console.log({
+                ...formData,
+                profile_pic: uploadedUrl,
+                mobile_number: formData.mobile_number,
+                country_code: formData.country_code,
+            })
             enqueueSnackbar("Profile updated", {variant: "success"});
         } catch (err) {
             console.error("Update failed", err);
@@ -249,9 +259,10 @@ export default function EditProfilePage() {
                         />
 
                         <FormControl fullWidth error={!!errors.country}>
-                            <InputLabel shrink id="country-label">Country</InputLabel>
+                            <InputLabel id="country-label" shrink>Country</InputLabel>
                             <Select
                                 labelId="country-label"
+                                label="Country" // <-- This is the fix
                                 displayEmpty
                                 defaultValue=""
                                 {...register("country", { required: "Country is required" })}
@@ -267,6 +278,53 @@ export default function EditProfilePage() {
                             {errors.country && <p className="text-red-600 text-sm mt-1">{errors.country.message}</p>}
                         </FormControl>
 
+                        <div className="flex gap-4 w-full">
+                            <FormControl className="w-1/3" error={!!errors.country_code}>
+                                <InputLabel id="code-label" shrink>Country Code</InputLabel>
+                                <Select
+                                    labelId="code-label"
+                                    label={"Country Code"}
+                                    displayEmpty
+                                    defaultValue=""
+                                    {...register("country_code")}
+                                    value={watch("country_code") || ""}
+                                    onChange={(e) => setValue("country_code", e.target.value)}
+                                >
+                                    {countries.map((c) => {
+                                        const callingCode =
+                                            c.idd?.root && c.idd?.suffixes?.length
+                                                ? `${c.idd.root}${c.idd.suffixes[0]}`
+                                                : "";
+
+                                        return (
+                                            <MenuItem key={c.cca2} value={`${callingCode}`}>
+                                                {callingCode ? `${callingCode} (${c.cca2})` : `(${c.cca2})`}
+                                            </MenuItem>
+                                        );
+                                    })}
+
+                                </Select>
+                                {errors.country_code && <p className="text-red-600 text-sm mt-1">{errors.country_code.message}</p>}
+                            </FormControl>
+
+                            <TextField
+                                className="w-2/3"
+                                label="Mobile Number"
+                                {...register("mobile_number", {
+                                    pattern: {
+                                        value: /^[0-9]{7,15}$/,
+                                        message: "Invalid mobile number"
+                                    }
+                                })}
+                                error={!!errors.mobile_number}
+                                helperText={errors.mobile_number?.message}
+                                slotProps={{
+                                    inputLabel: {
+                                        shrink: true
+                                    }
+                                }}
+                            />
+                        </div>
                         <button
                             type="submit"
                             disabled={loading}

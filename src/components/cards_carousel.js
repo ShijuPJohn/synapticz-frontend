@@ -29,8 +29,12 @@ const SwiperCarousel = ({ cards }) => {
                         slidesPerView: 2,
                     },
                     1024: {
-                        slidesPerView: 5,
+                        slidesPerView: 3,
                     },
+                    1300: {
+                        slidesPerView:4,
+                    },
+
                 }}
             >
                 {cards.map((card, index) => (
@@ -38,7 +42,7 @@ const SwiperCarousel = ({ cards }) => {
                         <div
                             className={`transition-all duration-500 ease-in-out transform ${
                                 index === activeIndex ? 'scale-105 z-10 shadow-2xl' : 'scale-95'
-                            } bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg overflow-hidden flex flex-col h-[32rem]`}
+                            } bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg overflow-hidden flex flex-col h-[32rem] w-full`}
                         >
                             <div className="bg-gradient-to-br from-[#1e293b] to-[#0f172a] p-4 flex items-center justify-center h-[40%]">
                                 <div className="relative w-full h-full rounded-xl overflow-hidden shadow-md">
