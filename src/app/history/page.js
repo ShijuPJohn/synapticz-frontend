@@ -21,7 +21,7 @@ function Page() {
                 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`
             };
             try {
-                const response = await axios.get(`${fetchURL}/test_session/history?limit=50`, {withCredentials: true,});
+                const response = await axios.get(`${fetchURL}/test_session/history?limit=50`, {headers});
                 const testHistory = response.data.history;
                 const testHistoryModified = testHistory.map((item) => {
                     if (!item.coverImage || item.coverImage === "") {

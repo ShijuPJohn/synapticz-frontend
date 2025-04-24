@@ -40,11 +40,14 @@ export default function UserActivityPage() {
         const fetchData = async () => {
             try {
                 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const headers = {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${userInfo.token}`,
+                };
 
                 const res = await axios.get(`${fetchURL}/auth/users/overview?tz=${timezone}`, {
-                    withCredentials: true,
+                    headers
                 });
-                console.log("user overview data", res.data);
                 setData(res.data);
             } catch (err) {
                 console.error("Error fetching activity data:", err);
@@ -72,12 +75,10 @@ export default function UserActivityPage() {
         );
 
     const {profile, daily_activity, year_summary} = data;
-    console.log("object.entries year summary", Object.entries(year_summary));
     const heatmapData = Object.entries(year_summary).map(([date, count]) => ({
         date,
         count,
     }));
-    console.log(heatmapData)
     const totalQuestions = daily_activity.reduce(
         (sum, day) => sum + day.questions_answered,
         0
