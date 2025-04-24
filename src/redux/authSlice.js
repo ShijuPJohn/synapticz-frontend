@@ -2,7 +2,7 @@
 import {createSlice} from "@reduxjs/toolkit";
 import axios from "axios";
 import {enqueueSnackbar} from "notistack";
-import {fetchURL} from "@/constants";
+import {fetchURL, protectedRoutePrefixes} from "@/constants";
 
 function getFromLocalStorage() {
     if (typeof window === 'undefined') {
