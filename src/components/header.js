@@ -13,6 +13,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import {protectedRoutePrefixes} from "@/constants";
+import {usePathname, useRouter} from "next/navigation";
 
 function Header() {
     const drawerTimeout = useRef(null);
@@ -23,6 +25,8 @@ function Header() {
     const {userInfo} = userLogin;
     const [hydrated, setHydrated] = useState(false);
     const dispatch = useDispatch();
+    const router = useRouter();
+    const pathname = usePathname();
 
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
@@ -39,6 +43,13 @@ function Header() {
     const handleLogout = () => {
         dispatch(logout());
         handleMenuClose();
+        const isProtected = protectedRoutePrefixes.some((prefix) =>
+            pathname.startsWith(prefix)
+        );
+
+        if (isProtected) {
+            router.push("/login");
+        }
     };
     useEffect(() => {
         setHydrated(true);
@@ -90,31 +101,43 @@ function Header() {
     }
 
     const navElements = [
-        { id: 'quizzes', element: <li key="quizzes" className="header-list-item">
+        {
+            id: 'quizzes', element: <li key="quizzes" className="header-list-item">
                 <Link href="/quizzes">Quizzes</Link>
-            </li> },
+            </li>
+        },
         ...(userInfo && Object.keys(userInfo).length ? [
-            { id: 'history', element: <li key="history" className="header-list-item">
+            {
+                id: 'history', element: <li key="history" className="header-list-item">
                     <Link href="/history">History</Link>
-                </li> },
-            { id: 'overview', element: <li key="overview" className="header-list-item">
+                </li>
+            },
+            {
+                id: 'overview', element: <li key="overview" className="header-list-item">
                     <Link href="/overview">Profile</Link>
-                </li> },
-            { id: 'logout', element: <li key="logout" className="header-list-item">
+                </li>
+            },
+            {
+                id: 'logout', element: <li key="logout" className="header-list-item">
                     <button className="logout-btn" onClick={() => {
                         dispatch(logout());
                         handleCloseDrawer();
                     }}>
                         LOGOUT
                     </button>
-                </li> }
+                </li>
+            }
         ] : [
-            { id: 'login', element: <li key="login" className="header-list-item">
+            {
+                id: 'login', element: <li key="login" className="header-list-item">
                     <Link href="/login">Login</Link>
-                </li> },
-            { id: 'signup', element: <li key="signup" className="header-list-item">
+                </li>
+            },
+            {
+                id: 'signup', element: <li key="signup" className="header-list-item">
                     <Link href="/signup">Signup</Link>
-                </li> }
+                </li>
+            }
         ])
     ];
 
@@ -156,8 +179,10 @@ function Header() {
                     </Link>
                 </h1>
                 <nav className="navLinks hidden md:flex uppercase  justify-center">
-                    <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link href={"/quizzes"} className={"flex justify-center items-center gap-2"}>
-                        <Image className={"bg-[#3583a5]"} src={"/images/exam3.png"} alt={"exam icon"} width={35} height={35}/>
+                    <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link href={"/quizzes"}
+                                                                                                   className={"flex justify-center items-center gap-2"}>
+                        <Image className={"bg-[#3583a5]"} src={"/images/exam3.png"} alt={"exam icon"} width={35}
+                               height={35}/>
                         Start Learning
                     </Link>
                     </ul>
@@ -211,39 +236,39 @@ function Header() {
                         {!userInfo || Object.keys(userInfo).length === 0 ? [
                             <MenuItem component={Link} href="/login" onClick={handleMenuClose} key="login">
                                 <ListItemIcon>
-                                    <LoginIcon fontSize="small" />
+                                    <LoginIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Login
                             </MenuItem>,
                             <MenuItem component={Link} href="/signup" onClick={handleMenuClose} key="signup">
                                 <ListItemIcon>
-                                    <PersonAddIcon fontSize="small" />
+                                    <PersonAddIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Sign Up
                             </MenuItem>
                         ] : [
                             <MenuItem component={Link} href="/overview" onClick={handleMenuClose} key="overview">
                                 <ListItemIcon>
-                                    <PersonIcon fontSize="small" />
+                                    <PersonIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Profile
                             </MenuItem>,
                             <MenuItem component={Link} href="/history" onClick={handleMenuClose} key="history">
                                 <ListItemIcon>
-                                    <HistoryIcon fontSize="small" />
+                                    <HistoryIcon fontSize="small"/>
                                 </ListItemIcon>
                                 History
                             </MenuItem>,
                             <MenuItem component={Link} href="/profile/edit" onClick={handleMenuClose} key="profile">
                                 <ListItemIcon>
-                                    <EditIcon fontSize="small" />
+                                    <EditIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Edit Profile
                             </MenuItem>,
-                            <Divider key="divider" />,
+                            <Divider key="divider"/>,
                             <MenuItem onClick={handleLogout} key="logout">
                                 <ListItemIcon>
-                                    <LogoutIcon fontSize="small" />
+                                    <LogoutIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Logout
                             </MenuItem>
