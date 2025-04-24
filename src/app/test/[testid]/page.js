@@ -64,7 +64,7 @@ function Page({params}) {
             'Authorization': `Bearer ${userInfo.token}`
         };
         try {
-            const response = await axios.get(`${fetchURL}/test_session/${id}`, {withCredentials: true,});
+            const response = await axios.get(`${fetchURL}/test_session/${id}`, {headers});
             const data = response.data;
 
             // Handle both old and new response formats
@@ -116,6 +116,7 @@ function Page({params}) {
         if (!finished) {
             const headers = {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${userInfo.token}`
             };
             const body = {
                 question_answer_data: questionAnswerData,
@@ -123,7 +124,7 @@ function Page({params}) {
                 total_marks_scored: scoredMark,
             };
             try {
-                const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers, withCredentials: true,});
+                const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
                 const data = response.data;
             } catch (error) {
                 console.error('Error:', error.response ? error.response.data : error.message);
@@ -232,7 +233,7 @@ function Page({params}) {
             'Authorization': `Bearer ${userInfo.token}`
         };
         try {
-            const response = await axios.put(`${fetchURL}/test_session/finish/${testSessionId}`, {}, {withCredentials: true,});
+            const response = await axios.put(`${fetchURL}/test_session/finish/${testSessionId}`, {}, {headers});
             setCurrentQuestionIndex(0);
             setFinished(true);
             setResultScreen(true);

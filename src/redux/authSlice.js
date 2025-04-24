@@ -90,7 +90,6 @@ export const loginThunk = (email, password) => async (dispatch) => {
             {email, password},
             config
         )
-        console.log("attempted login", data)
         dispatch(login(data))
     } catch (e) {
         dispatch(loginFail())

@@ -1,34 +1,58 @@
-"use client"
-import React, {useEffect} from 'react';
-import {login} from "@/redux/authSlice";
-import {useDispatch} from "react-redux";
-import {fetchURL} from "@/constants";
-import {useRouter} from "next/navigation";
-import axios from "axios";
+"use client";
+
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { login } from '@/redux/authSlice';
+import { fetchURL } from '@/constants';
 
 function Page() {
-    const router = useRouter();
     const dispatch = useDispatch();
+    const router = useRouter();
 
     useEffect(() => {
-        const verify = async () => {
+        const handleOAuthLogin = async () => {
+            const url = new URL(window.location.href);
+            const token = url.searchParams.get('token');
+            const isNewUser = url.searchParams.get('newuser') === 'true';
+
+            if (!token) {
+                router.push('/login');
+                return;
+            }
+
             try {
+                // Save token
+                localStorage.setItem('token', token);
+
+                // Verify token and fetch user info
                 const response = await axios.get(`${fetchURL}/auth/verify-oauth`, {
-                    withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
                 });
+
                 const data = response.data;
-                if (response.status === 200) {
-                    dispatch(login(data));
-                    router.push('/');
+
+                // Dispatch login info to Redux
+                dispatch(login(data));
+
+                // Redirect accordingly
+                if (isNewUser) {
+                    router.push('/profile/edit');
+                } else {
+                    router.push('/quizzes');
                 }
+
             } catch (error) {
-                console.error("Verification failed:", error.response?.data || error.message);
-                // optionally redirect to login page
+                console.error("Login verification failed:", error.response?.data || error.message);
+                localStorage.removeItem('store');
                 router.push('/login');
             }
         };
 
-        verify();
+        handleOAuthLogin();
     }, [dispatch, router]);
 
     return null;

@@ -46,7 +46,9 @@ export default function EditProfilePage() {
         async function fetchProfile() {
             try {
                 const res = await axios.get(`${fetchURL}/auth/users`, {
-                        withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${userInfo.token}`,
+                    },
                 });
 
                 const user = res.data.user;
@@ -85,7 +87,10 @@ export default function EditProfilePage() {
 
         try {
             const res = await axios.post(`${fetchURL}/image-upload`, formData, {
-                withCredentials: true,
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${userInfo.token}`,
+                },
             });
             enqueueSnackbar("Image uploaded successfully.", {variant: "success"});
             setUploadedUrl(res.data.url);
@@ -106,15 +111,11 @@ export default function EditProfilePage() {
                     country_code: formData.country_code,
                 },
                 {
-                    withCredentials: true,
+                    headers: {
+                        Authorization: `Bearer ${userInfo.token}`,
+                    },
                 }
             );
-            console.log({
-                ...formData,
-                profile_pic: uploadedUrl,
-                mobile_number: formData.mobile_number,
-                country_code: formData.country_code,
-            })
             enqueueSnackbar("Profile updated", {variant: "success"});
         } catch (err) {
             console.error("Update failed", err);
