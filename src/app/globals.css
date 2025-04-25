@@ -140,6 +140,13 @@ main{
 .react-calendar-heatmap .color-scale-4 { fill: #195c7e; }
 .react-calendar-heatmap .color-scale-5 { fill: #042a3e; }
 
+.bg-color-scale-1 { background-color: #a3dcf8; }
+.bg-color-scale-2 { background-color: #63a9cc; }
+.bg-color-scale-3 { background-color: #3983a8; }
+.bg-color-scale-4 { background-color: #195c7e; }
+.bg-color-scale-5 { background-color: #042a3e; }
+
+
 .hero-section {
     /*border-radius: 500px;*/
 }
