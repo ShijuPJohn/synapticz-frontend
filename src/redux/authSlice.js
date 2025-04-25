@@ -27,10 +27,10 @@ export const userSlice = createSlice({
         loginRequest: (state) => {
             state.loading = true
         },
-        loginFail: (state) => {
+        loginFail: (state,action) => {
             state.loading = false
             state.userInfo = {}
-            enqueueSnackbar('Login Failed', {variant: "error"})
+            enqueueSnackbar('Login Failed : '+action.payload, {variant: "error"})
         },
         login: (state, action) => {
             state.loading = false
@@ -92,7 +92,8 @@ export const loginThunk = (email, password) => async (dispatch) => {
         )
         dispatch(login(data))
     } catch (e) {
-        dispatch(loginFail())
+        dispatch(loginFail(e.message))
+
         // if (e.response.status === 401) {
         //     enqueueSnackbar('Incorrect email or password', {variant: "error"})
         // }

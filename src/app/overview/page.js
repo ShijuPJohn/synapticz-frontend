@@ -40,6 +40,7 @@ export default function UserActivityPage() {
         const fetchData = async () => {
             try {
                 const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
                 const headers = {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${userInfo.token}`,
@@ -110,17 +111,17 @@ export default function UserActivityPage() {
                 {/* Profile and Summary */}
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {/* Profile Card */}
-                    <div className="bg-white rounded-xl shadow-sm border border-cyan-100 p-5 flex flex-col gap-4">
+                    <div className="bg-white rounded-xl border border-cyan-300 shadow-sm p-5 flex flex-col gap-4">
                         <div className="flex items-start gap-4">
-                            <div className="bg-cyan-100 p-3 rounded-full overflow-hidden relative w-24 h-24">
-                                {profile.profile_pic? <Image
+                            <div className="bg-cyan-100 p-3 rounded-[200px] overflow-hidden relative w-28 min-w-[28] h-28 min-h-[28]">
+                                {profile.profile_pic ? <Image
                                         src={profile.profile_pic}
                                         alt={"profile picture"}
                                         fill
                                         priority
                                         className="object-cover w-full h-full"
                                     />
-                                    :<User className="w-6 h-6 text-cyan-700"/>}
+                                    : <User className="w-6 h-6 text-cyan-700"/>}
                             </div>
                             <div className="flex-1">
                                 <h2 className="text-lg font-bold text-slate-800">{profile.name}</h2>
@@ -172,7 +173,7 @@ export default function UserActivityPage() {
                         ].map((card, i) => (
                             <div
                                 key={i}
-                                className="bg-white border border-slate-100 rounded-xl p-4 flex items-center gap-3 shadow-sm"
+                                className="bg-white border border-orange-300 rounded-xl p-4 flex items-center gap-3 shadow-sm"
                             >
                                 <div className={`bg-${card.bg} p-2 rounded-full`}>{card.icon}</div>
                                 <div>
@@ -190,11 +191,11 @@ export default function UserActivityPage() {
                         <CalendarDays className="w-5 h-5 text-cyan-600"/>
                         Recent Activity
                     </h3>
-                    <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
+                    <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
                         {daily_activity.map((day) => (
                             <div
                                 key={day.date}
-                                className="bg-white border rounded-lg p-3 text-xs shadow-sm hover:shadow-md transition"
+                                className="bg-white border rounded-lg p-4 text-xs shadow-sm hover:shadow-md transition w-full min-w-[8rem]"
                             >
                                 <h4 className="font-medium text-slate-800 text-sm">
                                     {format(parseISO(day.date), "EEE")}
@@ -230,17 +231,17 @@ export default function UserActivityPage() {
                 {/* Heatmap */}
                 <section className="mb-10 overflow-scroll w-full">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
-                        <h3 className="text-lg font-semibold text-slate-700">Yearly Activity Heatmap</h3>
+                        <h3 className="text-lg font-semibold text-slate-700">Yearly Activity Map</h3>
                         <div className="text-sm text-slate-500 flex items-center gap-2 mt-2 sm:mt-0">
                             <span>Less</span>
                             <div className="flex gap-1">
-                                {[0, 1, 2, 3, 4].map((lvl) => (
+                                {[0, 1, 2, 3, 4, 5].map((lvl) => (
                                     <div
                                         key={lvl}
                                         className={`w-4 h-4 rounded-sm border ${
                                             lvl === 0
                                                 ? "bg-gray-100 border-gray-200"
-                                                : `bg-cyan-${lvl * 200} border-cyan-${lvl * 200 + 100}`
+                                                : `react-calendar-heatmap bg-color-scale-${lvl}`
                                         }`}
                                     />
                                 ))}
@@ -262,7 +263,7 @@ export default function UserActivityPage() {
                                     if (value.count < 50) return "color-scale-3";
                                     if (value.count < 100) return "color-scale-4";
                                     if (value.count > 100) return "color-scale-5";
-                                    return "color-scale-4";
+                                    return "color-empty";
                                 }}
                                 tooltipDataAttrs={(value) =>
                                     value?.date

@@ -119,10 +119,7 @@ function Header() {
             },
             {
                 id: 'logout', element: <li key="logout" className="header-list-item">
-                    <button className="logout-btn" onClick={() => {
-                        dispatch(logout());
-                        handleCloseDrawer();
-                    }}>
+                    <button className="logout-btn" onClick={handleLogout}>
                         LOGOUT
                     </button>
                 </li>
