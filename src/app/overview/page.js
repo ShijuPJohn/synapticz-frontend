@@ -112,18 +112,18 @@ export default function UserActivityPage() {
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {/* Profile Card */}
                     <div className="bg-white rounded-xl border border-cyan-300 shadow-sm p-5 flex flex-col gap-4">
-                        <div className="flex items-start gap-4">
-                            <div className="bg-cyan-100 p-3 rounded-[200px] overflow-hidden relative w-28 min-w-[28] h-28 min-h-[28]">
+                        <div className="flex flex-col lg:flex-row items-start gap-4">
+                            <div className="bg-cyan-100 p-3 rounded-[200px] overflow-hidden relative w-28 min-w-[28] h-28 ">
                                 {profile.profile_pic ? <Image
                                         src={profile.profile_pic}
                                         alt={"profile picture"}
                                         fill
                                         priority
-                                        className="object-cover w-full h-full"
+                                        className="object-cover min-w-full min-h-full"
                                     />
                                     : <User className="w-6 h-6 text-cyan-700"/>}
                             </div>
-                            <div className="flex-1">
+                            <div className="">
                                 <h2 className="text-lg font-bold text-slate-800">{profile.name}</h2>
                                 <p className="text-slate-600 text-sm flex items-center gap-1 mt-1">
                                     <Mail className="w-4 h-4"/> {profile.email}
@@ -191,11 +191,11 @@ export default function UserActivityPage() {
                         <CalendarDays className="w-5 h-5 text-cyan-600"/>
                         Recent Activity
                     </h3>
-                    <div className="grid grid-cols-3 md:grid-cols-7 gap-2">
+                    <div className="flex flex-wrap gap-2">
                         {daily_activity.map((day) => (
                             <div
                                 key={day.date}
-                                className="bg-white border rounded-lg p-4 text-xs shadow-sm hover:shadow-md transition w-full min-w-[8rem]"
+                                className="bg-white border rounded-lg p-4 text-xs shadow-sm hover:shadow-md transition min-w-[9rem] max-w-[10rem]"
                             >
                                 <h4 className="font-medium text-slate-800 text-sm">
                                     {format(parseISO(day.date), "EEE")}
@@ -250,7 +250,7 @@ export default function UserActivityPage() {
                         </div>
                     </div>
                     <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
-                        <div className="w-[50rem] md:w-full">
+                        <div className="w-full min-w-[30rem] md:w-full">
                             <CalendarHeatmap
                                 className={""}
                                 startDate={startOfMonthLastYear}
