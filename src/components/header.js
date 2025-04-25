@@ -118,6 +118,11 @@ function Header() {
                 </li>
             },
             {
+                id: 'overview', element: <li key="overview" className="header-list-item">
+                    <Link href="/profile/edit">Edit Profile</Link>
+                </li>
+            },
+            {
                 id: 'logout', element: <li key="logout" className="header-list-item">
                     <button className="logout-btn" onClick={handleLogout}>
                         LOGOUT
