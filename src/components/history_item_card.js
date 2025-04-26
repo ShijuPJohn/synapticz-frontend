@@ -37,16 +37,18 @@ function HistoryItemCard({testSession}) {
             <div className="flex-1 flex flex-col gap-1 text-sm text-slate-800">
                 <div className="flex items-start justify-between w-full">
                     <Link href={`/test/${testSession.id}`}>
-                        <h2 className="text-sm md:text-[1rem] font-semibold uppercase hover:text-cyan-600 transition text-pink-900">
+                        <h2 className="text-sm md:text-[1rem] font-semibold uppercase transition text-pink-900">
                             {testSession.qSetName}
                         </h2>
                     </Link>
                     {testSession.finished && (
+                        <Link href={`/test/${testSession.id}`}>
                         <div className="flex items-center h-full">
                             <span className="text-xs px-2 py-1 bg-green-500 text-white rounded-full self-center">
                                 Finished
                             </span>
                         </div>
+                        </Link>
                     )}
                 </div>
 
