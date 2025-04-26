@@ -23,7 +23,7 @@ async function createTest(questionSetID, token, router) {
 
     try {
         const response = await axios.post(`${fetchURL}/test_session`, data, {
-           headers
+            headers
         });
 
         enqueueSnackbar("Test session successfully created!");
@@ -42,7 +42,7 @@ function QuestionSetCard({questionSet}) {
 
     return (
         <div
-            className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap hover:shadow-md transition ">
+            className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap transition ">
             {/* Image */}
             <Link href={`/quizzes/${questionSet.id}`}>
                 <div
@@ -59,15 +59,15 @@ function QuestionSetCard({questionSet}) {
             </Link>
 
             {/* Info */}
-            <div className="flex-1 flex flex-col gap-1 text-sm text-slate-800">
+            <div className="flex-1 flex flex-col gap-1 md:gap-2 text-sm text-slate-800">
                 <div className="flex items-start justify-between w-full">
                     <Link href={`/quizzes/${questionSet.id}`}>
-                        <h2 className="text-sm md:text-[1rem] font-semibold  uppercase hover:text-cyan-600 transition text-pink-900">
+                        <h2 className="text-sm md:text-[1.2rem] font-[500] uppercase hover:text-pink-800 transition text-pink-900">
                             {questionSet.name}
                         </h2>
                     </Link>
                 </div>
-
+                <Link href={`/quizzes/${questionSet.id}`}>
                 <div
                     className="text-slate-600 flex mt-1 text-[.7rem] md:text-[.9rem] flex-wrap justify-between w-full md:w-[50%]">
                     <p>
@@ -83,21 +83,23 @@ function QuestionSetCard({questionSet}) {
                         {questionSet.total_questions}
                     </p>
                 </div>
+                </Link>
             </div>
 
             {/* CTA */}
             <div className="flex-shrink-0">
 
-                <FontAwesomeIcon icon={faPlay}
-                                 className="text-pink-900 hover:text-pink-700  text-xl cursor-pointer transition"
-                                 onClick={() => {
-                                     if (Object.keys(userInfo).length === 0) {
-                                         enqueueSnackbar("Sign in with an account or create a new account", {variant:"warning"})
-                                         router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-                                     } else {
-                                         createTest(questionSet.id, userInfo.token, router);
-                                     }
-                                 }}/>
+                <button icon={faPlay}
+                        className="text-white text-[.7rem] cursor-pointer transition uppercase  bg-green-700 py-1 px-2 rounded-sm w-[4rem] md:w-[5rem] h-[1.5rem]"
+                        onClick={() => {
+                            if (Object.keys(userInfo).length === 0) {
+                                enqueueSnackbar("Sign in with an account or create a new account", {variant: "warning"})
+                                router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+                            } else {
+                                createTest(questionSet.id, userInfo.token, router);
+                            }
+                        }}>start
+                </button>
             </div>
         </div>
     );

@@ -27,18 +27,20 @@ export const userSlice = createSlice({
         loginRequest: (state) => {
             state.loading = true
         },
-        loginFail: (state,action) => {
+        loginFail: (state, action) => {
             state.loading = false
             state.userInfo = {}
-            enqueueSnackbar('Login Failed : '+action.payload, {variant: "error"})
+            enqueueSnackbar('Login Failed : ' + action.payload, {variant: "error"})
         },
         login: (state, action) => {
             state.loading = false
+            state.pendingSignupEmail=null
             state.userInfo = action.payload
             enqueueSnackbar('Logged In. Redirecting to home page.', {variant: "success"})
         },
         signup: (state, action) => {
             state.loading = false
+            state.pendingSignupEmail=null
             state.userInfo = action.payload
             enqueueSnackbar('Logged In. Add profile details', {variant: "success"})
         },
@@ -114,6 +116,7 @@ export const signupThunk = (name, email, password) => async (dispatch) => {
         dispatch(setPendingSignup(email));
         enqueueSnackbar('Verification code sent to your email', {variant: "info"});
     } catch (e) {
+        enqueueSnackbar("Signup Error :", e.message)
         dispatch(signupFail(e.message || "Signup error"));
     }
 }
@@ -121,6 +124,7 @@ export const signupThunk = (name, email, password) => async (dispatch) => {
 export const verifyEmailThunk = ({email, code}) => async (dispatch) => {
     try {
         const {data} = await axios.post(`${fetchURL}/auth/users/verify`, {email, code});
+        console.log("Data after verification", data)
         dispatch(signup(data));
         dispatch(clearPendingSignup());
     } catch (e) {
