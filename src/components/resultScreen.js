@@ -11,6 +11,7 @@ import {
     faQuestionCircle,
     faTimesCircle
 } from '@fortawesome/free-solid-svg-icons';
+import Link from "next/link";
 import LeetCodeStylePercentileBar from "@/components/leetcode_style_percentile_bar";
 
 function ResultScreen({resObject, toggleResult}) {
@@ -46,7 +47,8 @@ function ResultScreen({resObject, toggleResult}) {
         <div className="max-w-6xl mx-auto p-4 md:p-6 bg-gray-50 rounded-lg shadow-lg flex flex-col">
             {/* Header Section */}
             <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-indigo-800 mb-2 uppercase">{resObject.question_set.name} : Results</h2>
+                <h2 className="text-3xl font-bold text-indigo-800 mb-2 uppercase">Results</h2>
+                <h2 className="text-xl text-sky-700 uppercase">{resObject.question_set.name}</h2>
                 <p className="text-gray-600 mt-1">{resObject.question_set.description}</p>
             </div>
             <div className="graph-container my-4 max-w-[90vw]">
@@ -228,14 +230,20 @@ function ResultScreen({resObject, toggleResult}) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+            <div className="flex sm:flex-row justify-center gap-4 mt-8">
 
                     <button
                         onClick={() => toggleResult(false)}
-                        className="px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                        className="flex-1 px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
                     >
                         Visit Test Again
                     </button>
+                <Link
+                    href={`/quizzes/${resObject.question_set.id}`}
+                    className="flex-1 justify-center items-center px-6 py-3 bg-cyan-700 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                >
+                    Retake Test
+                </Link>
 
             </div>
         </div>

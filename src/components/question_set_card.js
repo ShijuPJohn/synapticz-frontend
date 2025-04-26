@@ -62,7 +62,7 @@ function QuestionSetCard({questionSet}) {
             <div className="flex-1 flex flex-col gap-1 md:gap-2 text-sm text-slate-800">
                 <div className="flex items-start justify-between w-full">
                     <Link href={`/quizzes/${questionSet.id}`}>
-                        <h2 className="text-sm md:text-[1.2rem] font-[500] uppercase hover:text-pink-800 transition text-pink-900">
+                        <h2 className="text-sm md:text-[1rem] font-semibold uppercase  transition text-pink-900">
                             {questionSet.name}
                         </h2>
                     </Link>

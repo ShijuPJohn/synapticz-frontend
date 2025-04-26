@@ -186,12 +186,12 @@ export default function UserActivityPage() {
                 </section>
 
                 {/* Daily Activity */}
-                <section className="mb-10">
+                <section className="mb-10 flex flex-col items-center justify-center bg-white w-full">
                     <h3 className="text-lg font-semibold mb-4 text-slate-700 flex items-center gap-2">
                         <CalendarDays className="w-5 h-5 text-cyan-600"/>
                         Recent Activity
                     </h3>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 justify-center">
                         {daily_activity.map((day) => (
                             <div
                                 key={day.date}
@@ -250,7 +250,7 @@ export default function UserActivityPage() {
                         </div>
                     </div>
                     <div className="bg-white p-4 rounded-xl shadow-sm border overflow-x-auto">
-                        <div className="w-full min-w-[30rem] md:w-full">
+                        <div className="w-full min-w-[45rem]">
                             <CalendarHeatmap
                                 className={""}
                                 startDate={startOfMonthLastYear}
