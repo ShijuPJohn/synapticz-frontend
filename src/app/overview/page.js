@@ -97,7 +97,7 @@ export default function UserActivityPage() {
     return (
         <main>
             <div
-                className="w-[100%] max-w-6xl mx-auto p-4 md:p-6 lg:p-8 flex flex-col items-center justify-center bg-white">
+                className="w-[100%] max-w-6xl mx-auto p-2 md:p-6 lg:p-8 flex flex-col items-center justify-center bg-white">
                 {/* Header */}
                 <header className="mb-6 text-center">
                     <h1 className="text-2xl sm:text-3xl font-bold text-cyan-800">

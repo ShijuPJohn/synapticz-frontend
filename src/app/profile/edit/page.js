@@ -7,7 +7,7 @@ import {useSelector} from "react-redux";
 import Image from "next/image";
 import {fetchURL} from "@/constants";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEdit} from "@fortawesome/free-solid-svg-icons";
+import {faArrowRight, faEdit} from "@fortawesome/free-solid-svg-icons";
 import {
     CircularProgress,
     TextField,
@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import {enqueueSnackbar} from "notistack";
 import countries from 'world-countries';
+import Link from "next/link";
 
 export default function EditProfilePage() {
     const {userInfo} = useSelector((state) => state.user);
@@ -133,7 +134,10 @@ export default function EditProfilePage() {
                 </div>
             ) : (
                 <div className="sm:w-[50%] mx-auto px-6 py-10 bg-white">
-                    <h1 className="text-3xl font-bold text-slate-800 mb-6">Edit Profile</h1>
+                    <div className="title-container flex justify-between ">
+                        <h1 className="text-3xl font-bold text-slate-800 mb-6">Edit Profile</h1>
+                        <Link href={"/quizzes"} className={"text-sm md:text-lg text-indigo-700 flex items-center gap-2 border border-indigo-500 px-4 rounded-xl "}>Skip<FontAwesomeIcon icon={faArrowRight}/></Link>
+                    </div>
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 flex flex-col justify-center items-center">
                         <div className="flex items-center gap-4">

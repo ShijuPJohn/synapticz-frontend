@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { fetchURL } from "@/constants";
+import Image from "next/image";
 
 function Page({ params }) {
     const [quiz, setQuiz] = useState(null);
@@ -44,17 +45,18 @@ function Page({ params }) {
                 {/* Top Section: Image + Metadata */}
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Cover Image */}
-                    <div className="w-full lg:w-1/3 h-56 overflow-hidden border-[1px] border-purple-300 rounded-xl shadow-md">
-                        <img
+                    <div className="w-full lg:w-1/3 h-56 overflow-hidden border-[1px] border-purple-300 rounded-xl shadow-md relative">
+                        <Image
                             src={quiz.cover_image}
                             alt="Quiz Cover"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-contain"
+                            fill
                         />
                     </div>
 
                     {/* Info */}
                     <div className="flex-1">
-                        <h1 className="text-3xl md:text-4xl font-extrabold text-pink-900 mb-4 uppercase">
+                        <h1 className="text-[1.2rem] md:text-2xl font-bold text-pink-900 mb-4 uppercase">
                             {quiz.name}
                         </h1>
                         <p className="text-sm text-gray-600 mb-4">

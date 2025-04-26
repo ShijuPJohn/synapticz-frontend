@@ -37,8 +37,8 @@ const LoginPage = () => {
     const dispatch = useDispatch();
     const [id, setId] = useState(0);
     const userLogin = useSelector(state => state.user);
+    const {pendingSignupEmail} = userLogin;
     const {userInfo} = userLogin;
-
     const [pendingVerification, setPendingVerification] = useState(false);
     const [emailForVerification, setEmailForVerification] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
@@ -51,12 +51,16 @@ const LoginPage = () => {
             router.push('/profile/edit');
         }
     }, [userInfo]);
-
+    useEffect(() => {
+        if (pendingSignupEmail){
+            setPendingVerification(true); //TODO
+            setModalOpen(true); //TODO
+        }
+    }, [pendingSignupEmail])
     const onSubmit = async (data) => {
         setEmailForVerification(data.email);
         setId(data.id);
-        setPendingVerification(true);
-        setModalOpen(true);
+
         dispatch(signupThunk(data.username, data.email, data.password));
     };
 
