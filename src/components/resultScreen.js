@@ -1,7 +1,8 @@
 "use client"
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {useRouter} from 'next/navigation';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
+import Confetti from 'react-confetti'
 import {
     faChartBar,
     faCheckCircle,
@@ -19,13 +20,17 @@ function ResultScreen({resObject, toggleResult}) {
     // Calculate time taken
     const startedTime = new Date(resObject.test_session.started_time);
     const finishedTime = new Date(resObject.test_session.finished_time);
-
+    const [showConfetti, setShowConfetti] = useState(true);
+    const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
     // Format time
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}m ${secs}s`;
     };
+
+
+
 
     // Get performance message based on percentage
     const getPerformanceMessage = (percentage) => {
@@ -42,10 +47,31 @@ function ResultScreen({resObject, toggleResult}) {
         minute: '2-digit',
         hour12: true
     });
+    useEffect(() => {
+        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+
+        const handleResize = () => {
+            setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-6 bg-gray-50 rounded-lg shadow-lg flex flex-col">
-            {/* Header Section */}
+            {showConfetti && <Confetti
+                width={windowSize.width}
+                height={windowSize.height}
+                recycle={false}
+                numberOfPieces={600}
+                gravity={1}
+                onConfettiComplete={() => {
+                    setShowConfetti(false)
+                }}
+                style={{position: 'fixed', zIndex: 1000}}
+            />
+            }
             <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-indigo-800 mb-2 uppercase">Results</h2>
                 <h2 className="text-xl text-sky-700 uppercase">{resObject.question_set.name}</h2>
@@ -232,12 +258,12 @@ function ResultScreen({resObject, toggleResult}) {
             {/* Action Buttons */}
             <div className="flex sm:flex-row justify-center gap-4 mt-8">
 
-                    <button
-                        onClick={() => toggleResult(false)}
-                        className="flex-1 px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
-                    >
-                        Revisit Test
-                    </button>
+                <button
+                    onClick={() => toggleResult(false)}
+                    className="flex-1 px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                >
+                    Revisit Test
+                </button>
                 <Link
                     href={`/quizzes/${resObject.question_set.id}`}
                     className="flex-1 flex items-center justify-center px-6 py-3 bg-cyan-900 text-white rounded-lg hover:bg-cyan-600 transition-colors"
