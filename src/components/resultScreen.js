@@ -236,11 +236,11 @@ function ResultScreen({resObject, toggleResult}) {
                         onClick={() => toggleResult(false)}
                         className="flex-1 px-6 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
                     >
-                        Visit Test Again
+                        Revisit Test
                     </button>
                 <Link
                     href={`/quizzes/${resObject.question_set.id}`}
-                    className="flex-1 justify-center items-center px-6 py-3 bg-cyan-700 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                    className="flex-1 flex items-center justify-center px-6 py-3 bg-cyan-900 text-white rounded-lg hover:bg-cyan-600 transition-colors"
                 >
                     Retake Test
                 </Link>

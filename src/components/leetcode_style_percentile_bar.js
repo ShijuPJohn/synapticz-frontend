@@ -118,12 +118,13 @@ const LeetCodeStylePercentileChart = ({ allScores = [], userScore = 0, totalMark
     return (
         <div className="bg-white p-4 rounded-lg shadow-md">
             <h3 className="text-lg font-semibold mb-4 text-center">
-                You scored better than <span className="text-orange-500">
-          {((allScores.filter(s => {
-              const num = typeof s === 'string' ? parseFloat(s) : s;
-              return num < userScore;
-          }).length / allScores.length) * 100).toFixed(1)}%
-        </span> of test takers
+        {/*        You scored better than <span className="text-orange-500">*/}
+        {/*  {((allScores.filter(s => {*/}
+        {/*      const num = typeof s === 'string' ? parseFloat(s) : s;*/}
+        {/*      return num < userScore;*/}
+        {/*  }).length / allScores.length) * 100).toFixed(1)}%*/}
+        {/*</span> of test takers*/}
+                You stand here:
             </h3>
 
             <div style={{ height: '300px', width: '100%' }}>

@@ -1,32 +1,27 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import axios from "axios";
-import { fetchURL } from "@/constants";
+import {fetchURL} from "@/constants";
 import Image from "next/image";
+import StartQuizButton from "@/components/start_quiz_button";
 
-function Page({ params }) {
-    const [quiz, setQuiz] = useState(null);
+async function fetchQuizById(qzid) {
+    try {
+        const response = await axios.get(`${fetchURL}/questionsets/${qzid}`);
+        const data = response.data;
 
-    async function fetchQuizById(qzid) {
-        try {
-            const response = await axios.get(`${fetchURL}/questionsets/${qzid}`);
-            const data = response.data;
-
-            if (!data.cover_image || data.cover_image.trim() === "") {
-                data.cover_image = "/images/placeholder_book.png";
-            }
-
-            setQuiz(data);
-        } catch (err) {
-            console.error("Error fetching quiz:", err);
+        if (!data.cover_image || data.cover_image.trim() === "") {
+            data.cover_image = "/images/placeholder_book.png";
         }
+
+        return data;
+    } catch (err) {
+        console.error("Error fetching quiz:", err);
+        return null;
     }
+}
 
-    useEffect(() => {
-        if (params.quizzid) {
-            fetchQuizById(params.quizzid);
-        }
-    }, [params.quizzid]);
+async function Page({params}) {
+    const quiz = await fetchQuizById(params.quizzid);
 
     if (!quiz) {
         return (
@@ -39,13 +34,14 @@ function Page({ params }) {
     }
 
     return (
-        <main >
-            <div className="w-[98%] md:w-[80%] lg:w-[50%] mx-auto bg-white rounded-2xl shadow-2xl p-4 md:p-12 border border-purple-100">
-
+        <main>
+            <div
+                className="w-[98%] md:w-[80%] lg:w-[50%] mx-auto bg-white rounded-2xl p-4 md:p-12 border border-purple-100">
                 {/* Top Section: Image + Metadata */}
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Cover Image */}
-                    <div className="w-full lg:w-1/3 h-56 overflow-hidden border-[1px] border-purple-300 rounded-xl shadow-md relative">
+                    <div
+                        className="w-full lg:w-1/3 h-56 overflow-hidden border-[1px] border-purple-300 rounded-xl relative">
                         <Image
                             src={quiz.cover_image}
                             alt="Quiz Cover"
@@ -71,31 +67,37 @@ function Page({ params }) {
                         </p>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-700">
-                            <Info label="📚 Subject" value={quiz.subject} />
-                            <Info label="🎓 Exam" value={quiz.exam} />
-                            <Info label="🗣 Language" value={quiz.language} />
-                            <Info label="🕒 Duration" value={`${quiz.time_duration} min`} />
-                            <Info label="🎯 Mode" value={quiz.mode} />
-                            <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`} />
+                            <Info label="📚 Subject" value={quiz.subject}/>
+                            <Info label="🎓 Exam" value={quiz.exam}/>
+                            <Info label="🗣 Language" value={quiz.language}/>
+                            <Info label="🕒 Duration" value={`${quiz.time_duration} min`}/>
+                            <Info label="🎯 Mode" value={quiz.mode}/>
+                            <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`}/>
                         </div>
                     </div>
                 </div>
 
                 {/* Divider */}
-                <hr className="my-8 border-t border-purple-200" />
+                <hr className="my-8 border-t border-purple-200"/>
 
                 {/* Description */}
                 {quiz.description && (
                     <section className="mb-8">
-                        <h3 className="text-lg font-semibold text-purple-800 mb-2">📄 Description</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">{quiz.description}</p>
+                        <h3 className="text-lg font-semibold text-purple-800 mb-2">
+                            📄 Description
+                        </h3>
+                        <p className="text-gray-700 text-sm leading-relaxed">
+                            {quiz.description}
+                        </p>
                     </section>
                 )}
 
                 {/* Tags */}
                 {quiz.tags?.length > 0 && (
                     <section className="mb-8">
-                        <h3 className="text-lg font-semibold text-purple-800 mb-2">🏷 Tags</h3>
+                        <h3 className="text-lg font-semibold text-purple-800 mb-2">
+                            🏷 Tags
+                        </h3>
                         <div className="flex flex-wrap gap-3">
                             {quiz.tags.map((tag, idx) => (
                                 <span
@@ -112,7 +114,9 @@ function Page({ params }) {
                 {/* Resource Link */}
                 {quiz.associated_resource && (
                     <section className="mb-10">
-                        <h3 className="text-lg font-semibold text-purple-800 mb-2">🔗 Resource</h3>
+                        <h3 className="text-lg font-semibold text-purple-800 mb-2">
+                            🔗 Resource
+                        </h3>
                         <a
                             href={quiz.associated_resource}
                             className="text-blue-600 hover:underline text-sm"
@@ -127,9 +131,7 @@ function Page({ params }) {
                 {/* Start Test Button */}
                 {quiz.can_start_test && (
                     <div className="flex justify-center">
-                        <button className="bg-[#167e82] uppercase text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-300">
-                            Start Test
-                        </button>
+                        <StartQuizButton qid={params.quizzid}/>
                     </div>
                 )}
             </div>
@@ -137,7 +139,7 @@ function Page({ params }) {
     );
 }
 
-function Info({ label, value }) {
+function Info({label, value}) {
     return (
         <div>
             <p className="text-gray-500 text-xs mb-0.5">{label}</p>

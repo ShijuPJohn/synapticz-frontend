@@ -128,10 +128,11 @@ const LoginPage = () => {
                     <div className="w-full md:w-2/3 flex flex-col items-center justify-around">
                         <h3 className="text-2xl font-light text-gray-800 border-b border-amber-500 pb-2 mb-4">Sign
                             Up</h3>
-                        <button
-                            className={`w-full p-3 border border-gray-300 rounded-md bg-white text-slate-800 flex gap-2 justify-center items-center`}>
-                            <Image src={"/images/google_icon.png"} alt={"Google"} width={25} height={25}/>
-                            Signup with Google
+                        <button className={`w-[94%] p-3 mx-16 border border-gray-300 rounded-md bg-white text-slate-800 flex gap-2 justify-center items-center`}
+                                onClick={() => window.location.href = `${fetchURL}/auth/google-login`}
+                        >
+                            <Image src={"/images/google_icon.png"} alt={"Google"} width={25} height={25} />
+                            Login with Google
                         </button>
                         <div className="my-4 h-[1px] w-2/3 bg-amber-500"></div>
                         <form

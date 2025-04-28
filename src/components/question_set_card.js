@@ -18,7 +18,7 @@ async function createTest(questionSetID, token, router) {
     const data = {
         question_set_id: questionSetID,
         mode: "practice", // default
-        randomize_questions: false,
+        randomize_questions: true,
     };
 
     try {
