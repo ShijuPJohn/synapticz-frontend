@@ -1,50 +1,43 @@
-"use client";
 import React from "react";
 import Link from "next/link";
 import {useSelector} from "react-redux";
-import {usePathname, useRouter} from "next/navigation";
-import axios from "axios";
-import {fetchURL} from "@/constants";
-import {enqueueSnackbar} from "notistack";
 import Image from "next/image";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlay} from '@fortawesome/free-solid-svg-icons';
 
-async function createTest(questionSetID, token, router) {
-    const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-    };
-    const data = {
-        question_set_id: questionSetID,
-        mode: "practice", // default
-        randomize_questions: true,
-    };
-
-    try {
-        const response = await axios.post(`${fetchURL}/test_session`, data, {
-            headers
-        });
-
-        enqueueSnackbar("Test session successfully created!");
-        router.push(`/test/${response.data.test_session}`);
-    } catch (error) {
-        console.error("Error:", error.response ? error.response.data : error.message);
-    }
-}
+// async function createTest(questionSetID, token, router) {
+//     const headers = {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//     };
+//     const data = {
+//         question_set_id: questionSetID,
+//         mode: "practice", // default
+//         randomize_questions: true,
+//     };
+//
+//     try {
+//         const response = await axios.post(`${fetchURL}/test_session`, data, {
+//             headers
+//         });
+//
+//         enqueueSnackbar("Test session successfully created!");
+//         router.push(`/test/${response.data.test_session}`);
+//     } catch (error) {
+//         console.error("Error:", error.response ? error.response.data : error.message);
+//     }
+// }
 
 function QuestionSetCard({questionSet}) {
-    const userLogin = useSelector(state => state.user);
-    const {userInfo} = userLogin
-    const router = useRouter();
-    const pathname = usePathname(); // Get current path
+    // const userLogin = useSelector(state => state.user);
+    // const {userInfo} = userLogin
+    // const router = useRouter();
+    // const pathname = usePathname(); // Get current path
 
 
     return (
         <div
-            className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap transition ">
+            className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4transition ">
             {/* Image */}
-            <Link href={`/quizzes/${questionSet.id}`}>
+            <Link href={`/quizzes/${questionSet.id}`} className={" flex items-center gap-2 flex-wrap "}>
                 <div
                     className="w-[3rem] h-[3rem] md:w-[5rem] md:h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
                     <Image
@@ -56,7 +49,7 @@ function QuestionSetCard({questionSet}) {
                         className="object-cover"
                     />
                 </div>
-            </Link>
+
 
             {/* Info */}
             <div className="flex-1 flex flex-col gap-1 md:gap-2 text-sm text-slate-800">
@@ -87,20 +80,21 @@ function QuestionSetCard({questionSet}) {
             </div>
 
             {/* CTA */}
-            <div className="flex-shrink-0">
+            {/*<div className="flex-shrink-0">*/}
 
-                <button icon={faPlay}
-                        className="text-white text-[.7rem] cursor-pointer transition uppercase  bg-green-700 py-1 px-2 rounded-sm w-[4rem] md:w-[5rem] h-[1.5rem]"
-                        onClick={() => {
-                            if (Object.keys(userInfo).length === 0) {
-                                enqueueSnackbar("Sign in with an account or create a new account", {variant: "warning"})
-                                router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-                            } else {
-                                createTest(questionSet.id, userInfo.token, router);
-                            }
-                        }}>start
-                </button>
-            </div>
+            {/*    <button icon={faPlay}*/}
+            {/*            className="text-white text-[.7rem] cursor-pointer transition uppercase  bg-green-700 py-1 px-2 rounded-sm w-[4rem] md:w-[5rem] h-[1.5rem]"*/}
+            {/*            onClick={() => {*/}
+            {/*                if (Object.keys(userInfo).length === 0) {*/}
+            {/*                    enqueueSnackbar("Sign in with an account or create a new account", {variant: "warning"})*/}
+            {/*                    router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);*/}
+            {/*                } else {*/}
+            {/*                    createTest(questionSet.id, userInfo.token, router);*/}
+            {/*                }*/}
+            {/*            }}>start*/}
+            {/*    </button>*/}
+            {/*</div>*/}
+            </Link>
         </div>
     );
 }

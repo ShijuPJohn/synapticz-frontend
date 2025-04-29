@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import ResultScreen from "@/components/resultScreen";
 
+let countHandle = null
+
 function Page({params}) {
     const [questions, setQuestions] = useState({});
     const [currentQuestion, setCurrentQuestion] = useState({});
@@ -33,12 +35,18 @@ function Page({params}) {
     const [rawFetchedData, setRawFetchedData] = useState(null);
     const [scoredMark, setScoredMark] = useState(0);
     const [dialogOpen, setDialogOpen] = React.useState(false);
+    const [isTimedQuestions, setIsTimedQuestions] = useState(false);
+    const [isTotalTimeCapped, setIsTotalTimeCapped] = useState(false);
+    const [secondsPerQuestion, setSecondsPerQuestion] = useState(0);
+    const [minutesTimeCap, setMinutesTimeCap] = useState(0);
     const [fetched, setFetched] = useState(false);
     const [windowSize, setWindowSize] = useState({width: 0, height: 0});
+    const [secondsCount, setSecondsCount] = useState(0);
     //confetti
     // const [showConfetti, setShowConfetti] = useState(false);
     const answerButtonRef = useRef(null);
     const [showRedSplash, setShowRedSplash] = useState(false);
+    const [lockQuestion, setLockQuestion] = useState(false);
 
     const handleClickOpen = () => {
         setDialogOpen(true);
@@ -63,6 +71,32 @@ function Page({params}) {
             update();
         }
     }, [questionAnswerData]);
+    useEffect(() => {
+        clearInterval(countHandle); // Always clear first
+
+        if (
+            fetched &&
+            isTimedQuestions &&
+            !isCurrentQuestionAnswered
+        ) {
+            setLockQuestion(true)
+            setSecondsCount(secondsPerQuestion);
+            countHandle = setInterval(() => {
+                setSecondsCount(prev => prev - 1);
+            }, 1000);
+        } else {
+            setSecondsCount(0);
+        }
+
+        return () => clearInterval(countHandle);
+    }, [currentQuestionIndex, isCurrentQuestionAnswered, fetched]);
+    useEffect(() => {
+        if (fetched && secondsCount <= 0) {
+            setLockQuestion(false)
+            clearInterval(countHandle)
+            checkAndMarkAnswer()
+        }
+    }, [secondsCount])
 
 
     const triggerConfetti = () => {
@@ -96,7 +130,6 @@ function Page({params}) {
             // Handle both old and new response formats
             const questionsData = data.questions || data.test_session?.questions || [];
             const testSession = data.test_session || data;
-
             setRawFetchedData(data);
             setCurrentQuestion(questionsData[testSession.current_question_num || 0]);
             setCurrentQuestionIndex(testSession.current_question_num || 0);
@@ -126,6 +159,11 @@ function Page({params}) {
             setIsCurrentQuestionAnswered(
                 questionsData[testSession.current_question_num || 0]?.selected_answer_list?.length > 0
             );
+            setIsTimedQuestions(testSession.is_timed_question)
+            setIsTotalTimeCapped(testSession.is_time_capped)
+            setSecondsPerQuestion(testSession.seconds_per_question)
+            setMinutesTimeCap(testSession.time_cap_minutes)
+            setSecondsCount(testSession.seconds_per_question)
 
             if (testSession.finished) {
                 setFinished(true);
@@ -159,6 +197,7 @@ function Page({params}) {
     }
 
     function checkAndMarkAnswer() {
+        setLockQuestion(false)
         hasInteracted.current = true;
         setIsCurrentQuestionAnswered(true);
         setQuestionAnswerData(prevState => {
@@ -204,6 +243,9 @@ function Page({params}) {
 
     async function nextQuestion() {
         hasInteracted.current = true;
+        if ((!isCurrentQuestionAnswered && isTimedQuestions)||lockQuestion) {
+            return;
+        }
         if (currentQuestionIndex + 1 < questionIdsOrdered.length) {
             setCurrentQuestion(questions[questionIdsOrdered[currentQuestionIndex + 1]]);
             setIsCurrentQuestionAnswered(
@@ -216,6 +258,9 @@ function Page({params}) {
 
     async function prevQuestion() {
         hasInteracted.current = true;
+        if (isTimedQuestions && lockQuestion) {
+            return;
+        }
         if (currentQuestionIndex > 0) {
             setCurrentQuestion(questions[questionIdsOrdered[currentQuestionIndex - 1]]);
             setIsCurrentQuestionAnswered(
@@ -335,9 +380,10 @@ function Page({params}) {
                         )}
 
                             <div
-                                className="flex flex-wrap justify-between items-center text-[1.2rem] p-[.9rem] mb-2 bg-[#23364a] text-amber-300 align-baseline gap-1">
+                                className="flex flex-wrap justify-between items-center text-[1rem] p-[.5rem] mb-2 bg-[#23364a] text-amber-300 align-baseline gap-1">
 
                                 <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
+                                <p>{secondsCount}</p>
                                 {currentQuestion && (
                                     <h4 className="text-blue-300">
                                         {currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}
@@ -413,14 +459,14 @@ function Page({params}) {
 
                                     <div className="quiz_box_btn_box_2nd_row flex justify-between w-full gap-2">
                                         <button
-                                            className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white py-2 text-sm md:text-base disabled:bg-orange-400 disabled:cursor-default"
+                                            className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white py-2 text-sm md:text-base disabled:bg-orange-300 disabled:cursor-default"
                                             onClick={prevQuestion}
-                                            disabled={currentQuestionIndex === 0}
+                                            disabled={currentQuestionIndex === 0||lockQuestion}
                                         >
                                             Previous
                                         </button>
                                         <button
-                                            className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white py-2 text-sm md:text-base disabled:bg-teal-400 disabled:cursor-default"
+                                            className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white py-2 text-sm md:text-base disabled:bg-teal-300 disabled:cursor-default"
                                             onClick={() => {
                                                 if ((currentQuestionIndex + 1) === questionIdsOrdered.length) {
                                                     handleClickOpen();
@@ -428,6 +474,7 @@ function Page({params}) {
                                                     nextQuestion();
                                                 }
                                             }}
+                                            disabled={lockQuestion}
                                         >
                                             {((currentQuestionIndex + 1) === questionIdsOrdered.length) ? "Finish" : "Next"}
                                         </button>
