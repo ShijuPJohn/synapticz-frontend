@@ -14,17 +14,22 @@ const TimingOptions = dynamic(() => import("./timing_options"), {ssr: false});
 
 async function createTest(questionSetID, token, router, timingEnabled, timingMode, secondsPerQuestion, totalTimeCapMinutes) {
     const headers = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json", Authorization: `Bearer ${token}`,
     };
+    let mode = ""
+    if (timingEnabled && timingMode === "total") {
+        mode = "t_timed";
+    } else if (timingEnabled && timingMode === "per-question") {
+        mode = "q_timed";
+    } else {
+        mode = "untimed";
+    }
     const data = {
         question_set_id: parseInt(questionSetID),
-        mode: "practice", // default
         randomize_questions: true,
-        is_time_capped: timingMode === "total",
-        is_timed_question: timingMode === "per-question",
-        seconds_per_question: timingMode === "per-question"?parseInt(secondsPerQuestion):0,
-        time_cap_minutes: timingMode === "total"? parseInt(totalTimeCapMinutes):0,
+        mode,
+        seconds_per_question: timingMode === "per-question" ? parseInt(secondsPerQuestion) : 0,
+        time_cap_seconds: timingMode === "total" ? parseInt(totalTimeCapMinutes)*60 : 0,
     };
 
     try {
@@ -48,26 +53,23 @@ function StartSessionControlBox({qid}) {
     const [timingMode, setTimingMode] = useState(""); // "per-question" or "total"
     const [secondsPerQuestion, setSecondsPerQuestion] = useState(10);
     const [totalTimeCapMinutes, setTotalTimeCapMinutes] = useState(60);
-    return (
-        <>
+    return (<>
             <section className="mb-10">
                 <h3 className="text-lg font-semibold text-purple-800 mb-3">
                     ⏱️ Timed Mode Options
                 </h3>
 
                 <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={timingEnabled}
-                            onChange={(e) => {
-                                setTimingEnabled(e.target.checked);
-                                if (!e.target.checked) {
-                                    setTimingMode("");
-                                }
-                            }}
-                            color="primary"
-                        />
-                    }
+                    control={<Checkbox
+                        checked={timingEnabled}
+                        onChange={(e) => {
+                            setTimingEnabled(e.target.checked);
+                            if (!e.target.checked) {
+                                setTimingMode("");
+                            }
+                        }}
+                        color="primary"
+                    />}
                     label={timingEnabled ? "Timed" : "Not timed"}
                 />
                 <Box className="mt-4 ml-4 p-4 border rounded-lg border-purple-200 bg-purple-50">
@@ -94,8 +96,7 @@ function StartSessionControlBox({qid}) {
                         </RadioGroup>
                     </FormControl>
 
-                    {timingMode === "per-question" && (
-                        <Box className="mt-4 bg-white w-1/2">
+                    {timingMode === "per-question" && (<Box className="mt-4 bg-white w-1/2">
                             <TextField
                                 label="Seconds per question"
                                 type="number"
@@ -106,11 +107,9 @@ function StartSessionControlBox({qid}) {
                                 variant="outlined"
                                 disabled={!timingEnabled}
                             />
-                        </Box>
-                    )}
+                        </Box>)}
 
-                    {timingMode === "total" && (
-                        <Box className="mt-4 bg-white  w-1/2">
+                    {timingMode === "total" && (<Box className="mt-4 bg-white  w-1/2">
                             <TextField
                                 disabled={!timingEnabled}
                                 label="Total time (minutes)"
@@ -121,8 +120,7 @@ function StartSessionControlBox({qid}) {
                                 fullWidth
                                 variant="outlined"
                             />
-                        </Box>
-                    )}
+                        </Box>)}
                 </Box>
             </section>
             <button
@@ -138,8 +136,7 @@ function StartSessionControlBox({qid}) {
             >
                 Start Test
             </button>
-        </>
-    );
+        </>);
 }
 
 export default StartSessionControlBox;

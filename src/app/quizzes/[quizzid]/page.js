@@ -3,7 +3,6 @@ import axios from "axios";
 import {fetchURL} from "@/constants";
 import Image from "next/image";
 import StartSessionControlBox from "@/components/start_session_control_box";
-import dynamic from "next/dynamic";
 
 async function fetchQuizById(qzid) {
     try {
