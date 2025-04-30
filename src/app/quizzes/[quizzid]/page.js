@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import {fetchURL} from "@/constants";
 import Image from "next/image";
-import StartQuizButton from "@/components/start_quiz_button";
+import StartSessionControlBox from "@/components/start_session_control_box";
 
 async function fetchQuizById(qzid) {
     try {
@@ -130,9 +130,7 @@ async function Page({params}) {
 
                 {/* Start Test Button */}
                 {quiz.can_start_test && (
-                    <div className="flex justify-center">
-                        <StartQuizButton qid={params.quizzid}/>
-                    </div>
+                        <StartSessionControlBox qid={params.quizzid}/>
                 )}
             </div>
         </main>

@@ -11,6 +11,9 @@ import {
 } from "@mui/material";
 import ResultScreen from "@/components/resultScreen";
 
+let countHandle = null
+let totalTimeCountHandle = null
+
 function Page({params}) {
     const [questions, setQuestions] = useState({});
     const [currentQuestion, setCurrentQuestion] = useState({});
@@ -33,12 +36,20 @@ function Page({params}) {
     const [rawFetchedData, setRawFetchedData] = useState(null);
     const [scoredMark, setScoredMark] = useState(0);
     const [dialogOpen, setDialogOpen] = React.useState(false);
+    // const [isTimedQuestions, setIsTimedQuestions] = useState(false);
+    // const [isTotalTimeCapped, setIsTotalTimeCapped] = useState(false);
+    const [mode, setMode] = React.useState("untimed");
+    const [secondsPerQuestion, setSecondsPerQuestion] = useState(0);
+    const [secondsTimeCap, setSecondsTimeCap] = useState(0);
     const [fetched, setFetched] = useState(false);
     const [windowSize, setWindowSize] = useState({width: 0, height: 0});
+    const [secondsCount, setSecondsCount] = useState(0);
+    const [totalRemainingSecondsCount, setTotalRemainingSecondsCount] = useState(0);
     //confetti
     // const [showConfetti, setShowConfetti] = useState(false);
     const answerButtonRef = useRef(null);
     const [showRedSplash, setShowRedSplash] = useState(false);
+    const [lockQuestion, setLockQuestion] = useState(false);
 
     const handleClickOpen = () => {
         setDialogOpen(true);
@@ -63,6 +74,46 @@ function Page({params}) {
             update();
         }
     }, [questionAnswerData]);
+    useEffect(() => {
+        if (fetched && mode === "t_timed") {
+            // setTotalRemainingSecondsCount(secondsTimeCap)
+            totalTimeCountHandle = setInterval(() => {
+                setTotalRemainingSecondsCount(prevState => prevState - 1)
+            }, 1000)
+        }
+    }, [fetched])
+    useEffect(() => {
+        if (fetched && totalRemainingSecondsCount <= 0) {
+            checkAndMarkAnswer()
+            finishTest()
+        }
+    }, [totalRemainingSecondsCount])
+    useEffect(() => {
+        clearInterval(countHandle); // Always clear first
+
+        if (
+            fetched &&
+            mode === "q_timed" &&
+            !isCurrentQuestionAnswered
+        ) {
+            setLockQuestion(true)
+            setSecondsCount(secondsPerQuestion);
+            countHandle = setInterval(() => {
+                setSecondsCount(prev => prev - 1);
+            }, 1000);
+        } else {
+            setSecondsCount(0);
+        }
+
+        return () => clearInterval(countHandle);
+    }, [currentQuestionIndex, isCurrentQuestionAnswered, fetched]);
+    useEffect(() => {
+        if (fetched && secondsCount <= 0) {
+            setLockQuestion(false)
+            clearInterval(countHandle)
+            checkAndMarkAnswer()
+        }
+    }, [secondsCount])
 
 
     const triggerConfetti = () => {
@@ -96,7 +147,6 @@ function Page({params}) {
             // Handle both old and new response formats
             const questionsData = data.questions || data.test_session?.questions || [];
             const testSession = data.test_session || data;
-
             setRawFetchedData(data);
             setCurrentQuestion(questionsData[testSession.current_question_num || 0]);
             setCurrentQuestionIndex(testSession.current_question_num || 0);
@@ -126,6 +176,11 @@ function Page({params}) {
             setIsCurrentQuestionAnswered(
                 questionsData[testSession.current_question_num || 0]?.selected_answer_list?.length > 0
             );
+            setMode(testSession.mode);
+            setSecondsPerQuestion(testSession.seconds_per_question)
+            setSecondsTimeCap(testSession.time_cap_seconds)
+            setSecondsCount(testSession.seconds_per_question)
+            setTotalRemainingSecondsCount(testSession.remaining_time)
 
             if (testSession.finished) {
                 setFinished(true);
@@ -148,6 +203,7 @@ function Page({params}) {
                 question_answer_data: questionAnswerData,
                 current_question_index: currentQuestionIndex,
                 total_marks_scored: scoredMark,
+                remaining_time: totalRemainingSecondsCount,
             };
             try {
                 const response = await axios.put(`${fetchURL}/test_session/${testSessionId}`, body, {headers});
@@ -159,6 +215,7 @@ function Page({params}) {
     }
 
     function checkAndMarkAnswer() {
+        setLockQuestion(false)
         hasInteracted.current = true;
         setIsCurrentQuestionAnswered(true);
         setQuestionAnswerData(prevState => {
@@ -204,6 +261,9 @@ function Page({params}) {
 
     async function nextQuestion() {
         hasInteracted.current = true;
+        if ((!isCurrentQuestionAnswered && mode === "q_timed") || lockQuestion) {
+            return;
+        }
         if (currentQuestionIndex + 1 < questionIdsOrdered.length) {
             setCurrentQuestion(questions[questionIdsOrdered[currentQuestionIndex + 1]]);
             setIsCurrentQuestionAnswered(
@@ -216,6 +276,9 @@ function Page({params}) {
 
     async function prevQuestion() {
         hasInteracted.current = true;
+        if (mode === "q_timed" && lockQuestion) {
+            return;
+        }
         if (currentQuestionIndex > 0) {
             setCurrentQuestion(questions[questionIdsOrdered[currentQuestionIndex - 1]]);
             setIsCurrentQuestionAnswered(
@@ -335,9 +398,29 @@ function Page({params}) {
                         )}
 
                             <div
-                                className="flex flex-wrap justify-between items-center text-[1.2rem] p-[.9rem] mb-2 bg-[#23364a] text-amber-300 align-baseline gap-1">
+                                className="flex flex-wrap justify-between items-center text-[1rem] p-[.5rem] mb-2 bg-[#23364a] text-amber-300 align-baseline gap-1">
 
+                                {mode === "q_timed" && <p
+                                    className="text-3xl"
+                                    style={{
+                                        color: `rgb(${((secondsPerQuestion - secondsCount) / secondsPerQuestion) * 255}, ${(secondsCount / secondsPerQuestion) * 255}, 0)`
+                                    }}
+                                >
+                                    {secondsCount}
+                                </p>}
+                                {mode === "t_timed" && (
+                                    <p
+                                        className="text-3xl"
+                                        style={{
+                                            color: `rgb(${((secondsTimeCap - totalRemainingSecondsCount) / (secondsTimeCap)) * 255}, ${(totalRemainingSecondsCount / (secondsTimeCap)) * 255}, 0)`
+                                        }}
+                                    >
+                                        {Math.floor(totalRemainingSecondsCount / 60).toString().padStart(2, '0')}:
+                                        {(totalRemainingSecondsCount % 60).toString().padStart(2, '0')}
+                                    </p>
+                                )}
                                 <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
+
                                 {currentQuestion && (
                                     <h4 className="text-blue-300">
                                         {currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}
@@ -413,14 +496,14 @@ function Page({params}) {
 
                                     <div className="quiz_box_btn_box_2nd_row flex justify-between w-full gap-2">
                                         <button
-                                            className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white py-2 text-sm md:text-base disabled:bg-orange-400 disabled:cursor-default"
+                                            className="quiz_box_btn_box_2nd_row_prev_btn flex-1 bg-orange-500 text-white py-2 text-sm md:text-base disabled:bg-orange-300 disabled:cursor-default"
                                             onClick={prevQuestion}
-                                            disabled={currentQuestionIndex === 0}
+                                            disabled={currentQuestionIndex === 0 || lockQuestion}
                                         >
                                             Previous
                                         </button>
                                         <button
-                                            className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white py-2 text-sm md:text-base disabled:bg-teal-400 disabled:cursor-default"
+                                            className="quiz_box_btn_box_2nd_row_next_btn flex-1 bg-teal-500 text-white py-2 text-sm md:text-base disabled:bg-teal-300 disabled:cursor-default"
                                             onClick={() => {
                                                 if ((currentQuestionIndex + 1) === questionIdsOrdered.length) {
                                                     handleClickOpen();
@@ -428,6 +511,7 @@ function Page({params}) {
                                                     nextQuestion();
                                                 }
                                             }}
+                                            disabled={lockQuestion}
                                         >
                                             {((currentQuestionIndex + 1) === questionIdsOrdered.length) ? "Finish" : "Next"}
                                         </button>

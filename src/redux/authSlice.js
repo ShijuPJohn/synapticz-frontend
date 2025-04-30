@@ -99,7 +99,6 @@ export const loginThunk = (email, password) => async (dispatch) => {
         // if (e.response.status === 401) {
         //     enqueueSnackbar('Incorrect email or password', {variant: "error"})
         // }
-        console.log(e);
     }
 }
 
@@ -124,11 +123,9 @@ export const signupThunk = (name, email, password) => async (dispatch) => {
 export const verifyEmailThunk = ({email, code}) => async (dispatch) => {
     try {
         const {data} = await axios.post(`${fetchURL}/auth/users/verify`, {email, code});
-        console.log("Data after verification", data)
         dispatch(signup(data));
         dispatch(clearPendingSignup());
     } catch (e) {
         enqueueSnackbar('Verification failed. Check the code.', {variant: "error"});
-        console.log("Verification error:", e);
     }
 };
