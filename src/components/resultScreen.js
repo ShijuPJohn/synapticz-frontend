@@ -16,7 +16,6 @@ import Link from "next/link";
 import LeetCodeStylePercentileBar from "@/components/leetcode_style_percentile_bar";
 
 function ResultScreen({resObject, toggleResult}) {
-    console.log("calculation",(resObject.test_session.scored_marks/resObject.test_session.total_marks))
     const router = useRouter();
     // Calculate time taken
     const startedTime = new Date(resObject.test_session.started_time);

@@ -143,7 +143,6 @@ function Page({params}) {
         try {
             const response = await axios.get(`${fetchURL}/test_session/${id}`, {headers});
             const data = response.data;
-            console.log("raw data", data)
             // Handle both old and new response formats
             const questionsData = data.questions || data.test_session?.questions || [];
             const testSession = data.test_session || data;
