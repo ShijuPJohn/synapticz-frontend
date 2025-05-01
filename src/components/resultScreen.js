@@ -16,6 +16,7 @@ import Link from "next/link";
 import LeetCodeStylePercentileBar from "@/components/leetcode_style_percentile_bar";
 
 function ResultScreen({resObject, toggleResult}) {
+    console.log("calculation",(resObject.test_session.scored_marks/resObject.test_session.total_marks))
     const router = useRouter();
     // Calculate time taken
     const startedTime = new Date(resObject.test_session.started_time);
@@ -60,7 +61,7 @@ function ResultScreen({resObject, toggleResult}) {
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-6 bg-gray-50 rounded-lg shadow-lg flex flex-col">
-            {showConfetti && <Confetti
+            {(resObject.test_session.scored_marks/resObject.test_session.total_marks)>=.6 && showConfetti && <Confetti
                 width={windowSize.width}
                 height={windowSize.height}
                 recycle={false}
@@ -72,12 +73,12 @@ function ResultScreen({resObject, toggleResult}) {
                 style={{position: 'fixed', zIndex: 1000}}
             />
             }
-            <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-indigo-800 mb-2 uppercase">Results</h2>
-                <h2 className="text-xl text-sky-700 uppercase">{resObject.question_set.name}</h2>
-                <p className="text-gray-600 mt-1">{resObject.question_set.description}</p>
+            <div className="text-center flex flex-col md:flex-row justify-center items-center md:gap-2 text-lg md:text-2xl">
+                <h2 className="text-indigo-800 uppercase">Results:</h2>
+                <h2 className="font-bold text-sky-700 uppercase"> {`${resObject.question_set.name}`}</h2>
+                {/*<p className="text-gray-600 mt-1">{resObject.question_set.description}</p>*/}
             </div>
-            <div className="graph-container my-4 max-w-[90vw]">
+            <div className="graph-container my-2 max-w-[90vw]">
                 <LeetCodeStylePercentileBar
                     allScores={resObject.test_stats.all_test_takers_scores}
                     userScore={resObject.test_session.scored_marks}
@@ -154,7 +155,7 @@ function ResultScreen({resObject, toggleResult}) {
                     <div className="space-y-3">
                         <div className="flex justify-between">
                             <span className="text-gray-600">Test Mode:</span>
-                            <span className="font-medium capitalize">{resObject.test_session.mode}</span>
+                            <span className="font-medium capitalize">{resObject.test_session.mode==="untimed"?"Not timed":(resObject.test_session.mode==="t_timed"?"Total Time Capped":"Per Question Timeout")}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Time Started:</span>
