@@ -120,7 +120,7 @@ export default function EditProfilePage() {
             enqueueSnackbar("Profile updated", {variant: "success"});
         } catch (err) {
             console.error("Update failed", err);
-            alert("Failed to update profile");
+            alert("Failed to update edit-profile");
         } finally {
             setLoading(false);
         }

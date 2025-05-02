@@ -3,13 +3,20 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useSelector} from "react-redux";
 import axios from "axios";
 import {fetchURL} from "@/constants";
-import {faFlagCheckered} from "@fortawesome/free-solid-svg-icons";
+import {faFlagCheckered, faSave, faStar} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import confetti from "canvas-confetti";
 import {
-    Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
 } from "@mui/material";
 import ResultScreen from "@/components/resultScreen";
+import {enqueueSnackbar} from "notistack";
 
 let countHandle = null
 let totalTimeCountHandle = null
@@ -36,8 +43,6 @@ function Page({params}) {
     const [rawFetchedData, setRawFetchedData] = useState(null);
     const [scoredMark, setScoredMark] = useState(0);
     const [dialogOpen, setDialogOpen] = React.useState(false);
-    // const [isTimedQuestions, setIsTimedQuestions] = useState(false);
-    // const [isTotalTimeCapped, setIsTotalTimeCapped] = useState(false);
     const [mode, setMode] = React.useState("untimed");
     const [secondsPerQuestion, setSecondsPerQuestion] = useState(0);
     const [secondsTimeCap, setSecondsTimeCap] = useState(0);
@@ -45,15 +50,24 @@ function Page({params}) {
     const [windowSize, setWindowSize] = useState({width: 0, height: 0});
     const [secondsCount, setSecondsCount] = useState(0);
     const [totalRemainingSecondsCount, setTotalRemainingSecondsCount] = useState(0);
-    //confetti
-    // const [showConfetti, setShowConfetti] = useState(false);
     const answerButtonRef = useRef(null);
     const [showRedSplash, setShowRedSplash] = useState(false);
     const [lockQuestion, setLockQuestion] = useState(false);
+    const [isCurrentQuestionBookmarked, setIsCurrentQuestionBookmarked] = useState(false);
+    const [bookmarkedQuestionIds, setBookmarkedQuestionIds] = useState({});
+    const [savedExplanationQuestionIds, setSavedExplanationQuestionIds] = useState({});
+    const [isCurrentQuestionExplanationSaved, setIsCurrentQuestionExplanationSaved] = useState(false);
 
     const handleClickOpen = () => {
         setDialogOpen(true);
     };
+
+    function getHeader() {
+        return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${userInfo.token}`
+        };
+    }
 
     const handleClose = () => {
         setDialogOpen(false);
@@ -83,7 +97,7 @@ function Page({params}) {
         }
     }, [fetched])
     useEffect(() => {
-        if (fetched && !finished && totalRemainingSecondsCount <= 0) {
+        if (fetched && !isCurrentQuestionAnswered && !finished && totalRemainingSecondsCount <= 0) {
             checkAndMarkAnswer()
             finishTest()
         }
@@ -114,6 +128,10 @@ function Page({params}) {
             checkAndMarkAnswer()
         }
     }, [secondsCount])
+    useEffect(() => {
+        setIsCurrentQuestionBookmarked(bookmarkedQuestionIds[currentQuestionId])
+        setIsCurrentQuestionExplanationSaved(savedExplanationQuestionIds[currentQuestionId])
+    }, [currentQuestionId])
 
 
     const triggerConfetti = () => {
@@ -167,6 +185,14 @@ function Page({params}) {
             questionIdsOrderedTemp.forEach((qid, index) => {
                 let selectedList = questionsData[index]?.selected_answer_list || [];
                 selectedOptions.push(selectedList ? selectedList : []);
+                setBookmarkedQuestionIds(prevState => ({
+                    ...prevState,
+                    [qid]: data.bookmarked_question_ids.includes(qid)
+                }));
+                setSavedExplanationQuestionIds(prevState => ({
+                    ...prevState,
+                    [qid]: data.saved_explanation_question_ids.includes(qid)
+                }));
             });
 
             setSelectedOptions(selectedOptions);
@@ -180,7 +206,6 @@ function Page({params}) {
             setSecondsTimeCap(testSession.time_cap_seconds)
             setSecondsCount(testSession.seconds_per_question)
             setTotalRemainingSecondsCount(testSession.remaining_time)
-
             if (testSession.finished) {
                 setFinished(true);
                 setResultScreen(true);
@@ -194,10 +219,7 @@ function Page({params}) {
 
     async function update() {
         if (!finished) {
-            const headers = {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${userInfo.token}`
-            };
+            const headers = getHeader();
             const body = {
                 question_answer_data: questionAnswerData,
                 current_question_index: currentQuestionIndex,
@@ -285,6 +307,7 @@ function Page({params}) {
             );
             setCurrentQuestionId(questionIdsOrdered[currentQuestionIndex - 1]);
             setCurrentQuestionIndex(presentState => presentState - 1);
+
         }
     }
 
@@ -322,18 +345,83 @@ function Page({params}) {
         }
     }
 
+    async function bookmarkQuestion() {
+        hasInteracted.current = true;
+        const headers = getHeader();
+        if (isCurrentQuestionBookmarked) {
+
+            try {
+                const response = await axios.delete(`${fetchURL}/bookmarks/${currentQuestionId}`, {headers});
+                enqueueSnackbar("Question removed from favorites", {variant: "info"})
+                setIsCurrentQuestionBookmarked(false)
+                setBookmarkedQuestionIds(prev => {
+                    return {...prev, [currentQuestionId]: false}
+                })
+            } catch (error) {
+                console.error('Error:', error.response ? error.response.data : error.message);
+                enqueueSnackbar("Couldn't remove from favorites", {variant: "error"})
+            }
+        } else {
+            try {
+                const response = await axios.post(`${fetchURL}/bookmarks/`, {question_id: currentQuestionId}, {headers});
+                enqueueSnackbar("Question added to favorites", {variant: "info"})
+                setIsCurrentQuestionBookmarked(true)
+                setBookmarkedQuestionIds(prev => {
+                    return {...prev, [currentQuestionId]: true}
+                })
+            } catch (error) {
+                console.error('Error:', error.response ? error.response.data : error.message);
+                enqueueSnackbar("Couldn't add to favorites", {variant: "error"})
+            }
+        }
+
+    }
+
+    async function saveExplanationToggle() {
+        const headers = getHeader();
+        if (isCurrentQuestionExplanationSaved) {
+            try {
+                const response = await axios.delete(`${fetchURL}/explanations/${currentQuestionId}`, {headers});
+                enqueueSnackbar("Explanation unsaved", {variant: "info"})
+                setIsCurrentQuestionExplanationSaved(false)
+                setSavedExplanationQuestionIds(prev => {
+                    return {...prev, [currentQuestionId]: false}
+                })
+            } catch (error) {
+                console.error('Error:', error.response ? error.response.data : error.message);
+                enqueueSnackbar("Couldn't unsave explanation", {variant: "error"})
+            }
+
+
+        } else {
+
+            try {
+                const response = await axios.post(`${fetchURL}/explanations/`, {
+                    question_id: currentQuestionId,
+                    explanation: currentQuestion.explanation
+                }, {headers});
+                enqueueSnackbar("Explanation saved", {variant: "info"})
+                setIsCurrentQuestionExplanationSaved(true)
+                setSavedExplanationQuestionIds(prev => {
+                    return {...prev, [currentQuestionId]: true}
+                })
+            } catch (error) {
+                console.error('Error:', error.response ? error.response.data : error.message);
+                enqueueSnackbar("Couldn't save", {variant: "error"})
+            }
+
+
+        }
+    }
+
     async function finishTest() {
         hasInteracted.current = true;
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${userInfo.token}`
-        };
+        const headers = getHeader();
         try {
             const response = await axios.put(`${fetchURL}/test_session/finish/${testSessionId}`, {}, {headers});
             setCurrentQuestionIndex(0);
             setFinished(true);
             setResultScreen(true);
-            // Update local data with final results if needed
             if (response.data) {
                 setRawFetchedData(response.data);
             }
@@ -439,10 +527,14 @@ function Page({params}) {
                             </div>
 
                             <div className="question-container px-4">
-                                <div className="py-4 ">
+                                <div className="py-4 flex justify-between">
                                     <h1 className="quiz_box_quest_title text-lg md:text-xl font-medium text-gray-700">
                                         {currentQuestion.question}
                                     </h1>
+                                    <div className="bookmark-icon-container cursor-pointer" onClick={bookmarkQuestion}>
+                                        <FontAwesomeIcon icon={faStar}
+                                                         className={`text-2xl ${isCurrentQuestionBookmarked ? "text-orange-500" : "text-gray-400"} hover:text-orange-400 `}/>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-3 mb-4">
@@ -519,8 +611,14 @@ function Page({params}) {
 
                                 {(isCurrentQuestionAnswered || finished) && currentQuestion?.explanation && (
                                     <div
-                                        className="quiz_box_explanation_box border-[1px] border-amber-500 p-2 mt-4 max-h-40 overflow-y-auto text-md md:text-lg text-gray-700">
-                                        <p>{currentQuestion.explanation}</p>
+                                        className={`quiz_box_explanation_box flex border-[1px] ${isCurrentQuestionExplanationSaved ? "bg-amber-100" : "bg-white"} border-amber-500 mt-4 max-h-40 overflow-y-auto text-md md:text-lg text-gray-700`}>
+                                        <p className={"m-2"}>{currentQuestion.explanation}</p>
+                                        <div
+                                            className="explanation-save-btn p-[.5rem] bg-amber-800x max-w-[2rem] max-h-[2rem] flex justify-center items-center border-[1px] cursor-pointer hover:bg-amber-100 shadow-md hover:shadow-lg"
+                                            onClick={saveExplanationToggle}
+                                        >
+                                            <FontAwesomeIcon icon={faSave} className={" text-indigo-500 h-6"}/>
+                                        </div>
                                     </div>
                                 )}
 

@@ -5,7 +5,7 @@ export const fetchURL = cloudAPI;
 
 export const protectedRoutePrefixes = [
     "/overview",
-    "/profile/edit",
+    "/edit-profile/edit",
     "/history",
     "/test",
 ];

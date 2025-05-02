@@ -95,9 +95,9 @@ export default function UserActivityPage() {
     const activeDays = heatmapData.filter((day) => day.count > 0).length;
 
     return (
-        <main>
+        <main className={"p-0"}>
             <div
-                className="w-[100%] max-w-6xl mx-auto p-2 md:p-6 lg:p-8 flex flex-col items-center justify-center bg-white">
+                className="w-[100%] mx-auto p-2 md:p-6 lg:p-8 flex flex-col items-center justify-center bg-white">
                 {/* Header */}
                 <header className="mb-6 text-center">
                     <h1 className="text-2xl sm:text-3xl font-bold text-cyan-800">
@@ -116,7 +116,7 @@ export default function UserActivityPage() {
                             <div className="bg-cyan-100 p-3 rounded-[200px] overflow-hidden relative w-28 min-w-[28] h-28 ">
                                 {profile.profile_pic ? <Image
                                         src={profile.profile_pic}
-                                        alt={"profile picture"}
+                                        alt={"edit-profile picture"}
                                         fill
                                         priority
                                         className="object-cover min-w-full min-h-full"
@@ -136,7 +136,7 @@ export default function UserActivityPage() {
                             </div>
                         </div>
                         <button
-                            onClick={() => router.push("/profile/edit")}
+                            onClick={() => router.push("/edit-profile")}
                             className="mt-auto ml-auto text-sm text-cyan-700 border border-cyan-200 px-3 py-1.5 rounded-md hover:bg-cyan-50 transition flex items-center gap-1"
                         >
                             <Pencil className="w-4 h-4"/> Edit

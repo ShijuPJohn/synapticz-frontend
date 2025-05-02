@@ -42,7 +42,7 @@ export const userSlice = createSlice({
             state.loading = false
             state.pendingSignupEmail=null
             state.userInfo = action.payload
-            enqueueSnackbar('Logged In. Add profile details', {variant: "success"})
+            enqueueSnackbar('Logged In. Add edit-profile details', {variant: "success"})
         },
         signupFail: (state, action) => {
             state.loading = false
