@@ -119,7 +119,7 @@ function Header() {
             },
             {
                 id: 'overview', element: <li key="overview" className="header-list-item">
-                    <Link href="/profile/edit">Edit Profile</Link>
+                    <Link href="/src/app/edit-profile/edit">Edit Profile</Link>
                 </li>
             },
             {
@@ -261,7 +261,7 @@ function Header() {
                                 </ListItemIcon>
                                 History
                             </MenuItem>,
-                            <MenuItem component={Link} href="/profile/edit" onClick={handleMenuClose} key="profile">
+                            <MenuItem component={Link} href="/edit-profile" onClick={handleMenuClose} key="profile">
                                 <ListItemIcon>
                                     <EditIcon fontSize="small"/>
                                 </ListItemIcon>

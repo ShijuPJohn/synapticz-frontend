@@ -19,7 +19,7 @@ function HistoryItemCard({testSession}) {
     );
 
     return (
-        <div className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg  border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap hover:shadow-md transition">
+        <div className="w-full md:w-[80%] mx-auto bg-[rgba(0,0,0,.05)] rounded-lg  border-gray-200 shadow-sm py-2 px-4 md:p-4 flex items-center gap-2 flex-wrap hover:shadow-md transition">
             {/* Image */}
             <Link href={`/test/${testSession.id}`}>
                 <div className="w-[3rem] h-[3rem] md:w-[5rem] md:h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
