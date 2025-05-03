@@ -488,7 +488,7 @@ function Page({params}) {
                                 className="flex flex-wrap justify-between items-center text-[1rem] p-[.5rem] mb-2 bg-[#23364a] text-amber-300 align-baseline gap-1">
 
                                 {mode === "q_timed" && <p
-                                    className="text-3xl"
+                                    className="text-xl md:text-2xl"
                                     style={{
                                         color: `rgb(${((secondsPerQuestion - secondsCount) / secondsPerQuestion) * 255}, ${(secondsCount / secondsPerQuestion) * 255}, 0)`
                                     }}
@@ -497,7 +497,7 @@ function Page({params}) {
                                 </p>}
                                 {mode === "t_timed" && (
                                     <p
-                                        className="text-3xl"
+                                        className="text-xl md:text-2xl"
                                         style={{
                                             color: `rgb(${((secondsTimeCap - totalRemainingSecondsCount) / (secondsTimeCap)) * 255}, ${(totalRemainingSecondsCount / (secondsTimeCap)) * 255}, 0)`
                                         }}
@@ -509,8 +509,8 @@ function Page({params}) {
                                 <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
 
                                 {currentQuestion && (
-                                    <h4 className="text-blue-300">
-                                        {currentQuestion.question_type === "m-select" ? "Multi-Select" : "MCQ"}
+                                    <h4 className="text-blue-300 uppercase">
+                                        {currentQuestion.question_type === "m-select" ? "Multi" : "Single"}
                                     </h4>
                                 )}
                                 {!finished && <h4>Score: {parseFloat(scoredMark.toFixed(2))}</h4>}
@@ -518,7 +518,7 @@ function Page({params}) {
                                     <p>Finished</p>
                                 ) : (
                                     <button
-                                        className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap px-4 py-[.3rem] border-[1px] border-amber-600"
+                                        className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap px-2 py-[.3rem] border-[1px] border-amber-600"
                                         onClick={handleClickOpen}
                                     >
                                         <FontAwesomeIcon icon={faFlagCheckered}/> Finish
@@ -611,7 +611,7 @@ function Page({params}) {
 
                                 {(isCurrentQuestionAnswered || finished) && currentQuestion?.explanation && (
                                     <div
-                                        className={`quiz_box_explanation_box flex border-[1px] ${isCurrentQuestionExplanationSaved ? "bg-amber-100" : "bg-white"} border-amber-500 mt-4 max-h-40 overflow-y-auto text-md md:text-lg text-gray-700`}>
+                                        className={`quiz_box_explanation_box flex justify-between border-[1px] ${isCurrentQuestionExplanationSaved ? "bg-amber-100" : "bg-white"} border-amber-500 mt-4 max-h-40 overflow-y-auto text-md md:text-lg text-gray-700`}>
                                         <p className={"m-2"}>{currentQuestion.explanation}</p>
                                         <div
                                             className="explanation-save-btn p-[.5rem] bg-amber-800x max-w-[2rem] max-h-[2rem] flex justify-center items-center border-[1px] cursor-pointer hover:bg-amber-100 shadow-md hover:shadow-lg"

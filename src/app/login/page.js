@@ -1,7 +1,16 @@
 'use client';
 import React, {useEffect, useState} from 'react';
 import {useForm} from "react-hook-form";
-import {IconButton, InputAdornment, TextField} from "@mui/material";
+import {
+    Button,
+    CircularProgress,
+    Dialog,
+    DialogActions, DialogContent,
+    DialogTitle,
+    IconButton,
+    InputAdornment,
+    TextField
+} from "@mui/material";
 import Link from "next/link";
 import {Visibility, VisibilityOff} from "@mui/icons-material";
 import {useDispatch, useSelector} from "react-redux";
@@ -9,7 +18,13 @@ import {loginThunk} from "@/redux/authSlice";
 import {useRouter} from "next/navigation";
 import Image from "next/image";
 import {fetchURL} from "@/constants";
+import * as PropTypes from "prop-types";
 
+// function DialogActions(props) {
+//     return null;
+// }
+//
+// DialogActions.propTypes = {children: PropTypes.node};
 const LoginPage = () => {
     const router = useRouter();
     const {register, formState: {errors}, handleSubmit} = useForm();
@@ -18,6 +33,16 @@ const LoginPage = () => {
     const [returnUrl, setReturnUrl] = useState('/');
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin;
+    const [openForgotModal, setOpenForgotModal] = useState(false);
+    const [email, setEmail] = useState('');
+    const [emailSent, setEmailSent] = useState(false);
+    const [code, setCode] = useState('');
+    const [codeVerified, setCodeVerified] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [emailDisabled, setEmailDisabled] = useState(false);
+    const [errorMsg, setErrorMsg] = useState('');
 
     useEffect(() => {
         // Client-side only URL parsing
@@ -117,6 +142,12 @@ const LoginPage = () => {
                                 Submit
                             </button>
                         </form>
+                        <p
+                            className="forgot-password-btn text-blue-500 cursor-pointer"
+                            onClick={() => setOpenForgotModal(true)}
+                        >
+                            Forgot Password
+                        </p>
 
                         <div className="my-6 h-[1px] w-4/5 bg-gray-300"></div>
                         <Link href="/signup" className="text-blue-500 hover:text-blue-700 text-lg">
@@ -126,6 +157,101 @@ const LoginPage = () => {
                     </div>
                 </div>
             </main>
+            <Dialog fullWidth open={openForgotModal} onClose={() => setOpenForgotModal(false)}>
+                <DialogTitle>Enter you email</DialogTitle>
+                <DialogContent className="flex flex-col gap-4 mt-2">
+                    {/* Email Field */}
+                    <TextField
+                        label="Email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        disabled={emailDisabled}
+                        fullWidth
+                        error={!!errorMsg}
+                        helperText={errorMsg}
+                    />
+
+                    {/* Code Field */}
+                    {emailSent && !codeVerified && (
+                        <TextField
+                            label="Verification Code"
+                            value={code}
+                            onChange={e => setCode(e.target.value)}
+                            fullWidth
+                        />
+                    )}
+
+                    {/* Password Fields */}
+                    {codeVerified && (
+                        <>
+                            <TextField
+                                label="New Password"
+                                type="password"
+                                value={newPassword}
+                                onChange={e => setNewPassword(e.target.value)}
+                                fullWidth
+                            />
+                            <TextField
+                                label="Confirm Password"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={e => setConfirmPassword(e.target.value)}
+                                fullWidth
+                            />
+                        </>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    {loading ? (
+                        <CircularProgress size={24} />
+                    ) : (
+                        <Button
+                            onClick={async () => {
+                                setErrorMsg('');
+                                setLoading(true);
+                                try {
+                                    if (!emailSent) {
+                                        const res = await fetch(`${fetchURL}/auth/forgot-password`, {
+                                            method: 'POST',
+                                            headers: {'Content-Type': 'application/json'},
+                                            body: JSON.stringify({email})
+                                        });
+                                        if (!res.ok) throw new Error('User not found');
+                                        setEmailDisabled(true);
+                                        setEmailSent(true);
+                                    } else if (!codeVerified) {
+                                        const res = await fetch(`${fetchURL}/auth/verify-code`, {
+                                            method: 'POST',
+                                            headers: {'Content-Type': 'application/json'},
+                                            body: JSON.stringify({email, code})
+                                        });
+                                        if (!res.ok) throw new Error('Invalid code');
+                                        setCodeVerified(true);
+                                    } else {
+                                        if (newPassword !== confirmPassword) {
+                                            setErrorMsg("Passwords don't match");
+                                            return;
+                                        }
+                                        const res = await fetch(`${fetchURL}/auth/reset-password`, {
+                                            method: 'POST',
+                                            headers: {'Content-Type': 'application/json'},
+                                            body: JSON.stringify({email, newPassword})
+                                        });
+                                        if (!res.ok) throw new Error('Reset failed');
+                                        setOpenForgotModal(false);
+                                    }
+                                } catch (err) {
+                                    setErrorMsg(err.message);
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}
+                        >
+                            {codeVerified ? "Reset Password" : emailSent ? "Verify Code" : "Submit"}
+                        </Button>
+                    )}
+                </DialogActions>
+            </Dialog>
         </>
     );
 };
