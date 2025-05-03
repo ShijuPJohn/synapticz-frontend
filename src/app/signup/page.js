@@ -48,7 +48,7 @@ const LoginPage = () => {
 
     useEffect(() => {
         if (userInfo?.token) {
-            router.push('/profile/edit');
+            router.push('/edit-profile');
         }
     }, [userInfo]);
     useEffect(() => {

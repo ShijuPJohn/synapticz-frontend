@@ -41,7 +41,7 @@ function Page() {
     }, [token]);
     if (!fetched) {
         return (
-            <div>
+            <div className="w-[100%] mx-auto p-2 md:p-4 lg:p-8 flex flex-col items-center justify-center bg-white min-h-[100vh]">
                 <CircularProgress size="3rem"/>
             </div>
         )

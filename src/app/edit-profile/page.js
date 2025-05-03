@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useForm} from "react-hook-form";
 import axios from "axios";
 import {useSelector} from "react-redux";
@@ -19,6 +19,7 @@ import {
 import {enqueueSnackbar} from "notistack";
 import countries from 'world-countries';
 import Link from "next/link";
+import Change_password_button from "@/components/change_password_button";
 
 export default function EditProfilePage() {
     const {userInfo} = useSelector((state) => state.user);
@@ -125,6 +126,11 @@ export default function EditProfilePage() {
             setLoading(false);
         }
     };
+    const forgotPasswordButton = <p
+        className="forgot-password-btn text-blue-500 cursor-pointer border-[1px] px-4 py-2 border-blue-400 hover:border-teal-400"
+    >
+        Change Password
+    </p>
 
     return (
         <main>
@@ -166,6 +172,7 @@ export default function EditProfilePage() {
                             </label>
                         </div>
 
+
                         <TextField
                             label="Full Name"
                             fullWidth
@@ -188,7 +195,7 @@ export default function EditProfilePage() {
                             disabled
                             value={email}
                         />
-
+                        <Change_password_button resetPasswordBtn={forgotPasswordButton}/>
                         <TextField
                             label="About"
                             fullWidth

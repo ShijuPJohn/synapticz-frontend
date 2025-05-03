@@ -19,7 +19,7 @@ function Page() {
                 const data = response.data;
                 if (response.status === 200) {
                     dispatch(login(data));
-                    router.push('/profile/edit');
+                    router.push('/edit-profile');
                 }
             } catch (error) {
                 console.error("Verification failed:", error.response?.data || error.message);

@@ -6,6 +6,7 @@ import {fetchURL} from "@/constants";
 import QuestionCard from "@/components/question_card";
 import ConfirmModal from "@/components/confirm_modal";
 import {enqueueSnackbar} from "notistack";
+import {CircularProgress} from "@mui/material";
 
 export default function BookmarksPage() {
     const userLogin = useSelector(state => state.user);
@@ -14,6 +15,7 @@ export default function BookmarksPage() {
     const [bookmarks, setBookmarks] = useState([]);
     const [selectedId, setSelectedId] = useState(null); // for modal
     const [showModal, setShowModal] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     function getHeaders() {
         return {
@@ -28,6 +30,7 @@ export default function BookmarksPage() {
                 headers: getHeaders()
             });
             setBookmarks(response.data.bookmarks);
+            setLoading(false);
         } catch (error) {
             console.error('Error:', error.response ? error.response.data : error.message);
         }
@@ -66,6 +69,14 @@ export default function BookmarksPage() {
     function handleCancel() {
         setShowModal(false);
         setSelectedId(null);
+    }
+    if (loading) {
+        return(
+            <div className="w-[100%] mx-auto p-2 md:p-4 lg:p-8 flex flex-col items-center justify-center bg-white min-h-[100vh]">
+                <CircularProgress size="3rem"/>
+            </div>
+    )
+
     }
 
     return (
