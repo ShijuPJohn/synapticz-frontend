@@ -40,7 +40,7 @@ function Page() {
 
                 // Redirect accordingly
                 if (isNewUser) {
-                    router.push('/profile/edit');
+                    router.push('/edit-profile');
                 } else {
                     router.push('/quizzes');
                 }

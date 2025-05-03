@@ -4,8 +4,8 @@ const cloudAPI = "https://synapticz-backend-go-1037996227658.asia-southeast1.run
 export const fetchURL = cloudAPI;
 
 export const protectedRoutePrefixes = [
-    "/overview",
-    "/edit-profile/edit",
+    "/profile",
+    "/edit-profile",
     "/history",
     "/test",
 ];
