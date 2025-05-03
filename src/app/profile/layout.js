@@ -9,7 +9,7 @@ export default function Profile({ children }) {
     const isActive = (path) => pathname === path
 
     return (
-        <div className="m-2 w-full md:w-[70%]">
+        <div className="p-1 w-full md:w-[90%] xl:w-[70%]">
             <div className="flex gap-8 bg-gray-100 px-4 pt-4 ">
                 <Tab href="/profile/overview" label="Overview" active={isActive('/profile/overview')} />
                 <Tab href="/profile/history" label="History" active={isActive('/profile/history')} />

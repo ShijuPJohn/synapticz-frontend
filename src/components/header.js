@@ -6,9 +6,8 @@ import Link from "next/link";
 import {useDispatch, useSelector} from "react-redux";
 import {logout} from "@/redux/authSlice";
 import Image from 'next/image';
-import {Avatar, IconButton, Menu, MenuItem, ListItemIcon, Divider} from '@mui/material';
+import {Avatar, Divider, IconButton, ListItemIcon, Menu, MenuItem} from '@mui/material';
 import PersonIcon from '@mui/icons-material/Person';
-import HistoryIcon from '@mui/icons-material/History';
 import EditIcon from '@mui/icons-material/Edit';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
@@ -107,6 +106,11 @@ function Header() {
             </li>
         },
         ...(userInfo && Object.keys(userInfo).length ? [
+            (userInfo.role === 'admin' || userInfo.role === 'owner') &&{
+                id: 'admin-dashboard', element: <li key="admin-dashboard" className="header-list-item">
+                    <Link href="/admin">Admin Dashboard</Link>
+                </li>
+            },
             {
                 id: 'profile', element: <li key="profile" className="header-list-item">
                     <Link href="/profile">Profile</Link>
@@ -175,7 +179,7 @@ function Header() {
                         </div>
                     </Link>
                 </h1>
-                <nav className="navLinks hidden md:flex uppercase  justify-center">
+                <nav className="navLinks hidden md:flex md:gap-2 uppercase  justify-center">
                     <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link href={"/quizzes"}
                                                                                                    className={"flex justify-center items-center gap-2"}>
                         <Image className={"bg-[#3583a5]"} src={"/images/exam3.png"} alt={"exam icon"} width={35}
@@ -183,6 +187,12 @@ function Header() {
                         Start Learning
                     </Link>
                     </ul>
+                    { (userInfo.role==='admin' || userInfo.role==='owner')&&
+                        <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link href={"/admin"} className={"flex justify-center items-center gap-2"}>
+                            Admin Dashboard
+                        </Link>
+                        </ul>
+                    }
                     <IconButton
                         onClick={handleAvatarClick}
                         size="small"

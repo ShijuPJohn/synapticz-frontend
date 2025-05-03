@@ -63,14 +63,14 @@ export default function UserActivityPage() {
 
     if (loading)
         return (
-            <div>
+            <div className="w-[100%] mx-auto p-2 md:p-4 lg:p-8 flex flex-col items-center justify-center bg-white min-h-[100vh]">
                 <CircularProgress size="3rem"/>
             </div>
         );
 
     if (!data)
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="w-[100%] mx-auto p-2 md:p-4 lg:p-8 flex flex-col items-center justify-center bg-white min-h-[100vh]">
                 <p className="text-red-500 text-xl">No data found. Please try again later.</p>
             </div>
         );
@@ -97,22 +97,22 @@ export default function UserActivityPage() {
     return (
         <main className={"p-0"}>
             <div
-                className="w-[100%] mx-auto p-2 md:p-6 lg:p-8 flex flex-col items-center justify-center bg-white">
+                className="w-[100%] mx-auto p-2 md:p-4 lg:p-8 flex flex-col items-center justify-center bg-white">
                 {/* Header */}
-                <header className="mb-6 text-center">
+                <div className="mb-6 text-center">
                     <h1 className="text-2xl sm:text-3xl font-bold text-cyan-800">
                         Your Learning Journey
                     </h1>
                     <p className="text-slate-600 text-sm sm:text-base">
                         Track your progress and activity over time
                     </p>
-                </header>
+                </div>
 
                 {/* Profile and Summary */}
                 <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     {/* Profile Card */}
                     <div className="bg-white rounded-xl border border-cyan-300 shadow-sm p-5 flex flex-col gap-4">
-                        <div className="flex flex-col lg:flex-row items-start gap-4">
+                        <div className="flex flex-col 2xl:flex-row items-start gap-4">
                             <div className="bg-cyan-100 p-3 rounded-[200px] overflow-hidden relative w-28 min-w-[28] h-28 ">
                                 {profile.profile_pic ? <Image
                                         src={profile.profile_pic}
