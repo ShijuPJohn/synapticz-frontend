@@ -6,6 +6,7 @@ import {fetchURL} from "@/constants";
 import ConfirmModal from "@/components/confirm_modal";
 import {CheckCircle, Eye, EyeOff, Trash2, Pencil} from "lucide-react";
 import {enqueueSnackbar} from "notistack";
+import {TextareaAutosize} from "@mui/material";
 
 export default function SavedExplanationsPage() {
     const userLogin = useSelector(state => state.user);
@@ -161,7 +162,7 @@ export default function SavedExplanationsPage() {
                 <div className="fixed inset-0 bg-black bg-opacity-40 z-50 flex items-center justify-center">
                     <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md space-y-4">
                         <h3 className="text-lg font-semibold">Edit Explanation</h3>
-                        <textarea
+                        <TextareaAutosize
                             className="w-full border border-gray-300 p-2 rounded-md text-sm"
                             rows={4}
                             value={editText}

@@ -108,18 +108,13 @@ function Header() {
         },
         ...(userInfo && Object.keys(userInfo).length ? [
             {
-                id: 'history', element: <li key="history" className="header-list-item">
-                    <Link href="/history">History</Link>
+                id: 'profile', element: <li key="profile" className="header-list-item">
+                    <Link href="/profile">Profile</Link>
                 </li>
             },
             {
                 id: 'overview', element: <li key="overview" className="header-list-item">
-                    <Link href="/overview">Profile</Link>
-                </li>
-            },
-            {
-                id: 'overview', element: <li key="overview" className="header-list-item">
-                    <Link href="/src/app/edit-profile/edit">Edit Profile</Link>
+                    <Link href="/src/app/edit-profile">Edit Profile</Link>
                 </li>
             },
             {
@@ -249,19 +244,13 @@ function Header() {
                                 Sign Up
                             </MenuItem>
                         ] : [
-                            <MenuItem component={Link} href="/overview" onClick={handleMenuClose} key="overview">
+                            <MenuItem component={Link} href="/profile" onClick={handleMenuClose} key="profile">
                                 <ListItemIcon>
                                     <PersonIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Profile
                             </MenuItem>,
-                            <MenuItem component={Link} href="/history" onClick={handleMenuClose} key="history">
-                                <ListItemIcon>
-                                    <HistoryIcon fontSize="small"/>
-                                </ListItemIcon>
-                                History
-                            </MenuItem>,
-                            <MenuItem component={Link} href="/edit-profile" onClick={handleMenuClose} key="profile">
+                            <MenuItem component={Link} href="/edit-profile" onClick={handleMenuClose} key="edit-profile">
                                 <ListItemIcon>
                                     <EditIcon fontSize="small"/>
                                 </ListItemIcon>
