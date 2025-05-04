@@ -118,7 +118,7 @@ function Header() {
             },
             {
                 id: 'overview', element: <li key="overview" className="header-list-item">
-                    <Link href="/src/app/edit-profile">Edit Profile</Link>
+                    <Link href="/edit-profile">Edit Profile</Link>
                 </li>
             },
             {
