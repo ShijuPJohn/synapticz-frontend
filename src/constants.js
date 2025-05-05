@@ -8,5 +8,6 @@ export const protectedRoutePrefixes = [
     "/edit-profile",
     "/history",
     "/test",
-    "/admin-dashboard"
+    "/admin-dashboard",
+    "/create-quizzes",
 ];
