@@ -1,43 +1,43 @@
+"use client"
 import React from "react";
 import Link from "next/link";
-import {useSelector} from "react-redux";
 import Image from "next/image";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faEdit, faTrash} from "@fortawesome/free-solid-svg-icons";
+import {useRouter} from "next/navigation";
 
-// async function createTest(questionSetID, token, router) {
-//     const headers = {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//     };
-//     const data = {
-//         question_set_id: questionSetID,
-//         mode: "practice", // default
-//         randomize_questions: true,
-//     };
-//
-//     try {
-//         const response = await axios.post(`${fetchURL}/test_session`, data, {
-//             headers
-//         });
-//
-//         enqueueSnackbar("Test session successfully created!");
-//         router.push(`/test/${response.data.test_session}`);
-//     } catch (error) {
-//         console.error("Error:", error.response ? error.response.data : error.message);
-//     }
-// }
+function QuestionSetCard({
+                             questionSet,
+                             editDeleteButtons,
+                             setCurrentQuizCallback,
+                             openDeleteModalCallback,
+                         }) {
+    const router = useRouter();
+    function conditionalWrapper(child) {
+        if (!editDeleteButtons) {
+            return (
+                <div
+                    className="w-full md:w-[70%] lg:w-[60%] mx-auto 4">
+                    <Link href={`/quizzes/${questionSet.id}`}
+                          className={"w-full bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm transition p-4 block"}>
+                        {child}
+                    </Link>
+                </div>
+            )
+        } else {
+            return (
+                <div
+                    className="w-full md:w-[70%] lg:w-[60%] mx-auto px-4 bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm transition p-4 flex">
+                    {child}
+                </div>);
 
-function QuestionSetCard({questionSet}) {
-    // const userLogin = useSelector(state => state.user);
-    // const {userInfo} = userLogin
-    // const router = useRouter();
-    // const pathname = usePathname(); // Get current path
-
+        }
+    }
 
     return (
-        <div
-            className="w-full md:w-[70%] lg:w-[60%] mx-auto bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm py-2 px-4 md:p-4transition ">
-            {/* Image */}
-            <Link href={`/quizzes/${questionSet.id}`} className={" flex items-center gap-2 flex-wrap "}>
+        conditionalWrapper(<>
+            <div className="flex items-center gap-2 flex-wrap">
+                {/* Image */}
                 <div
                     className="w-[3rem] h-[3rem] md:w-[5rem] md:h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
                     <Image
@@ -50,53 +50,48 @@ function QuestionSetCard({questionSet}) {
                     />
                 </div>
 
+                {/* Info */}
+                <div className="flex-1 flex flex-col gap-1 md:gap-2 text-sm text-slate-800">
+                    <h2 className="text-sm md:text-[1rem] font-semibold uppercase text-pink-900">
+                        {questionSet.name}
+                    </h2>
 
-            {/* Info */}
-            <div className="flex-1 flex flex-col gap-1 md:gap-2 text-sm text-slate-800">
-                <div className="flex items-start justify-between w-full">
-                    <Link href={`/quizzes/${questionSet.id}`}>
-                        <h2 className="text-sm md:text-[1rem] font-semibold uppercase  transition text-pink-900">
-                            {questionSet.name}
-                        </h2>
-                    </Link>
+                    <div
+                        className="text-slate-600 mt-1 text-[.7rem] md:text-[.9rem] flex gap-4 flex-wrap justify-start w-full  ">
+                        <p>
+                            <span className="font-medium text-slate-500">Sub:</span>{" "}
+                            {questionSet.subject}
+                        </p>
+                        <p>
+                            <span className="font-medium text-slate-500">Lang:</span>{" "}
+                            {questionSet.language}
+                        </p>
+                        <p>
+                            <span className="font-medium text-slate-500">Questions:</span>{" "}
+                            {questionSet.total_questions}
+                        </p>
+                    </div>
                 </div>
-                <Link href={`/quizzes/${questionSet.id}`}>
-                <div
-                    className="text-slate-600 flex mt-1 text-[.7rem] md:text-[.9rem] flex-wrap justify-between w-full md:w-[50%]">
-                    <p>
-                        <span className="font-medium text-slate-500">Sub:</span>{" "}
-                        {questionSet.subject}
-                    </p>
-                    <p>
-                        <span className="font-medium text-slate-500">Lang:</span>{" "}
-                        {questionSet.language}
-                    </p>
-                    <p>
-                        <span className="font-medium text-slate-500">Questions:</span>{" "}
-                        {questionSet.total_questions}
-                    </p>
-                </div>
-                </Link>
             </div>
+            {
+                editDeleteButtons &&
+                <div className={"ml-auto flex justify-around items-center gap-2 text-gray-700 min-w-16 "}>
+                    <FontAwesomeIcon icon={faEdit} size={"lg"} className={"cursor-pointer text-teal-600"}
+                                     onClick={() => {
+                                         router.push(`/edit-quiz/${questionSet.id}`);
+                                     }}/>
+                    <FontAwesomeIcon icon={faTrash} size={"lg"} className={"cursor-pointer text-red-700"}
+                                     onClick={(e) => {
+                                         e.stopPropagation();
+                                         openDeleteModalCallback(true);
+                                         setCurrentQuizCallback(questionSet)
+                                     }}/>
+                </div>
 
-            {/* CTA */}
-            {/*<div className="flex-shrink-0">*/}
-
-            {/*    <button icon={faPlay}*/}
-            {/*            className="text-white text-[.7rem] cursor-pointer transition uppercase  bg-green-700 py-1 px-2 rounded-sm w-[4rem] md:w-[5rem] h-[1.5rem]"*/}
-            {/*            onClick={() => {*/}
-            {/*                if (Object.keys(userInfo).length === 0) {*/}
-            {/*                    enqueueSnackbar("Sign in with an account or create a new account", {variant: "warning"})*/}
-            {/*                    router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);*/}
-            {/*                } else {*/}
-            {/*                    createTest(questionSet.id, userInfo.token, router);*/}
-            {/*                }*/}
-            {/*            }}>start*/}
-            {/*    </button>*/}
-            {/*</div>*/}
-            </Link>
-        </div>
-    );
+            }
+        </>)
+    )
+        ;
 }
 
 export default QuestionSetCard;

@@ -3,7 +3,7 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
-    faEdit, faTrash, faFilter, faChevronDown, faChevronUp, faCheckSquare, faSquare, faPlus
+    faEdit, faTrash, faFilter, faChevronDown, faChevronUp, faCheckSquare, faSquare, faPlus, faDeleteLeft, faQuestion
 } from '@fortawesome/free-solid-svg-icons';
 import {useSelector} from "react-redux";
 import {fetchURL} from "@/constants";
@@ -11,6 +11,7 @@ import {
     Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Chip, MenuItem
 } from "@mui/material";
 import {enqueueSnackbar} from "notistack";
+import {useRouter} from "next/navigation";
 
 export default function QuestionsPage() {
     const [questions, setQuestions] = useState([]);
@@ -19,7 +20,7 @@ export default function QuestionsPage() {
     });
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [questionsCount, setQuestionsCount] = useState(0);
-    const [selectedQuestionIds, setSelectedQuestionIds] = useState([]);
+    const [selectedQuestions, setSelectedQuestions] = useState([]);
     const userLogin = useSelector((state) => state.user);
     const {userInfo} = userLogin;
     const [showModal, setShowModal] = useState(false);
@@ -40,6 +41,18 @@ export default function QuestionsPage() {
     const [answerOptions, setAnswerOptions] = useState(["", "", "", ""]);
     const [correctOptions, setCorrectOptions] = useState([]);
     const [tags, setTags] = useState([]);
+    const [selectedQuestionsModalOpen, setSelectedQuestionsModalOpen] = useState(false);
+    const [qName, setQName] = useState("");
+    const [qMode, setQMode] = useState("untimed");
+    const [qSubject, setQSubject] = useState("");
+    const [qExam, setQExam] = useState("");
+    const [qLanguage, setQLanguage] = useState("");
+    const [qDuration, setQDuration] = useState(40);
+    const [qDescription, setQDescription] = useState("");
+    const [qAssociatedResource, setQAssociatedResource] = useState("");
+    const [qQuestionIds, setQQuestionIds] = useState([]);
+    const [qTags, setQTags] = useState([]);
+    const router = useRouter();
 
     const hourOptions = [{label: '1 hour', value: '1'}, {label: '2 hours', value: '2'}, {
         label: '4 hours', value: '4'
@@ -49,8 +62,34 @@ export default function QuestionsPage() {
         label: '2 weeks', value: (24 * 14).toString()
     }, {label: '1 month', value: (24 * 30).toString()},];
 
-    const handleSelectQuestion = (id) => {
-        setSelectedQuestionIds((prev) => prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, id]);
+
+    function getSelectedQuestionIds() {
+        const selectedQuestionIds = [];
+        if (selectedQuestions.length === 0) {
+            return selectedQuestionIds;
+        } else {
+            selectedQuestions.forEach(question => {
+                selectedQuestionIds.push(question.id);
+            })
+            return selectedQuestionIds;
+        }
+    }
+
+    const handleSelectQuestion = (question) => {
+        setSelectedQuestions(
+            (prev) => {
+                //  prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, {id:question.id, statement:question.statement, created_by:question.created_by}]);
+                if (prev.map(question => question.id).includes(question.id)) {
+                    return prev.filter((q) => q.id !== question.id);
+                } else {
+                    return [...prev, {
+                        id: question.id,
+                        statement: question.question,
+                        created_by: question.created_by_name,
+                        created_time: question.created_at
+                    }]
+                }
+            })
     };
 
     const fetchQuestions = async () => {
@@ -139,6 +178,30 @@ export default function QuestionsPage() {
         }
     }
 
+    async function handleCreateQuiz() {
+        const data = {
+            name: qName,
+            mode: qMode,
+            subject: qSubject,
+            exam: qExam,
+            language: qLanguage,
+            time_duration: qDuration,
+            description: qDescription,
+            associated_resource: qAssociatedResource,
+            question_ids: selectedQuestions.map(question => question.id),
+            tags: qTags
+        };
+        try {
+            await axios.post(`${fetchURL}/questionsets/`, data, {headers: getHeaders()});
+            enqueueSnackbar("Quiz created successfully", {variant: 'success'});
+            setNewQuizDialogOpen(false);
+            // Optional: reset form fields or refetch question sets
+        } catch (error) {
+            console.error("Error creating quiz:", error);
+            enqueueSnackbar("Failed to create quiz", {variant: 'error'});
+        }
+    }
+
     const handleQuestionEditChange = (field, value) => {
         setQuestionToEdit(prev => ({...prev, [field]: value}));
     };
@@ -185,12 +248,12 @@ export default function QuestionsPage() {
 
     function toggleFloatingMenu() {
         setFloatingMenu(prev => !prev);
-        // setTimeout(()=>{
-        //     setFloatingMenu(false);
-        // },4000)
+        setTimeout(() => {
+            setFloatingMenu(false);
+        }, 4000)
     }
 
-    return (<div className="container mx-auto px-4 py-8 max-w-7xl relative">
+    return (<div className="container mx-auto p-1 w-full relative">
         {/* Filter Section */}
         <div
             className="z-[1000] shadow-lg floating-action-button fixed bottom-5 right-5 w-16 h-16 bg-red-400 text-white font-extrabold flex justify-center items-center rounded-[100rem] cursor-pointer"
@@ -198,26 +261,39 @@ export default function QuestionsPage() {
         >
             <FontAwesomeIcon icon={faPlus}/>
         </div>
-        {floatingMenu && <div
-            className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-24 w-48 bg-amber-400 shadow-md text-slate-700">
+        {floatingMenu &&
             <div
-                className="bg-orange-200 h-full w-full border-b border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-orange-300"
-                onClick={() => {
-                    setNewQuestionDialogOpen(true)
-                }}
-            >
-                New Question
+                className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-32 w-48 bg-gray-200 shadow-md text-slate-700">
+                <div
+                    className=" h-full w-full border-b gap-4  border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-cyan-300"
+                    onClick={() => {
+                        setNewQuestionDialogOpen(true)
+                    }}
+                ><FontAwesomeIcon icon={faQuestion}/>
+
+                    New Question
+                </div>
+                <div
+                    className=" h-full w-full border-b   border-b-gray-300  flex justify-center gap-4 items-center cursor-pointer hover:bg-cyan-300"
+                    onClick={() => {
+                        setNewQuizDialogOpen(true)
+                    }}
+                >
+                    <FontAwesomeIcon icon={faPlus}/>
+                    New Quiz
+                </div>
+                <div
+                    className="h-full w-full flex justify-center gap-4  items-center cursor-pointer hover:bg-cyan-300"
+                    onClick={() => {
+                       router.push("/edit-quiz")
+                    }}
+                >
+                    <FontAwesomeIcon icon={faEdit}/>
+                    Edit Quizzes
+                </div>
             </div>
-            <div
-                className="bg-cyan-200 h-full w-full flex justify-center items-center cursor-pointer hover:bg-cyan-300"
-                onClick={() => {
-                    setNewQuizDialogOpen(true)
-                }}
-            >
-                New Quiz
-            </div>
-        </div>}
-        <div className="bg-white shadow-lg mb-4 py-4 px-4">
+        }
+        <div className="bg-white shadow-lg mb-1 py-4 px-4">
             <div className="flex flex-wrap items-center gap-4">
                 <div className="relative w-full sm:w-48">
                     <select
@@ -266,8 +342,13 @@ export default function QuestionsPage() {
                     Apply Filters
                 </button>
 
-                <div className="text-gray-700">
-                    {selectedQuestionIds.length} Questions selected
+                <div className="text-gray-700"
+                     onClick={() => {
+                         console.log("selected questions", selectedQuestions)
+                         setSelectedQuestionsModalOpen(true);
+                     }}
+                >
+                    {selectedQuestions.length} Questions selected
                 </div>
             </div>
 
@@ -291,11 +372,12 @@ export default function QuestionsPage() {
         </div>
 
         {/* Questions Grid */}
-        <div className="flex flex-wrap gap-2 items-center justify-center">
+        <div className="flex flex-wrap gap-2 items-center px-2 justify-center w-full bg-white py-4">
+
             {questions && questions.map((q) => {
-                const isOwner = q.created_by_id === userInfo.id;
+                const isOwner = q.created_by_id === userInfo.user_id;
                 const isAdminOrOwner = userInfo.role === 'admin' || userInfo.role === 'owner' || isOwner;
-                const isSelected = selectedQuestionIds.includes(q.id);
+                const isSelected = selectedQuestions.map(qstn => qstn.id).includes(q.id)
 
                 return (<div
                     key={q.id}
@@ -303,13 +385,13 @@ export default function QuestionsPage() {
                         setActiveQuestion(q);
                         setShowModal(true);
                     }}
-                    className={`w-[25rem] h-[20rem] relative bg-white rounded-xl border shadow-sm p-6 transition-all duration-300 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
+                    className={`w-full md:w-[25rem] h-[20rem] relative bg-white rounded-xl border shadow-sm p-6 transition-all duration-300 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
                 >
                     <div className="absolute top-4 left-4">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
-                                handleSelectQuestion(q.id)
+                                handleSelectQuestion(q)
                             }}
                             className="hover:text-indigo-500 transition-colors"
                         >
@@ -376,56 +458,157 @@ export default function QuestionsPage() {
                 </p>
             </div>)}
 
-            <Dialog open={showModal} onClose={()=>{setShowModal(false)}} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                {activeQuestion && <div
-                    className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-3xl relative max-h-[90vh] overflow-y-auto">
+        <Dialog open={showModal} onClose={() => {
+            setShowModal(false)
+        }} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            {activeQuestion && <div
+                className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-3xl relative max-h-[90vh] overflow-y-auto border border-gray-100">
+                {/* Header with question icon */}
+                <div className="flex items-start gap-3 mb-6">
+                    <div className="bg-blue-100 p-3 rounded-full">
+                        <span className="text-blue-600 text-xl">❓</span>
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-800">{activeQuestion.question}</h2>
+                        <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                            <span>Question Details</span>
+                        </div>
+                    </div>
+                </div>
 
-                    <h2 className="text-xl font-bold mb-4">{activeQuestion.question}</h2>
-
-                    <div className="mb-4">
-                        <p><strong>Subject:</strong> {activeQuestion.subject}</p>
-                        <p><strong>Exam:</strong> {activeQuestion.exam}</p>
-                        <p><strong>Language:</strong> {activeQuestion.language}</p>
-                        <p><strong>Difficulty:</strong> {activeQuestion.difficulty}</p>
-                        <p><strong>Type:</strong> {activeQuestion.question_type}</p>
-                        <p><strong>Author:</strong> {activeQuestion.created_by_name}</p>
-                        <p><strong>Created At:</strong> {new Date(activeQuestion.created_at).toLocaleString()}</p>
-                        <div><strong>Tags:</strong> {activeQuestion.tags?.join(', ') || '—'}</div>
+                {/* Metadata grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="flex items-start gap-3">
+                        <div className="text-purple-600 mt-0.5">
+                            <span className="text-lg">📚</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Subject</p>
+                            <p className="text-gray-800">{activeQuestion.subject}</p>
+                        </div>
                     </div>
 
-                    <div className="mb-4">
-                        <h4 className="font-semibold mb-2">Options:</h4>
-                        <ul className="list-disc pl-6">
-                            {activeQuestion.options.map((opt, idx) => (<li key={idx}>{opt}</li>))}
-                        </ul>
+                    <div className="flex items-start gap-3">
+                        <div className="text-blue-600 mt-0.5">
+                            <span className="text-lg">📝</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Exam</p>
+                            <p className="text-gray-800">{activeQuestion.exam}</p>
+                        </div>
                     </div>
 
-                    {(userInfo.role === 'admin' || userInfo.role === 'owner' || activeQuestion.created_by_id === userInfo.id) && (
-                        <div className="flex gap-4 mt-6">
-                            <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
-                                    onClick={() => {
-                                        setQuestionToEdit(activeQuestion);
-                                        setEditModalOpen(true);
-                                    }}>
-                                Edit
-                            </button>
-                            <button className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
-                                    onClick={() => {
-                                        setQuestionToEdit(activeQuestion);
-                                        setDeleteConfirmModalOpen(true);
-                                    }}
-                            >
-                                Delete
-                            </button>
-                        </div>)}
-                </div>}
-            </Dialog>
+                    <div className="flex items-start gap-3">
+                        <div className="text-green-600 mt-0.5">
+                            <span className="text-lg">🌐</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Language</p>
+                            <p className="text-gray-800">{activeQuestion.language}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <div className="text-yellow-600 mt-0.5">
+                            <span className="text-lg">📊</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Difficulty</p>
+                            <p className="text-gray-800 capitalize">{activeQuestion.difficulty}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <div className="text-red-600 mt-0.5">
+                            <span className="text-lg">🔤</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Type</p>
+                            <p className="text-gray-800">{activeQuestion.question_type}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <div className="text-indigo-600 mt-0.5">
+                            <span className="text-lg">👤</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Author</p>
+                            <p className="text-gray-800">{activeQuestion.created_by_name}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <div className="text-gray-600 mt-0.5">
+                            <span className="text-lg">🕒</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Created At</p>
+                            <p className="text-gray-800">{new Date(activeQuestion.created_at).toLocaleString()}</p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                        <div className="text-pink-600 mt-0.5">
+                            <span className="text-lg">🏷️</span>
+                        </div>
+                        <div>
+                            <p className="text-sm font-medium text-gray-500">Tags</p>
+                            <p className="text-gray-800">{activeQuestion.tags?.join(', ') || '—'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Options section */}
+                <div className="mb-6">
+                    <div className="flex items-center gap-2 mb-3">
+                        <span className="text-lg text-gray-600">🔘</span>
+                        <h4 className="font-semibold text-gray-700">Options</h4>
+                    </div>
+                    <ul className="space-y-2 pl-8">
+                        {activeQuestion.options.map((opt, idx) => (
+                            <li key={idx}
+                                className="relative before:absolute before:-left-5 before:top-2 before:w-2 before:h-2 before:rounded-full before:bg-gray-400">
+                                <div
+                                    className={`bg-gray-50 p-3 rounded-lg border border-gray-200 ${activeQuestion.correct_options.includes(idx.toString()) ? "bg-green-300" : "bg-gray-200"}`}>
+                                    <p className="text-gray-800">{opt}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+
+                {/* Action buttons */}
+                {(userInfo.role === 'admin' || userInfo.role === 'owner' || activeQuestion.created_by_id === userInfo.id) && (
+                    <div className="flex flex-wrap gap-3 mt-8 border-t pt-6">
+                        <button
+                            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                            onClick={() => {
+                                setQuestionToEdit(activeQuestion);
+                                setEditModalOpen(true);
+                            }}>
+                            <span>✏️</span>
+                            <span>Edit</span>
+                        </button>
+                        <button
+                            className="flex items-center gap-2 bg-red-100 text-red-600 px-4 py-2 rounded-lg hover:bg-red-200 transition-colors"
+                            onClick={() => {
+                                setQuestionToEdit(activeQuestion);
+                                setDeleteConfirmModalOpen(true);
+                            }}>
+                            <span>🗑️</span>
+                            <span>Delete</span>
+                        </button>
+                    </div>
+                )}
+            </div>}
+        </Dialog>
         <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)}
                 fullWidth
-                sx={{'& .MuiDialog-paper': {minHeight: "15rem"}}}>
+                sx={{'& .MuiDialog-paper': {minHeight: "15rem", minWidth: "80%", width: "100%", margin: "0"}}}>
             <DialogTitle>Edit The Question</DialogTitle>
-            <DialogContent className="flex flex-col gap-4 mt-2 py-4">
-                {questionToEdit && (<>
+            {questionToEdit && <DialogContent className="flex flex-col lg:flex-row gap-4 mt-2 border p-2">
+                <div className="w-full lg:w-1/2 flex flex-col gap-2 lg:gap-4 mt-4">
                     <TextField
                         label="Question"
                         value={questionToEdit.question}
@@ -471,6 +654,8 @@ export default function QuestionsPage() {
                         <MenuItem value="m-select">Multi Select</MenuItem>
                         <MenuItem value="numeric">Numeric</MenuItem>
                     </TextField>
+                </div>
+                <div className="w-full lg:w-1/2 flex flex-col gap-2 lg:gap-4">
                     <div>
                         <h4 className="font-semibold mb-2">Options:</h4>
                         {questionToEdit.options.map((option, index) => (
@@ -518,8 +703,8 @@ export default function QuestionsPage() {
                             fullWidth
                         />
                     </div>
-                </>)}
-            </DialogContent>
+                </div>
+            </DialogContent>}
             <DialogActions>
                 <Button onClick={() => {
                     setEditModalOpen(false)
@@ -552,120 +737,117 @@ export default function QuestionsPage() {
         <Dialog open={newQuestionDialogOpen} onClose={() => setNewQuestionDialogOpen(false)}
                 sx={{'& .MuiDialog-paper': {minHeight: "15rem", minWidth: "80%", width: "100%", margin: "0"}}}>
             <DialogTitle>Create a new Question</DialogTitle>
-            <DialogContent className="flex flex-col gap-4 mt-2">
-                <div className={"flex flex-col lg:flex-row gap-4 border p-2"}>
-                    <div className="w-full lg:w-1/2 flex flex-col gap-2 lg:gap-4">
-                        <TextField
-                            label="Question"
-                            value={questionStatement}
-                            onChange={(e) => setQuestionStatement(e.target.value)}
-                            fullWidth
-                            multiline
-                            rows={3}
-                        />
-                        <TextField
-                            label="Subject"
-                            value={subject}
-                            onChange={(e) => setSubject(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Exam"
-                            value={exam}
-                            onChange={(e) => setExam(e.target.value)}
-                            fullWidth
-                        />
-                        <TextField
-                            label="Language"
-                            value={language}
-                            onChange={(e) => setLanguage(e.target.value)}
-                            fullWidth
-                        >
-                        </TextField>
-                        <TextField
-                            label="Difficulty"
-                            value={difficulty}
-                            onChange={(e) => setDifficulty(e.target.value)}
-                            fullWidth
-                        >
-                        </TextField>
-                        <TextField
-                            select
-                            label="Question Type"
-                            value={questionType}
-                            onChange={(e) => setQuestionType(e.target.value)}
-                            fullWidth
-                        >
-                            <MenuItem value="m-choice">Multiple Choice</MenuItem>
-                            <MenuItem value="m-select">Multi Select</MenuItem>
-                            <MenuItem value="numeric">Numeric</MenuItem>
-                        </TextField>
-                    </div>
-                    <div className={"w-full lg:w-1/2 flex flex-col"}>
-                        <h4 className="font-semibold mb-2">Options:</h4>
-                        {answerOptions.map((option, index) => (
-                            <div key={index} className="flex items-center gap-2 mb-2">
-                                <TextField
-                                    label={`Option ${index + 1}`}
-                                    value={option}
-                                    onChange={(e) => setAnswerOptions(prevState => {
-                                        const newOptions = [...prevState];
-                                        newOptions[index] = e.target.value;
-                                        return newOptions;
-                                    })}
-                                    fullWidth
-                                />
-                                <input
-                                    type="checkbox"
-                                    checked={correctOptions.includes(index)}
-                                    onChange={() => setCorrectOptions(prevState => {
-                                        if (questionType === "m-choice") {
-                                            return [index]
-                                        } else if (questionType === "m-select") {
-                                            if (prevState.includes(index)) {
-                                                return prevState.filter((option) => option !== index);
-                                            } else {
-                                                return [...prevState, index];
-                                            }
-                                        }
-                                    })}
-                                    className="w-5 h-5"
-                                />
-                            </div>))}
-                        <TextField
-                            label="Explanation"
-                            value={explanation || ''}
-                            onChange={(e) => setExplanation(e.target.value)}
-                            fullWidth
-                            multiline
-                            rows={3}
-                        />
-                        <div>
-                            <h4 className="font-semibold mb-2">Tags:</h4>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                                {tags.map((tag, index) => (<Chip
-                                    key={index}
-                                    label={tag}
-                                    onDelete={() => setTags(prevState => {
-                                        return prevState.filter(t => t !== tag);
-                                    })}
-                                    color="primary"
-                                />))}
-                            </div>
+            <DialogContent className="flex flex-col lg:flex-row gap-4 mt-2 border p-2">
+                <div className="w-full lg:w-1/2 flex flex-col gap-2 lg:gap-4 mt-4">
+                    <TextField
+                        label="Question"
+                        value={questionStatement}
+                        onChange={(e) => setQuestionStatement(e.target.value)}
+                        fullWidth
+                        multiline
+                        rows={3}
+                    />
+                    <TextField
+                        label="Subject"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Exam"
+                        value={exam}
+                        onChange={(e) => setExam(e.target.value)}
+                        fullWidth
+                    />
+                    <TextField
+                        label="Language"
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        fullWidth
+                    >
+                    </TextField>
+                    <TextField
+                        label="Difficulty"
+                        value={difficulty}
+                        onChange={(e) => setDifficulty(e.target.value)}
+                        fullWidth
+                    >
+                    </TextField>
+                    <TextField
+                        select
+                        label="Question Type"
+                        value={questionType}
+                        onChange={(e) => setQuestionType(e.target.value)}
+                        fullWidth
+                    >
+                        <MenuItem value="m-choice">Multiple Choice</MenuItem>
+                        <MenuItem value="m-select">Multi Select</MenuItem>
+                        <MenuItem value="numeric">Numeric</MenuItem>
+                    </TextField>
+                </div>
+                <div className={"w-full lg:w-1/2 flex flex-col"}>
+                    <h4 className="font-semibold mb-2">Options:</h4>
+                    {answerOptions.map((option, index) => (
+                        <div key={index} className="flex items-center gap-2 mb-2">
                             <TextField
-                                label="Add Tag"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        setTags(prevState => {
-                                            return [...prevState, e.target.value];
-                                        });
-                                    }
-                                }}
+                                label={`Option ${index + 1}`}
+                                value={option}
+                                onChange={(e) => setAnswerOptions(prevState => {
+                                    const newOptions = [...prevState];
+                                    newOptions[index] = e.target.value;
+                                    return newOptions;
+                                })}
                                 fullWidth
                             />
+                            <input
+                                type="checkbox"
+                                checked={correctOptions.includes(index)}
+                                onChange={() => setCorrectOptions(prevState => {
+                                    if (questionType === "m-choice") {
+                                        return [index]
+                                    } else if (questionType === "m-select") {
+                                        if (prevState.includes(index)) {
+                                            return prevState.filter((option) => option !== index);
+                                        } else {
+                                            return [...prevState, index];
+                                        }
+                                    }
+                                })}
+                                className="w-5 h-5"
+                            />
+                        </div>))}
+                    <TextField
+                        label="Explanation"
+                        value={explanation || ''}
+                        onChange={(e) => setExplanation(e.target.value)}
+                        fullWidth
+                        multiline
+                        rows={3}
+                    />
+                    <div>
+                        <h4 className="font-semibold mb-2">Tags:</h4>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                            {tags.map((tag, index) => (<Chip
+                                key={index}
+                                label={tag}
+                                onDelete={() => setTags(prevState => {
+                                    return prevState.filter(t => t !== tag);
+                                })}
+                                color="primary"
+                            />))}
                         </div>
+                        <TextField
+                            label="Add Tag"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    setTags(prevState => {
+                                        return [...prevState, e.target.value];
+                                    });
+                                }
+                            }}
+                            fullWidth
+                        />
                     </div>
-
                 </div>
             </DialogContent>
             <DialogActions>
@@ -677,25 +859,161 @@ export default function QuestionsPage() {
                 </Button>
             </DialogActions>
         </Dialog>
-
-
-        <Dialog open={newQuizDialogOpen} onClose={() => setNewQuizDialogOpen(false)}
+        <Dialog open={selectedQuestionsModalOpen} onClose={() => setSelectedQuestionsModalOpen(false)}
                 fullWidth
-                sx={{'& .MuiDialog-paper': {minHeight: "15rem"}}}>
-            <DialogTitle>Confirm delete?</DialogTitle>
+                sx={{'& .MuiDialog-paper': {minHeight: "15rem", minWidth: "70%"}}}>
+            <DialogTitle>Selected Questions</DialogTitle>
             <DialogContent className="flex flex-col gap-4 mt-2 py-4">
-                {questionToEdit && (<>
-                    Question: {questionToEdit.question}
-                </>)}
+                <div className="flex flex-col gap-2">
+                    {selectedQuestions.map((question, index) => (
+                        <div
+                            key={question.id}
+                            className="flex justify-between items-center bg-white shadow-sm border border-gray-200 rounded-lg px-4 py-2"
+                        >
+                            <div
+                                className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm w-full overflow-hidden">
+        <span className="font-medium text-gray-800 truncate">
+          Q{index + 1}: {question.statement}
+        </span>
+                                <span className="text-gray-500 hidden sm:inline">
+          · Created by {question.created_by}
+        </span>
+                                <span className="text-gray-400 hidden md:inline">
+          · {new Date(question.created_time).toLocaleString("ml-IN")}
+        </span>
+                            </div>
+
+                            <button
+                                onClick={() =>
+                                    setSelectedQuestions((prev) =>
+                                        prev.filter((q) => q.id !== question.id)
+                                    )
+                                }
+                                className="ml-4 text-red-500 hover:text-red-700 text-sm font-medium"
+                                title="Remove"
+                            >
+                                <FontAwesomeIcon icon={faTrash}/>
+                            </button>
+                        </div>
+                    ))}
+                </div>
+
             </DialogContent>
             <DialogActions>
-                <Button onClick={() => {
-                    setDeleteConfirmModalOpen(false)
-                }}>Cancel</Button>
-                <Button onClick={handleDeleteQuestion} variant="contained" color="primary">
-                    Delete
-                </Button>
+
+                <button onClick={() => setSelectedQuestionsModalOpen(false)} variant="contained" color="primary">
+                    Close
+                </button>
             </DialogActions>
         </Dialog>
+
+        <Dialog open={newQuizDialogOpen} onClose={() => setNewQuizDialogOpen(false)} fullWidth maxWidth="md">
+            <DialogTitle>Create New Quiz</DialogTitle>
+            <DialogContent>
+                <TextField
+                    label="Name"
+                    fullWidth
+                    margin="normal"
+                    value={qName}
+                    onChange={(e) => setQName(e.target.value)}
+                />
+                <TextField
+                    select
+                    label="Mode"
+                    fullWidth
+                    margin="normal"
+                    value={qMode}
+                    onChange={(e) => setQMode(e.target.value)}
+                >
+                    <MenuItem value="practice">Practice</MenuItem>
+                    <MenuItem value="exam">Exam</MenuItem>
+                </TextField>
+                <TextField
+                    label="Subject(s)"
+                    fullWidth
+                    margin="normal"
+                    value={qSubject}
+                    onChange={(e) => setQSubject(e.target.value)}
+                    helperText="Comma-separated for multiple subjects"
+                />
+                <TextField
+                    label="Exam"
+                    fullWidth
+                    margin="normal"
+                    value={qExam}
+                    onChange={(e) => setQExam(e.target.value)}
+                />
+                <TextField
+                    label="Language"
+                    fullWidth
+                    margin="normal"
+                    value={qLanguage}
+                    onChange={(e) => setQLanguage(e.target.value)}
+                />
+                <TextField
+                    type="number"
+                    label="Time Duration (in minutes)"
+                    fullWidth
+                    margin="normal"
+                    value={qDuration}
+                    onChange={(e) => setQDuration(Number(e.target.value))}
+                />
+                <TextField
+                    label="Description"
+                    multiline
+                    rows={4}
+                    fullWidth
+                    margin="normal"
+                    value={qDescription}
+                    onChange={(e) => setQDescription(e.target.value)}
+                />
+                <TextField
+                    label="Associated Resource (URL)"
+                    fullWidth
+                    margin="normal"
+                    value={qAssociatedResource}
+                    onChange={(e) => setQAssociatedResource(e.target.value)}
+                />
+                <div>
+                    <h4 className="font-semibold mb-2">Tags:</h4>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                        {qTags.map((tag, index) => (<Chip
+                            key={index}
+                            label={tag}
+                            onDelete={() => setQTags(prevState => {
+                                return prevState.filter(t => t !== tag);
+                            })}
+                            color="primary"
+                        />))}
+                    </div>
+                    <TextField
+                        label="Add Tag"
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                                setQTags(prevState => {
+                                    return [...prevState, e.target.value];
+                                });
+                                e.target.value = '';
+                            }
+
+                        }}
+                        fullWidth
+                    />
+                </div>
+                <TextField
+                    label="Question IDs"
+                    fullWidth
+                    margin="normal"
+                    value={selectedQuestions.map(question => question.id)}
+                    // onChange={(e) => setQQuestionIds(e.target.value.split(",").map(id => parseInt(id.trim())))}
+                    helperText="Comma-separated question IDs"
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => setNewQuizDialogOpen(false)}>Cancel</Button>
+                <Button variant="contained" color="primary" onClick={handleCreateQuiz}>Create</Button>
+            </DialogActions>
+        </Dialog>
+
     </div>);
 }

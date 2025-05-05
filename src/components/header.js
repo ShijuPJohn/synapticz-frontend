@@ -14,6 +14,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {protectedRoutePrefixes} from "@/constants";
 import {usePathname, useRouter} from "next/navigation";
+import {NoteAdd} from "@mui/icons-material";
 
 function Header() {
     const drawerTimeout = useRef(null);
@@ -122,6 +123,11 @@ function Header() {
                 </li>
             },
             {
+                id: 'create-quiz', element: <li key="create" className="header-list-item">
+                    <Link href="/create-quiz">Quiz Studio</Link>
+                </li>
+            },
+            {
                 id: 'logout', element: <li key="logout" className="header-list-item">
                     <button className="logout-btn" onClick={handleLogout}>
                         LOGOUT
@@ -176,6 +182,7 @@ function Header() {
                                 priority
                                 className="object-contain"
                             />
+                            {/*LOGO*/}
                         </div>
                     </Link>
                 </h1>
@@ -265,6 +272,12 @@ function Header() {
                                     <EditIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Edit Profile
+                            </MenuItem>,
+                            <MenuItem component={Link} href="/create-quiz" onClick={handleMenuClose} key="create">
+                                <ListItemIcon>
+                                    <NoteAdd fontSize="small"/>
+                                </ListItemIcon>
+                                Quiz Studio
                             </MenuItem>,
                             <Divider key="divider"/>,
                             <MenuItem onClick={handleLogout} key="logout">
