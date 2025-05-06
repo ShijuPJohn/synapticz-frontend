@@ -3,13 +3,32 @@ import {useSelector} from "react-redux";
 import React, {useEffect, useState} from "react";
 import axios from "axios";
 import {fetchURL} from "@/constants";
-import {Chip, MenuItem, TextField, Button} from "@mui/material";
+import {Chip, MenuItem, TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions} from "@mui/material";
 import {enqueueSnackbar} from "notistack";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faListCheck} from "@fortawesome/free-solid-svg-icons";
+import QuestionShowSelect from "@/components/question_show_select";
+import {blue} from "@mui/material/colors";
 
 function Page({params}) {
     const userLogin = useSelector((state) => state.user);
     const {userInfo} = userLogin;
+    const [showQuestionsModal, setShowQuestionsModal] = useState(false);
+    const [questionSet, setQuestionSet] = useState([]);
+    const [filters, setFilters] = useState({
+        subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
+    });
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [questionsCount, setQuestionsCount] = useState(0);
+    const [selectedQuestions, setSelectedQuestions] = useState([]);
 
+    useEffect(() => {
+        setFormData({
+            ...formData,
+            question_ids: selectedQuestions
+        })
+        setQuestionSet(prevState => ({...prevState, question_ids: selectedQuestions}));
+    }, [selectedQuestions])
     const [formData, setFormData] = useState({
         name: "",
         mode: "practice",
@@ -36,6 +55,8 @@ function Page({params}) {
                 headers: getHeaders(),
             });
             const data = response.data;
+            setQuestionSet(response.data);
+            setSelectedQuestions(response.data.question_ids)
             setFormData({
                 name: data.name || "",
                 mode: data.mode || "practice",
@@ -62,7 +83,7 @@ function Page({params}) {
             );
             enqueueSnackbar("Question set updated successfully!", {variant: "success"});
         } catch (error) {
-            console.error("Failed to update question set:", error);
+            console.error("Failed to update questionSet set:", error);
             enqueueSnackbar("Update failed. Please try again.", {variant: "error"});
         }
     }
@@ -179,23 +200,30 @@ function Page({params}) {
                     />
                 </div>
 
-                <TextField
-                    label="Question IDs"
-                    fullWidth
-                    margin="normal"
-                    value={formData.question_ids.join(", ")}
-                    onChange={(e) =>
-                        setFormData({
-                            ...formData,
-                            question_ids: e.target.value
-                                .split(",")
-                                .map((id) => parseInt(id.trim()))
-                                .filter((id) => !isNaN(id)),
-                        })
-                    }
-                    helperText="Comma-separated question IDs"
-                />
-
+                <div className="flex items-center justify-center gap-4 ">
+                    <TextField
+                        label="Question IDs"
+                        fullWidth
+                        margin="normal"
+                        value={formData.question_ids.join(", ")}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                question_ids: e.target.value
+                                    .split(",")
+                                    .map((id) => parseInt(id.trim()))
+                                    .filter((id) => !isNaN(id)),
+                            })
+                        }
+                        helperText="Comma-separated question IDs"
+                    />
+                    <FontAwesomeIcon icon={faListCheck} size={"xl"}
+                                     className={"text-white bg-blue-600 p-2 rounded-md shadow-md mb-2 hover:bg-blue-700 cursor-pointer"}
+                                     onClick={() => {
+                                         setShowQuestionsModal(true)
+                                     }}
+                    />
+                </div>
                 <Button
                     variant="contained"
                     color="primary"
@@ -205,6 +233,21 @@ function Page({params}) {
                     Save Changes
                 </Button>
             </div>
+            <Dialog open={showQuestionsModal} onClose={() => setShowQuestionsModal(false)}
+                    fullWidth
+                    sx={{'& .MuiDialog-paper': {minHeight: "15rem", height:"100%", minWidth: "98%", width: "100%", margin: "0"}}}>
+                <DialogTitle>Select Questions</DialogTitle>
+                <DialogContent className="flex flex-col gap-4 mt-2 py-4">
+                    <QuestionShowSelect initialFetchIds={questionSet.question_ids} selectedQIds={selectedQuestions}
+                                        setSelectedQIdsCallback={setSelectedQuestions}/>
+                </DialogContent>
+                <DialogActions>
+                    <Button variant={"contained"} onClick={() => {
+                        setShowQuestionsModal(false);
+                    }}>Done</Button>
+                </DialogActions>
+            </Dialog>
+
         </main>
     );
 }

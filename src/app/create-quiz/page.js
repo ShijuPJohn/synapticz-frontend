@@ -3,7 +3,17 @@ import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {
-    faEdit, faTrash, faFilter, faChevronDown, faChevronUp, faCheckSquare, faSquare, faPlus, faDeleteLeft, faQuestion
+    faEdit,
+    faTrash,
+    faFilter,
+    faChevronDown,
+    faChevronUp,
+    faCheckSquare,
+    faSquare,
+    faPlus,
+    faDeleteLeft,
+    faQuestion,
+    faHamburger, faBars
 } from '@fortawesome/free-solid-svg-icons';
 import {useSelector} from "react-redux";
 import {fetchURL} from "@/constants";
@@ -12,6 +22,7 @@ import {
 } from "@mui/material";
 import {enqueueSnackbar} from "notistack";
 import {useRouter} from "next/navigation";
+import Image from "next/image";
 
 export default function QuestionsPage() {
     const [questions, setQuestions] = useState([]);
@@ -53,6 +64,8 @@ export default function QuestionsPage() {
     const [qQuestionIds, setQQuestionIds] = useState([]);
     const [qTags, setQTags] = useState([]);
     const router = useRouter();
+    const [coverImagePreview, setCoverImagePreview] = useState(null);
+    const [uploadedUrl, setUploadedUrl] = useState(null);
 
     const hourOptions = [{label: '1 hour', value: '1'}, {label: '2 hours', value: '2'}, {
         label: '4 hours', value: '4'
@@ -76,20 +89,19 @@ export default function QuestionsPage() {
     }
 
     const handleSelectQuestion = (question) => {
-        setSelectedQuestions(
-            (prev) => {
-                //  prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, {id:question.id, statement:question.statement, created_by:question.created_by}]);
-                if (prev.map(question => question.id).includes(question.id)) {
-                    return prev.filter((q) => q.id !== question.id);
-                } else {
-                    return [...prev, {
-                        id: question.id,
-                        statement: question.question,
-                        created_by: question.created_by_name,
-                        created_time: question.created_at
-                    }]
-                }
-            })
+        setSelectedQuestions((prev) => {
+            //  prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, {id:question.id, statement:question.statement, created_by:question.created_by}]);
+            if (prev.map(question => question.id).includes(question.id)) {
+                return prev.filter((q) => q.id !== question.id);
+            } else {
+                return [...prev, {
+                    id: question.id,
+                    statement: question.question,
+                    created_by: question.created_by_name,
+                    created_time: question.created_at
+                }]
+            }
+        })
     };
 
     const fetchQuestions = async () => {
@@ -146,6 +158,29 @@ export default function QuestionsPage() {
         }
     };
 
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setCoverImagePreview(URL.createObjectURL(file));
+
+        const formDataImg = new FormData();
+        formDataImg.append("file", file);
+
+        try {
+            const res = await axios.post(`${fetchURL}/image-upload`, formDataImg, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    Authorization: `Bearer ${userInfo.token}`,
+                },
+            });
+            enqueueSnackbar("Image uploaded successfully.", {variant: "success"});
+            setUploadedUrl(res.data.url);
+        } catch (err) {
+            console.error("Failed to upload image", err);
+        }
+    };
+
     async function handleCreateQuestion() {
         const data = {
             question: questionStatement,
@@ -189,7 +224,8 @@ export default function QuestionsPage() {
             description: qDescription,
             associated_resource: qAssociatedResource,
             question_ids: selectedQuestions.map(question => question.id),
-            tags: qTags
+            tags: qTags,
+            cover_image:uploadedUrl,
         };
         try {
             await axios.post(`${fetchURL}/questionsets/`, data, {headers: getHeaders()});
@@ -259,40 +295,38 @@ export default function QuestionsPage() {
             className="z-[1000] shadow-lg floating-action-button fixed bottom-5 right-5 w-16 h-16 bg-red-400 text-white font-extrabold flex justify-center items-center rounded-[100rem] cursor-pointer"
             onClick={toggleFloatingMenu}
         >
-            <FontAwesomeIcon icon={faPlus}/>
+            <FontAwesomeIcon icon={faBars}/>
         </div>
-        {floatingMenu &&
+        {floatingMenu && <div
+            className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-32 w-48 bg-gray-200 shadow-md text-slate-700">
             <div
-                className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-32 w-48 bg-gray-200 shadow-md text-slate-700">
-                <div
-                    className=" h-full w-full border-b gap-4  border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-cyan-300"
-                    onClick={() => {
-                        setNewQuestionDialogOpen(true)
-                    }}
-                ><FontAwesomeIcon icon={faQuestion}/>
+                className=" h-full w-full border-b gap-4  border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-cyan-300"
+                onClick={() => {
+                    setNewQuestionDialogOpen(true)
+                }}
+            ><FontAwesomeIcon icon={faQuestion}/>
 
-                    New Question
-                </div>
-                <div
-                    className=" h-full w-full border-b   border-b-gray-300  flex justify-center gap-4 items-center cursor-pointer hover:bg-cyan-300"
-                    onClick={() => {
-                        setNewQuizDialogOpen(true)
-                    }}
-                >
-                    <FontAwesomeIcon icon={faPlus}/>
-                    New Quiz
-                </div>
-                <div
-                    className="h-full w-full flex justify-center gap-4  items-center cursor-pointer hover:bg-cyan-300"
-                    onClick={() => {
-                       router.push("/edit-quiz")
-                    }}
-                >
-                    <FontAwesomeIcon icon={faEdit}/>
-                    Edit Quizzes
-                </div>
+                New Question
             </div>
-        }
+            <div
+                className=" h-full w-full border-b   border-b-gray-300  flex justify-center gap-4 items-center cursor-pointer hover:bg-cyan-300"
+                onClick={() => {
+                    setNewQuizDialogOpen(true)
+                }}
+            >
+                <FontAwesomeIcon icon={faPlus}/>
+                New Quiz
+            </div>
+            <div
+                className="h-full w-full flex justify-center gap-4  items-center cursor-pointer hover:bg-cyan-300"
+                onClick={() => {
+                    router.push("/edit-quiz")
+                }}
+            >
+                <FontAwesomeIcon icon={faEdit}/>
+                Edit Quizzes
+            </div>
+        </div>}
         <div className="bg-white shadow-lg mb-1 py-4 px-4">
             <div className="flex flex-wrap items-center gap-4">
                 <div className="relative w-full sm:w-48">
@@ -566,15 +600,13 @@ export default function QuestionsPage() {
                         <h4 className="font-semibold text-gray-700">Options</h4>
                     </div>
                     <ul className="space-y-2 pl-8">
-                        {activeQuestion.options.map((opt, idx) => (
-                            <li key={idx}
-                                className="relative before:absolute before:-left-5 before:top-2 before:w-2 before:h-2 before:rounded-full before:bg-gray-400">
-                                <div
-                                    className={`bg-gray-50 p-3 rounded-lg border border-gray-200 ${activeQuestion.correct_options.includes(idx.toString()) ? "bg-green-300" : "bg-gray-200"}`}>
-                                    <p className="text-gray-800">{opt}</p>
-                                </div>
-                            </li>
-                        ))}
+                        {activeQuestion.options.map((opt, idx) => (<li key={idx}
+                                                                       className="relative before:absolute before:-left-5 before:top-2 before:w-2 before:h-2 before:rounded-full before:bg-gray-400">
+                            <div
+                                className={`bg-gray-50 p-3 rounded-lg border border-gray-200 ${activeQuestion.correct_options.includes(idx.toString()) ? "bg-green-300" : "bg-gray-200"}`}>
+                                <p className="text-gray-800">{opt}</p>
+                            </div>
+                        </li>))}
                     </ul>
                 </div>
 
@@ -599,8 +631,7 @@ export default function QuestionsPage() {
                             <span>🗑️</span>
                             <span>Delete</span>
                         </button>
-                    </div>
-                )}
+                    </div>)}
             </div>}
         </Dialog>
         <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)}
@@ -787,35 +818,34 @@ export default function QuestionsPage() {
                 </div>
                 <div className={"w-full lg:w-1/2 flex flex-col"}>
                     <h4 className="font-semibold mb-2">Options:</h4>
-                    {answerOptions.map((option, index) => (
-                        <div key={index} className="flex items-center gap-2 mb-2">
-                            <TextField
-                                label={`Option ${index + 1}`}
-                                value={option}
-                                onChange={(e) => setAnswerOptions(prevState => {
-                                    const newOptions = [...prevState];
-                                    newOptions[index] = e.target.value;
-                                    return newOptions;
-                                })}
-                                fullWidth
-                            />
-                            <input
-                                type="checkbox"
-                                checked={correctOptions.includes(index)}
-                                onChange={() => setCorrectOptions(prevState => {
-                                    if (questionType === "m-choice") {
-                                        return [index]
-                                    } else if (questionType === "m-select") {
-                                        if (prevState.includes(index)) {
-                                            return prevState.filter((option) => option !== index);
-                                        } else {
-                                            return [...prevState, index];
-                                        }
+                    {answerOptions.map((option, index) => (<div key={index} className="flex items-center gap-2 mb-2">
+                        <TextField
+                            label={`Option ${index + 1}`}
+                            value={option}
+                            onChange={(e) => setAnswerOptions(prevState => {
+                                const newOptions = [...prevState];
+                                newOptions[index] = e.target.value;
+                                return newOptions;
+                            })}
+                            fullWidth
+                        />
+                        <input
+                            type="checkbox"
+                            checked={correctOptions.includes(index)}
+                            onChange={() => setCorrectOptions(prevState => {
+                                if (questionType === "m-choice") {
+                                    return [index]
+                                } else if (questionType === "m-select") {
+                                    if (prevState.includes(index)) {
+                                        return prevState.filter((option) => option !== index);
+                                    } else {
+                                        return [...prevState, index];
                                     }
-                                })}
-                                className="w-5 h-5"
-                            />
-                        </div>))}
+                                }
+                            })}
+                            className="w-5 h-5"
+                        />
+                    </div>))}
                     <TextField
                         label="Explanation"
                         value={explanation || ''}
@@ -865,37 +895,31 @@ export default function QuestionsPage() {
             <DialogTitle>Selected Questions</DialogTitle>
             <DialogContent className="flex flex-col gap-4 mt-2 py-4">
                 <div className="flex flex-col gap-2">
-                    {selectedQuestions.map((question, index) => (
+                    {selectedQuestions.map((question, index) => (<div
+                        key={question.id}
+                        className="flex justify-between items-center bg-white shadow-sm border border-gray-200 rounded-lg px-4 py-2"
+                    >
                         <div
-                            key={question.id}
-                            className="flex justify-between items-center bg-white shadow-sm border border-gray-200 rounded-lg px-4 py-2"
-                        >
-                            <div
-                                className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm w-full overflow-hidden">
+                            className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm w-full overflow-hidden">
         <span className="font-medium text-gray-800 truncate">
           Q{index + 1}: {question.statement}
         </span>
-                                <span className="text-gray-500 hidden sm:inline">
+                            <span className="text-gray-500 hidden sm:inline">
           · Created by {question.created_by}
         </span>
-                                <span className="text-gray-400 hidden md:inline">
+                            <span className="text-gray-400 hidden md:inline">
           · {new Date(question.created_time).toLocaleString("ml-IN")}
         </span>
-                            </div>
-
-                            <button
-                                onClick={() =>
-                                    setSelectedQuestions((prev) =>
-                                        prev.filter((q) => q.id !== question.id)
-                                    )
-                                }
-                                className="ml-4 text-red-500 hover:text-red-700 text-sm font-medium"
-                                title="Remove"
-                            >
-                                <FontAwesomeIcon icon={faTrash}/>
-                            </button>
                         </div>
-                    ))}
+
+                        <button
+                            onClick={() => setSelectedQuestions((prev) => prev.filter((q) => q.id !== question.id))}
+                            className="ml-4 text-red-500 hover:text-red-700 text-sm font-medium"
+                            title="Remove"
+                        >
+                            <FontAwesomeIcon icon={faTrash}/>
+                        </button>
+                    </div>))}
                 </div>
 
             </DialogContent>
@@ -950,6 +974,31 @@ export default function QuestionsPage() {
                     value={qLanguage}
                     onChange={(e) => setQLanguage(e.target.value)}
                 />
+                <div className="flex items-center gap-4">
+                    <div className="w-36 h-36 rounded-full overflow-hidden border border-slate-200 shadow">
+                        {coverImagePreview ? (
+                            <Image
+                                src={coverImagePreview}
+                                alt="Profile"
+                                width={144}
+                                height={144}
+                                priority
+                                className="object-cover w-full h-full"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gray-200"/>
+                        )}
+                    </div>
+                    <label className="cursor-pointer text-blue-600 text-lg">
+                        <FontAwesomeIcon icon={faEdit}/> Change Cover Image
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleImageUpload}
+                        />
+                    </label>
+                </div>
                 <TextField
                     type="number"
                     label="Time Duration (in minutes)"
