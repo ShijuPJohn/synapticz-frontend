@@ -11,8 +11,10 @@ function QuestionSetCard({
                              editDeleteButtons,
                              setCurrentQuizCallback,
                              openDeleteModalCallback,
+                             openEditModalCallback,
                          }) {
     const router = useRouter();
+
     function conditionalWrapper(child) {
         if (!editDeleteButtons) {
             return (
@@ -77,14 +79,12 @@ function QuestionSetCard({
                 editDeleteButtons &&
                 <div className={"ml-auto flex justify-around items-center gap-2 text-gray-700 min-w-16 "}>
                     <FontAwesomeIcon icon={faEdit} size={"lg"} className={"cursor-pointer text-teal-600"}
-                                     onClick={() => {
-                                         router.push(`/edit-quiz/${questionSet.id}`);
-                                     }}/>
+                                     onClick={openEditModalCallback}/>
                     <FontAwesomeIcon icon={faTrash} size={"lg"} className={"cursor-pointer text-red-700"}
                                      onClick={(e) => {
                                          e.stopPropagation();
-                                         openDeleteModalCallback(true);
                                          setCurrentQuizCallback(questionSet)
+                                         openDeleteModalCallback(true);
                                      }}/>
                 </div>
 
