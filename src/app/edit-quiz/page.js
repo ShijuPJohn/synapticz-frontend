@@ -21,17 +21,18 @@ const Page = () => {
     const [questionSets, setQuestionSets] = useState([]);
     const [deleteConfirmModalOpen, setDeleteConfirmModalOpen] = useState(false);
     const [currentQuiz, setCurrentQuiz] = useState(null);
-    const [loading, setLoading] = useState(true);
     const userLogin = useSelector((state) => state.user);
     const {userInfo} = userLogin;
-    // const [currentQuestionSet, setCurrentQuestionSet] = useState({});
     const [showEditModal, setShowEditModal] = useState(false);
     const router = useRouter();
     const [showQuestionsModal, setShowQuestionsModal] = useState(false);
-    // const [questionSet, setQuestionSet] = useState([]);
     const [selectedQuestions, setSelectedQuestions] = useState([]);
     const [coverImagePreview, setCoverImagePreview] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState(null);
+    const [filters, setFilters] = useState({
+        subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
+    });
+    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -55,9 +56,9 @@ const Page = () => {
 
     useEffect(() => {
         const fetchSets = async () => {
+            setLoading(true);
             try {
                 const res = await axios.get(`${fetchURL}/questionsets?search=${searchTerm}&uid=${userInfo.user_id}`);
-                console.log("fetched data", res.data)
                 const sets = res.data.map(item => ({
                     ...item,
                     coverImage: item.coverImage || "/images/placeholder_book.png",
@@ -74,6 +75,7 @@ const Page = () => {
     }, [searchTerm]);
 
     async function handleDeleteQuiz() {
+        setLoading(true);
         try {
             await axios.delete(`${fetchURL}/questionsets/${currentQuiz.id}`, {headers: getHeaders()});
             setDeleteConfirmModalOpen(false);
@@ -84,10 +86,13 @@ const Page = () => {
         } catch (error) {
             enqueueSnackbar("Quiz delete failed", {variant: 'error'});
             console.error('Error updating question:', error);
+        } finally {
+            setLoading(false);
         }
     }
 
     async function handleSubmit() {
+        setLoading(true);
         try {
             const response = await axios.put(
                 `${fetchURL}/questionsets/${currentQuiz.id}`,
@@ -99,16 +104,18 @@ const Page = () => {
             setQuestionSets(prev => {
                 return prev.map(qSet =>
                     qSet.id === currentQuiz.id
-                        ? {...qSet, ...formData, coverImage: uploadedUrl}
+                        ? {...qSet, ...formData, coverImage: uploadedUrl?uploadedUrl:currentQuiz.coverImage}
                         : qSet
                 );
             });
-
+            setUploadedUrl(null);
             setShowEditModal(false);
             enqueueSnackbar("Question set updated successfully!", {variant: "success"});
         } catch (error) {
             console.error("Failed to update questionSet set:", error);
             enqueueSnackbar("Update failed. Please try again.", {variant: "error"});
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -120,7 +127,7 @@ const Page = () => {
 
         const formDataImg = new FormData();
         formDataImg.append("file", file);
-
+        setLoading(true);
         try {
             const res = await axios.post(`${fetchURL}/image-upload`, formDataImg, {
                 headers: {
@@ -132,6 +139,8 @@ const Page = () => {
             setUploadedUrl(res.data.url);
         } catch (err) {
             console.error("Failed to upload image", err);
+        } finally {
+            setLoading(false);
         }
     };
 // Update the useEffect for form data initialization
@@ -147,10 +156,11 @@ const Page = () => {
                 description: currentQuiz.description || "",
                 associated_resource: currentQuiz.associated_resource || "",
                 tags: currentQuiz.tags || [],
-                question_ids: currentQuiz.question_ids || [],
+                question_ids: Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : [],
                 coverImage: currentQuiz.coverImage || "/images/placeholder_book.png",
             });
-            setSelectedQuestions(currentQuiz.question_ids || []);
+            setSelectedQuestions(Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : []);
+            setCoverImagePreview(currentQuiz.coverImage);
         }
     }, [currentQuiz]);
 
@@ -161,6 +171,8 @@ const Page = () => {
             question_ids: selectedQuestions
         }));
     }, [selectedQuestions]);
+
+
     return (
         <>
             <main className="">
@@ -174,11 +186,7 @@ const Page = () => {
                             <QuestionSetCard key={set.id} questionSet={set}
                                              editDeleteButtons={userInfo.role === "owner" || userInfo.role === "admin" || userInfo.user_id === parseInt(set.created_by_id)}
                                              setCurrentQuizCallback={setCurrentQuiz}
-                                             openEditModalCallback={() => {
-                                                 setShowEditModal(true);
-                                                 setCurrentQuiz(questionSets[index])
-
-                                             }}
+                                             openEditModalCallback={setShowEditModal}
                                              openDeleteModalCallback={setDeleteConfirmModalOpen}
                             />
                         ))
@@ -356,11 +364,11 @@ const Page = () => {
                         </div>
 
                         <div className="flex items-center justify-center gap-4 ">
-                            <TextField
+                            {currentQuiz && <TextField
                                 label="Question IDs"
                                 fullWidth
                                 margin="normal"
-                                value={formData.question_ids.join(", ")}
+                                value={(selectedQuestions || []).join(", ")}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
@@ -371,7 +379,7 @@ const Page = () => {
                                     })
                                 }
                                 helperText="Comma-separated question IDs"
-                            />
+                            />}
                             <FontAwesomeIcon icon={faListCheck} size={"xl"}
                                              className={"text-white bg-blue-600 p-2 rounded-md shadow-md mb-2 hover:bg-blue-700 cursor-pointer"}
                                              onClick={() => {
@@ -406,7 +414,7 @@ const Page = () => {
                 <DialogTitle>Select Questions</DialogTitle>
                 <DialogContent className="flex flex-col gap-4 mt-2 py-4">
                     <QuestionShowSelect initialFetchIds={currentQuiz.question_ids} selectedQIds={selectedQuestions}
-                                        setSelectedQIdsCallback={setSelectedQuestions}/>
+                                        setSelectedQIdsCallback={setSelectedQuestions} filters={filters} setFilters={setFilters}/>
                 </DialogContent>
                 <DialogActions>
                     <Button variant={"contained"} onClick={() => {
