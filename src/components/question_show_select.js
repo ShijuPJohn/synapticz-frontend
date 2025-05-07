@@ -37,12 +37,10 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
 
     useEffect(() => {
         setSelectedQIdsCallback(selectedQuestions.map(question => question.id));
-        console.log("selectedQuestions: ", selectedQuestions);
     }, [selectedQuestions])
 
     const handleSelectQuestion = (question) => {
         setSelectedQuestions((prev) => {
-            //  prev.includes(id) ? prev.filter((qid) => qid !== id) : [...prev, {id:question.id, statement:question.statement, created_by:question.created_by}]);
             if (prev.map(question => question.id).includes(question.id)) {
                 return prev.filter((q) => q.id !== question.id);
             } else {
@@ -84,14 +82,14 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
         try {
             const response = await axios.get(`${fetchURL}/questions?${params.toString()}`, {headers: getHeaders()});
             setQuestions(response.data.questions);
-            setSelectedQuestions(response.data.questions.map((question) => {
-                return {
-                    id: question.id,
-                    statement: question.question,
-                    created_by: question.created_by_name,
-                    created_time:question.created_at,
-                }
-            }));
+            // setSelectedQuestions(response.data.questions.map((question) => {
+            //     return {
+            //         id: question.id,
+            //         statement: question.question,
+            //         created_by: question.created_by_name,
+            //         created_time:question.created_at,
+            //     }
+            // }));
             setQuestionsCount(response.data.questions.length);
         } catch (error) {
             console.error('Error fetching questions:', error);

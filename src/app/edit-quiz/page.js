@@ -99,11 +99,11 @@ const Page = () => {
             setQuestionSets(prev => {
                 return prev.map(qSet =>
                     qSet.id === currentQuiz.id
-                        ? {...qSet, ...formData, coverImage: uploadedUrl}
+                        ? {...qSet, ...formData, coverImage: uploadedUrl?uploadedUrl:currentQuiz.coverImage}
                         : qSet
                 );
             });
-
+            setUploadedUrl(null);
             setShowEditModal(false);
             enqueueSnackbar("Question set updated successfully!", {variant: "success"});
         } catch (error) {
@@ -147,10 +147,11 @@ const Page = () => {
                 description: currentQuiz.description || "",
                 associated_resource: currentQuiz.associated_resource || "",
                 tags: currentQuiz.tags || [],
-                question_ids: currentQuiz.question_ids || [],
+                question_ids: Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : [],
                 coverImage: currentQuiz.coverImage || "/images/placeholder_book.png",
             });
-            setSelectedQuestions(currentQuiz.question_ids || []);
+            setSelectedQuestions(Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : []);
+            setCoverImagePreview(currentQuiz.coverImage);
         }
     }, [currentQuiz]);
 
@@ -161,6 +162,11 @@ const Page = () => {
             question_ids: selectedQuestions
         }));
     }, [selectedQuestions]);
+
+
+    useEffect(()=>{
+        console.log("currentQuiz", currentQuiz);
+    },[currentQuiz])
     return (
         <>
             <main className="">
@@ -174,11 +180,7 @@ const Page = () => {
                             <QuestionSetCard key={set.id} questionSet={set}
                                              editDeleteButtons={userInfo.role === "owner" || userInfo.role === "admin" || userInfo.user_id === parseInt(set.created_by_id)}
                                              setCurrentQuizCallback={setCurrentQuiz}
-                                             openEditModalCallback={() => {
-                                                 setShowEditModal(true);
-                                                 setCurrentQuiz(questionSets[index])
-
-                                             }}
+                                             openEditModalCallback={setShowEditModal}
                                              openDeleteModalCallback={setDeleteConfirmModalOpen}
                             />
                         ))
@@ -356,11 +358,11 @@ const Page = () => {
                         </div>
 
                         <div className="flex items-center justify-center gap-4 ">
-                            <TextField
+                            {currentQuiz && <TextField
                                 label="Question IDs"
                                 fullWidth
                                 margin="normal"
-                                value={formData.question_ids.join(", ")}
+                                value={(selectedQuestions || []).join(", ")}
                                 onChange={(e) =>
                                     setFormData({
                                         ...formData,
@@ -371,7 +373,7 @@ const Page = () => {
                                     })
                                 }
                                 helperText="Comma-separated question IDs"
-                            />
+                            />}
                             <FontAwesomeIcon icon={faListCheck} size={"xl"}
                                              className={"text-white bg-blue-600 p-2 rounded-md shadow-md mb-2 hover:bg-blue-700 cursor-pointer"}
                                              onClick={() => {
