@@ -14,7 +14,9 @@ import {faEdit, faListCheck} from "@fortawesome/free-solid-svg-icons";
 import QuestionShowSelect from "@/components/question_show_select";
 import Image from "next/image";
 
-const Page = () => {
+import { Suspense } from 'react';
+
+const EditQuizComponent = () => {
     const searchParams = useSearchParams();
     const searchTerm = searchParams.get("search")?.toLowerCase() || "";
     const [fetched, setFetched] = useState(false);
@@ -427,5 +429,11 @@ const Page = () => {
         </>
     );
 };
-
+function Page() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <EditQuizComponent />
+        </Suspense>
+    );
+}
 export default Page;
