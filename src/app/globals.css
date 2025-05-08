@@ -155,3 +155,8 @@ main{
     50% { opacity: 1; }
     100% { opacity: 0; }
 }
+pre[class*="language-"], code[class*="language-"] {
+    padding: 0.3rem;
+    font-size: 0.9rem;
+    white-space: pre-wrap; /* optional: wrap long lines */
+}

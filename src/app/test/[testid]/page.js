@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import ResultScreen from "@/components/resultScreen";
 import {enqueueSnackbar} from "notistack";
+import MarkdownWithMath from "@/components/markdown_with_math";
 
 let countHandle = null
 let totalTimeCountHandle = null
@@ -529,7 +530,7 @@ function Page({params}) {
                             <div className="question-container px-4">
                                 <div className="py-4 flex justify-between">
                                     <h1 className="quiz_box_quest_title text-lg md:text-xl font-medium text-gray-700">
-                                        {currentQuestion.question}
+                                        <MarkdownWithMath content={currentQuestion.question}/>
                                     </h1>
                                     <div className="bookmark-icon-container cursor-pointer" onClick={bookmarkQuestion}>
                                         <FontAwesomeIcon icon={faStar}
@@ -557,7 +558,8 @@ function Page({params}) {
                                             }`}
                                             style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
                                         >
-                                            <h4 className="quiz_box_option text-sm md:text-base">{option}</h4>
+                                            <h4 className="quiz_box_option text-sm md:text-base"><MarkdownWithMath
+                                                content={option}/></h4>
                                             {isCurrentQuestionAnswered &&
                                                 selectedOptions[currentQuestionIndex]?.includes(index) &&
                                                 correctOptions[currentQuestionIndex]?.includes(index) && (
@@ -612,7 +614,8 @@ function Page({params}) {
                                 {(isCurrentQuestionAnswered || finished) && currentQuestion?.explanation && (
                                     <div
                                         className={`quiz_box_explanation_box flex justify-between border-[1px] ${isCurrentQuestionExplanationSaved ? "bg-amber-100" : "bg-white"} border-amber-500 mt-4 max-h-40 overflow-y-auto text-md md:text-lg text-gray-700`}>
-                                        <p className={"m-2"}>{currentQuestion.explanation}</p>
+                                        <p className={"m-2"}><MarkdownWithMath content={currentQuestion.explanation}/>
+                                        </p>
                                         <div
                                             className="explanation-save-btn p-[.5rem] bg-amber-800x max-w-[2rem] max-h-[2rem] flex justify-center items-center border-[1px] cursor-pointer hover:bg-amber-100 shadow-md hover:shadow-lg"
                                             onClick={saveExplanationToggle}

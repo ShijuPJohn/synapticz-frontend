@@ -12,6 +12,7 @@ import {
 import axios from "axios";
 import {fetchURL} from "@/constants";
 import {enqueueSnackbar} from "notistack";
+import MarkdownWithMath from "@/components/markdown_with_math";
 
 function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
     const [questions, setQuestions] = useState([]);
@@ -439,7 +440,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                     </div>)}
 
                     <div className="mt-8">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2">{q.question}</h3>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2"><MarkdownWithMath content={q.question}/> </h3>
 
                         {q.tags?.length > 0 && (<div className="flex flex-wrap gap-2 mb-4">
                             {q.tags.map((tag, index) => (<span

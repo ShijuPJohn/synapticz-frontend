@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import CardsCarousel from "@/components/cards_carousel";
+import 'katex/dist/katex.min.css';
 
 const cardContentData = [
     {
