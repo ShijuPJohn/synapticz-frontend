@@ -1,9 +1,9 @@
 "use client"
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useSelector} from "react-redux";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
-    faCheckSquare, faChevronDown, faChevronUp, faClose, faEdit, faFilter, faSquare, faTrash
+    faCheckSquare, faChevronDown, faChevronUp, faClose, faEdit, faFilter, faListCheck, faSquare, faTrash, faWarning
 } from "@fortawesome/free-solid-svg-icons";
 import {
     Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField
@@ -12,7 +12,7 @@ import axios from "axios";
 import {fetchURL} from "@/constants";
 import {enqueueSnackbar} from "notistack";
 
-function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallback, filters, setFilters}) {
+function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
     const [questions, setQuestions] = useState([]);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [questionsCount, setQuestionsCount] = useState(0);
@@ -24,11 +24,13 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [questionToEdit, setQuestionToEdit] = useState(null);
     const [deleteConfirmModalOpen, setDeleteConfirmModalOpen] = useState(false);
+    const [multipleDeleteConfirmModalOpen, setMultipleDeleteConfirmModalOpen] = useState(false);
     const [selectedQuestionsModalOpen, setSelectedQuestionsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [localFilters, setLocalFilters] = useState({
         subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
     });
+    const [selectedAll, setSelectedAll] = useState(false);
 
     const hourOptions = [{label: '1 hour', value: '1'}, {label: '2 hours', value: '2'}, {
         label: '4 hours', value: '4'
@@ -37,11 +39,6 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
     }, {label: '1 week', value: (24 * 7).toString()}, {
         label: '2 weeks', value: (24 * 14).toString()
     }, {label: '1 month', value: (24 * 30).toString()},];
-
-    useEffect(() => {
-        setLocalFilters(filters);
-        fetchQuestions();
-    }, [filters]);
 
 
     useEffect(() => {
@@ -53,27 +50,23 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
             if (prev.map(question => question.id).includes(question.id)) {
                 return prev.filter((q) => q.id !== question.id);
             } else {
-                return [...prev, {
-                    id: question.id,
-                    statement: question.question,
-                    created_by: question.created_by_name,
-                    created_time: question.created_at
-                }]
+                return [...prev, question];
             }
         })
     };
 
     async function fetchQuestionsInitial() {
-        if (initialFetchIds.length > 0) {
+        if (initialFetchIds?.length > 0) {
             try {
                 const response = await axios.get(`${fetchURL}/questions?qids=${initialFetchIds.join()}`, {headers: getHeaders()});
                 setQuestions(response.data.questions);
                 setSelectedQuestions(response.data.questions.map((question) => {
                     return {
                         id: question.id,
-                        statement: question.question,
-                        created_by: question.created_by_name,
-                        created_time: question.created_at,
+                        question: question.question,
+                        created_by_name: question.created_by_name,
+                        created_at: question.created_at,
+                        created_by_id: question.created_by_id,
                     }
                 }));
                 setQuestionsCount(response.data.questions.length);
@@ -82,19 +75,22 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
             } finally {
                 setLoading(false);
             }
+        } else {
+            fetchQuestions()
         }
     }
 
     const fetchQuestions = async () => {       //TODO
         const params = new URLSearchParams();
-        Object.entries(filters).forEach(([key, value]) => {
+        Object.entries(localFilters).forEach(([key, value]) => {
             if (value) params.append(key, value);
         });
         setLoading(true)
         try {
             const response = await axios.get(`${fetchURL}/questions?${params.toString()}`, {headers: getHeaders()});
-            setQuestions(response.data.questions);
+            setQuestions(response.data.questions ? response.data.questions : []);
             setQuestionsCount(response.data.questions.length);
+            setSelectedAll(false)
         } catch (error) {
             console.error('Error fetching questions:', error);
         } finally {
@@ -108,13 +104,20 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
         };
     }
 
+    const hasFetched = useRef(false);
+
     useEffect(() => {
-        if (initialFetchIds.length > 0) {
+        if (hasFetched.current) return;
+        if (mode === "edit") {
             fetchQuestionsInitial();
         } else {
             fetchQuestions();
         }
-    }, []);
+
+        hasFetched.current = true;
+    }, [initialFetchIds]);
+    useEffect(() => {
+    }, [])
 
     const handleChangeFilters = (e) => {
         const {name, value, type, checked} = e.target;
@@ -181,22 +184,51 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
     async function handleDeleteQuestion() {
         setLoading(true);
         try {
-            await axios.delete(`${fetchURL}/questions/${questionToEdit.id}`, {headers: getHeaders()});
+            await axios.delete(`${fetchURL}/questions?ids=${questionToEdit.id.toString()}`, {headers: getHeaders()});
             setDeleteConfirmModalOpen(false);
             setQuestions(prev => {
                 return prev.filter((question) => question.id !== questionToEdit.id);
             })
             enqueueSnackbar("Question deleted successfully.", {variant: 'success'});
+            setSelectedQuestions(prev => {
+                return prev.filter((question) => question.id !== questionToEdit.id);
+            })
         } catch (error) {
             enqueueSnackbar("Question delete failed", {variant: 'error'});
-            console.error('Error updating question:', error);
+            console.error('Error deleting question:', error);
         } finally {
             setLoading(false);
         }
     }
 
+    async function handleDeleteMultipleQuestions() {
+        setLoading(true);
+        const idsToDelete = selectedQuestions.map(q => q.id);
+
+        try {
+            const response = await axios.delete(`${fetchURL}/questions?ids=${idsToDelete.join(",")}`, {
+                headers: getHeaders()
+            });
+            setDeleteConfirmModalOpen(false);
+
+            setQuestions(prev => prev.filter(q => !idsToDelete.includes(q.question_id)));
+            setSelectedQuestions([])
+            enqueueSnackbar(`${response.data.message}`, {variant: "success"});
+            setMultipleDeleteConfirmModalOpen(false);
+            fetchQuestions();
+        } catch (error) {
+            enqueueSnackbar("Questions delete failed", {variant: "error"});
+            console.error("Error deleting questions:", error);
+        } finally {
+            setLoading(false);
+        }
+    }
+    useEffect(()=>{
+    },[selectedQuestions])
+
+
     function applyFilters() {
-        setFilters(localFilters);
+        fetchQuestions();
     }
 
 
@@ -243,10 +275,59 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
                     />
                     <span className="text-gray-700">My Questions</span>
                 </label>
+                <div className={"ml-auto flex gap-2"}>
+                    <button
+                        className={" text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-auto border-[1px] p-3 rounded-md cursor-pointer flex justify-center items-center"}
+                        onClick={() => {
+                            const selecteQIds = selectedQuestions.map((question) => question.id);
+                            if (!selectedAll) {
+                                questions.forEach(qstn => {
+                                    if (!selecteQIds.includes(qstn.id)) {
+                                        setSelectedQuestions(prevState => ([...prevState, {
+                                            id: qstn.id,
+                                            question: qstn.question,
+                                            created_by_name: qstn.created_by_name,
+                                            created_at: qstn.created_at,
+                                            created_by_id:qstn.created_by_id,
+                                        }]))
+                                    }
+                                })
+                            } else {
+                                questions.forEach(qstn => {
+                                    if (selecteQIds.includes(qstn.id)) {
+                                        setSelectedQuestions(prevState => (prevState.filter(pq => pq.id !== qstn.id)))
+                                    }
+                                })
+
+                            }
+                            setSelectedAll(prevState => !prevState)
+                        }}
+                    >
+                        <FontAwesomeIcon
+                            icon={faListCheck}
+                        />
+                    </button>
+
+                    <button
+                        className={"text-white bg-red-700 hover:bg-red-800 disabled:bg-red-300 disabled:cursor-auto border-[1px] p-3 rounded-md cursor-pointer flex justify-center items-center"}
+                        disabled={selectedQuestions.length === 0 || selectedQuestions.map(q => q.created_by_id).filter(cbid => cbid !== userInfo.user_id).length > 0}
+                        onClick={() => {
+                            setMultipleDeleteConfirmModalOpen(true)
+                        }}
+                    >
+                        <FontAwesomeIcon
+
+                            icon={faTrash}
+
+                        />
+                    </button>
+
+
+                </div>
 
                 <button
                     onClick={applyFilters}
-                    className="ml-auto flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                 >
                     <FontAwesomeIcon icon={faFilter}/>
                     Apply Filters
@@ -294,7 +375,7 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
                         setActiveQuestion(q);
                         setShowModal(true);
                     }}
-                    className={`w-full md:w-[25rem] h-[20rem] relative bg-white rounded-xl border shadow-sm p-6 transition-all duration-300 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
+                    className={`w-full md:w-[25rem] h-[20rem] relative bg-white rounded-xl border shadow-sm p-6 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
                 >
                     <div className="absolute top-4 left-4">
                         <button
@@ -624,11 +705,18 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
         <Dialog open={deleteConfirmModalOpen} onClose={() => setDeleteConfirmModalOpen(false)}
                 fullWidth
                 sx={{'& .MuiDialog-paper': {minHeight: "15rem"}}}>
-            <DialogTitle>Confirm delete?</DialogTitle>
+            <DialogTitle><FontAwesomeIcon size={"xl"} className={"text-red-800"} icon={faWarning}/>Confirm
+                delete?</DialogTitle>
             <DialogContent className="flex flex-col gap-4 mt-2 py-4">
                 {questionToEdit && (<>
                     Question: {questionToEdit.question}
                 </>)}
+                {mode === "edit" &&
+                    <p className={"text-red-800"}> Remember! The question will be permanently deleted. To
+                        remove questions from the quiz, just
+                        unselect the questions.</p>}
+                {mode === "full_control" &&
+                    <p className={"text-red-800"}> Remember! The question will be permanently deleted.</p>}
             </DialogContent>
             <DialogActions>
                 <Button onClick={() => {
@@ -639,6 +727,32 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
                 </Button>
             </DialogActions>
         </Dialog>
+
+
+        <Dialog open={multipleDeleteConfirmModalOpen} onClose={() => setMultipleDeleteConfirmModalOpen(false)}
+                fullWidth
+                sx={{'& .MuiDialog-paper': {minHeight: "15rem"}}}>
+            <DialogTitle><FontAwesomeIcon size={"xl"} className={"text-red-800"} icon={faWarning}/>Confirm
+                delete?</DialogTitle>
+            <DialogContent className="flex flex-col gap-4 mt-2 py-4">
+                Number of Questions about to be deleted: {selectedQuestions && selectedQuestions.length} <br/>
+                {mode === "edit" &&
+                    <p className={"text-red-800"}> Remember! The question(s) will be permanently deleted. To
+                        remove questions from the quiz, just
+                        unselect the questions.</p>}
+                {mode === "full_control" &&
+                    <p className={"text-red-800"}> Remember! The question(s) will be permanently deleted.</p>}
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => {
+                    setMultipleDeleteConfirmModalOpen(false)
+                }}>Cancel</Button>
+                <Button onClick={handleDeleteMultipleQuestions} variant="contained" color="primary">
+                    Delete
+                </Button>
+            </DialogActions>
+        </Dialog>
+
 
         <Dialog open={selectedQuestionsModalOpen} onClose={() => setSelectedQuestionsModalOpen(false)}
                 fullWidth
@@ -653,13 +767,13 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
                         <div
                             className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm w-full overflow-hidden">
                                 <span className="font-medium text-gray-800 truncate">
-                                  Q{index + 1}: {question.statement}
+                                  Q{index + 1}: {question.question}
                                 </span>
                             <span className="text-gray-500 hidden sm:inline">
-                                  · Created by {question.created_by}
+                                  · Created by {question.created_by_name}
                                 </span>
                             <span className="text-gray-400 hidden md:inline">
-                                  · {new Date(question.created_time).toLocaleString("ml-IN")}
+                                  · {new Date(question.created_at).toLocaleString("ml-IN")}
                                 </span>
                         </div>
 
@@ -681,10 +795,10 @@ function QuestionShowSelect({initialFetchIds, selectedQIds, setSelectedQIdsCallb
                 </button>
             </DialogActions>
         </Dialog>
-        {loading &&
-            <div className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-start">
-                <CircularProgress style={{ width: '10rem', height: '10rem' }} />
-            </div>}
+        {loading && <div
+            className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-start">
+            <CircularProgress style={{width: '10rem', height: '10rem'}}/>
+        </div>}
     </div>);
 }
 

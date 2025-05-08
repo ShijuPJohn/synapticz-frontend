@@ -13,7 +13,7 @@ import {
     faPlus,
     faDeleteLeft,
     faQuestion,
-    faHamburger, faBars
+    faHamburger, faBars, faListCheck
 } from '@fortawesome/free-solid-svg-icons';
 import {useSelector} from "react-redux";
 import {fetchURL} from "@/constants";
@@ -44,7 +44,7 @@ export default function QuestionsPage() {
     const [correctOptions, setCorrectOptions] = useState([]);
     const [tags, setTags] = useState([]);
     const [qName, setQName] = useState("");
-    const [qMode, setQMode] = useState("untimed");
+    const [qMode, setQMode] = useState("practice");
     const [qSubject, setQSubject] = useState("");
     const [qExam, setQExam] = useState("");
     const [qLanguage, setQLanguage] = useState("");
@@ -57,9 +57,9 @@ export default function QuestionsPage() {
     const [uploadedUrl, setUploadedUrl] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const [filters, setFilters] = useState({
-        subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
-    });
+    // const [filters, setFilters] = useState({
+    //     subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
+    // });
 
     function getHeaders() {
         return {
@@ -113,12 +113,9 @@ export default function QuestionsPage() {
             setExplanation("");
             setAnswerOptions(["", "", "", ""]);
             setCorrectOptions([]);
-            setFilters({
-                subject: '', exam: '', language: '', tags: '', hours: '1', created_by: '', self: false,
-            })
-            setFilters(prevState => {
-                return {...filters, hours: 1}
-            })
+            // setFilters(prevState => {
+            //     return {...filters, hours: 1}
+            // })
             enqueueSnackbar("Question created", {variant: 'success'});
         } catch (error) {
             enqueueSnackbar("Question creation failed", {variant: 'error'});
@@ -171,41 +168,55 @@ export default function QuestionsPage() {
             >
                 <FontAwesomeIcon icon={faBars}/>
             </div>
-            {floatingMenu &&
-                <div
-                    className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-32 w-48 bg-gray-200 shadow-md text-slate-700">
+            <Dialog open={floatingMenu} onClose={()=>{setFloatingMenu(false)}}>
                     <div
-                        className=" h-full w-full border-b gap-4  border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-cyan-300"
-                        onClick={() => {
-                            setNewQuestionDialogOpen(true)
-                        }}
-                    ><FontAwesomeIcon icon={faQuestion}/>
+                        className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-40 w-56 bg-gray-200 shadow-md text-slate-700">
+                        <div
+                            className="h-full w-full flex justify-center gap-4 border-b   border-b-gray-300  items-center cursor-pointer hover:bg-cyan-300"
+                            onClick={() => {
+                                router.push("/bulk-create-questions")
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faListCheck}/>
+                            Bulk Create Questions
+                        </div>
+                        <div
+                            className=" h-full w-full border-b gap-4  border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-cyan-300"
+                            onClick={() => {
+                                setNewQuestionDialogOpen(true)
+                            }}
+                        ><FontAwesomeIcon icon={faQuestion}/>
 
-                        New Question
+                            New Question
+                        </div>
+                        <div
+                            className=" h-full w-full border-b   border-b-gray-300  flex justify-center gap-4 items-center cursor-pointer hover:bg-cyan-300"
+                            onClick={() => {
+                                setNewQuizDialogOpen(true)
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faPlus}/>
+                            New Quiz
+                        </div>
+                        <div
+                            className="h-full w-full flex justify-center gap-4  items-center cursor-pointer hover:bg-cyan-300"
+                            onClick={() => {
+                                router.push("/edit-quiz")
+                            }}
+                        >
+                            <FontAwesomeIcon icon={faEdit}/>
+                            Edit Quizzes
+                        </div>
+
                     </div>
-                    <div
-                        className=" h-full w-full border-b   border-b-gray-300  flex justify-center gap-4 items-center cursor-pointer hover:bg-cyan-300"
-                        onClick={() => {
-                            setNewQuizDialogOpen(true)
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faPlus}/>
-                        New Quiz
-                    </div>
-                    <div
-                        className="h-full w-full flex justify-center gap-4  items-center cursor-pointer hover:bg-cyan-300"
-                        onClick={() => {
-                            router.push("/edit-quiz")
-                        }}
-                    >
-                        <FontAwesomeIcon icon={faEdit}/>
-                        Edit Quizzes
-                    </div>
-                </div>}
+            </Dialog>
+            {/*{floatingMenu &&*/}
+            {/*   }*/}
 
 
             <div className="bg-white shadow-lg mb-1 relative">
-                <QuestionShowSelect setSelectedQIdsCallback={setSelectedQuestions} selectedQIds={selectedQuestions} initialFetchIds={[]} filters={filters} setFilters={setFilters}/>
+                <QuestionShowSelect setSelectedQIdsCallback={setSelectedQuestions} selectedQIds={selectedQuestions} initialFetchIds={[]} mode={"full_control"}
+                />
             </div>
 
 
