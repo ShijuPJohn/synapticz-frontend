@@ -3,6 +3,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useSelector} from "react-redux";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
+    faArrowLeft, faArrowRight,
     faCheckSquare, faChevronDown, faChevronUp, faClose, faEdit, faFilter, faListCheck, faSquare, faTrash, faWarning
 } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -28,9 +29,12 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
     const [selectedQuestionsModalOpen, setSelectedQuestionsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [localFilters, setLocalFilters] = useState({
-        subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
+        subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false, noQs: 10, page: 1,
     });
     const [selectedAll, setSelectedAll] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [noQs, setNoQs] = useState(10);
+    const [totalNumberOfPages, setTotalNumberOfPages] = useState(0);
 
     const hourOptions = [{label: '1 hour', value: '1'}, {label: '2 hours', value: '2'}, {
         label: '4 hours', value: '4'
@@ -59,6 +63,8 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
         if (initialFetchIds?.length > 0) {
             try {
                 const response = await axios.get(`${fetchURL}/questions?qids=${initialFetchIds.join()}`, {headers: getHeaders()});
+                console.log("fetch response", response);
+                setTotalNumberOfPages(response.data.pagination.total_pages)
                 setQuestions(response.data.questions);
                 setSelectedQuestions(response.data.questions.map((question) => {
                     return {
@@ -80,14 +86,17 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
         }
     }
 
-    const fetchQuestions = async () => {       //TODO
+    const fetchQuestions = async (fltrs = localFilters) => {       //TODO
         const params = new URLSearchParams();
-        Object.entries(localFilters).forEach(([key, value]) => {
+        Object.entries(fltrs).forEach(([key, value]) => {
             if (value) params.append(key, value);
         });
         setLoading(true)
+        console.log("fetching this", `${fetchURL}/questions?${params.toString()}`)
         try {
             const response = await axios.get(`${fetchURL}/questions?${params.toString()}`, {headers: getHeaders()});
+            console.log("fetch response", response);
+            setTotalNumberOfPages(response.data.pagination.total_pages)
             setQuestions(response.data.questions ? response.data.questions : []);
             setQuestionsCount(response.data.questions.length);
             setSelectedAll(false)
@@ -223,13 +232,33 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
             setLoading(false);
         }
     }
-    useEffect(()=>{
-    },[selectedQuestions])
+
+    useEffect(() => {
+    }, [selectedQuestions])
 
 
     function applyFilters() {
         fetchQuestions();
     }
+
+    function prevPageHandler() {
+        setCurrentPage(prevState => {
+            return prevState - 1;
+        });
+    }
+
+    function nextPageHandler() {
+        setCurrentPage(prevState => prevState + 1);
+    }
+
+    useEffect(() => {
+        const updatedFilters = {
+            ...localFilters,
+            page: currentPage,
+        };
+        setLocalFilters(updatedFilters);
+        fetchQuestions(updatedFilters);
+    }, [currentPage]);
 
 
     return (<div className="p-1 w-full">
@@ -288,7 +317,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                                             question: qstn.question,
                                             created_by_name: qstn.created_by_name,
                                             created_at: qstn.created_at,
-                                            created_by_id:qstn.created_by_id,
+                                            created_by_id: qstn.created_by_id,
                                         }]))
                                     }
                                 })
@@ -439,8 +468,23 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                     </div>
                 </div>);
             })}
-        </div>
 
+        </div>
+        {questions?.length>0 &&  <div className="pagination-buttons-container w-full flex justify-center items-center gap-2">
+            <Button className={"flex gap-2 w-28"} variant={"contained"}
+                    disabled={currentPage <= 1}
+                    onClick={prevPageHandler}
+            >
+                <FontAwesomeIcon icon={faArrowLeft}/>Previous
+            </Button>
+            {`${currentPage}/${totalNumberOfPages}`}
+            <Button className={"flex gap-2 w-28"} variant={"contained"}
+                    disabled={currentPage >= totalNumberOfPages}
+                    onClick={nextPageHandler}
+            >
+                Next<FontAwesomeIcon icon={faArrowRight}/>
+            </Button>
+        </div>}
         {(!questions || questions.length === 0) && (
             <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-sm mt-8">
                 <p className="text-gray-500 text-lg font-medium">
