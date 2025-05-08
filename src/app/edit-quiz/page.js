@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import axios from "axios";
 import {useRouter, useSearchParams} from "next/navigation";
 import {fetchURL} from "@/constants";
@@ -10,7 +10,16 @@ import {useSelector} from "react-redux";
 import {enqueueSnackbar} from "notistack";
 import {Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEdit, faListCheck, faWarning} from "@fortawesome/free-solid-svg-icons";
+import {
+    faArrowLeft, faArrowRight,
+    faChevronDown,
+    faChevronUp,
+    faEdit, faEraser,
+    faFilter,
+    faListCheck, faSearch,
+    faTrash,
+    faWarning
+} from "@fortawesome/free-solid-svg-icons";
 import QuestionShowSelect from "@/components/question_show_select";
 import Image from "next/image";
 
@@ -18,7 +27,6 @@ import {Suspense} from 'react';
 
 const EditQuizComponent = () => {
     const searchParams = useSearchParams();
-    const searchTerm = searchParams.get("search")?.toLowerCase() || "";
     const [fetched, setFetched] = useState(false);
     const [questionSets, setQuestionSets] = useState([]);
     const [deleteConfirmModalOpen, setDeleteConfirmModalOpen] = useState(false);
@@ -31,9 +39,6 @@ const EditQuizComponent = () => {
     const [selectedQuestions, setSelectedQuestions] = useState([]);
     const [coverImagePreview, setCoverImagePreview] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState(null);
-    const [filters, setFilters] = useState({
-        subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
-    });
     const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
@@ -50,31 +55,49 @@ const EditQuizComponent = () => {
         coverImage: ""
     });
 
+    const [localFilters, setLocalFilters] = useState({
+        subject: '', exam: '', language: '', tags: '', created_by: '', self: false, page: 1, search: '',
+    });
+    const searchInputRef = useRef(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [noQs, setNoQs] = useState(10);
+    const [totalNumberOfPages, setTotalNumberOfPages] = useState(0);
+    const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+
     function getHeaders() {
         return {
             "Content-Type": "application/json", Authorization: `Bearer ${userInfo.token}`,
         };
     }
 
-    useEffect(() => {
-        const fetchSets = async () => {
-            setLoading(true);
-            try {
-                const res = await axios.get(`${fetchURL}/questionsets?search=${searchTerm}&uid=${userInfo.user_id}`);
-                const sets = res.data.map(item => ({
-                    ...item,
-                    coverImage: item.coverImage || "/images/placeholder_book.png",
-                }));
-                setQuestionSets(sets);
-            } catch (err) {
-                console.error("Failed to fetch sets:", err);
-            } finally {
-                setLoading(false);
-            }
-            setFetched(true)
-        };
-        fetchSets();
-    }, [searchTerm]);
+    const fetchSets = async (fltrs = localFilters) => {
+        setLoading(true);
+        const params = new URLSearchParams();
+        Object.entries(fltrs).forEach(([key, value]) => {
+            if (value) params.append(key, value);
+        });
+        try {
+            console.log("fetching this url", `${fetchURL}/questionsets??${params.toString()}&uid=${userInfo.user_id}`)
+            const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&uid=${userInfo.user_id}`);
+            console.log("got this response", res.data);
+            const sets = res.data.data.map(item => ({
+                ...item,
+                coverImage: item.coverImage || "/images/placeholder_book.png",
+            }));
+            setTotalNumberOfPages(res.data.pagination.total_pages)
+            setQuestionSets(sets);
+        } catch (err) {
+            console.error("Failed to fetch sets:", err);
+        } finally {
+            setLoading(false);
+        }
+        setFetched(true)
+    };
+
+    // useEffect(() => {
+    //     fetchSets();
+    // }, [searchTerm]);
 
     async function handleDeleteQuiz() {
         setLoading(true);
@@ -175,32 +198,132 @@ const EditQuizComponent = () => {
         }));
     }, [selectedQuestions]);
 
+    const toggleAdvancedFilters = () => {
+        if (showAdvancedFilters) {
+            setLocalFilters({
+                subject: '', exam: '', language: '', tags: '', created_by: '', self: false, page: 1,
+            })
+        } else {
+            setLocalFilters(prevState => ({...prevState, search: ''}))
+            searchInputRef.current.value="";
+        }
+        setShowAdvancedFilters(!showAdvancedFilters);
+    };
+    const handleChangeFilters = (e) => {
+        const {name, value, type, checked} = e.target;
+        setLocalFilters({
+            ...localFilters, [name]: type === 'checkbox' ? checked : value,
+        });
+    };
+
+    function applyFilters() {
+        fetchSets();
+    }
+
+    function prevPageHandler() {
+        setCurrentPage(prevState => {
+            return prevState - 1;
+        });
+    }
+
+    function nextPageHandler() {
+        setCurrentPage(prevState => prevState + 1);
+    }
+
+    useEffect(() => {
+        const updatedFilters = {
+            ...localFilters,
+            page: currentPage,
+        };
+        setLocalFilters(updatedFilters);
+        fetchSets(updatedFilters);
+    }, [currentPage]);
 
     return (
-        <>
-            <main className="">
-                <QuestionSetSearch searchTerm={searchTerm}/>
+        <div className="w-full">
+            <main className="w-full">
+                <div
+                    className="w-full md:w-[70%] lg:w-[60%] bg-[rgba(255,255,255,.6)] shadow-lg  py-2 px-4 rounded-2xl mb-2 border-[1px] border-gray-400">
+                    <div className="flex flex-wrap items-center justify-start gap-4">
+                        <input
+                            className={"w-[40%] md:w-[60%] rounded-2xl outline-none border-[1px] border-gray-400 bg-[rgba(255,255,255,.2)] p-2"}
+                            placeholder={"Search..."}
+                            name={"search"}
+                            onChange={handleChangeFilters}
+                            type={"text"}
+                            ref={searchInputRef}
+                        />
+                        <button
+                            onClick={applyFilters}
+                            className="flex items-center gap-2 h-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                        >
+                            <FontAwesomeIcon icon={faSearch}/>
+                        </button>
 
-                {loading ? (
+                        <button
+                            onClick={toggleAdvancedFilters}
+                            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-400 hover:bg-slate-500 transition-colors text-gray-700 font-medium"
+                        >
+                            <FontAwesomeIcon icon={showAdvancedFilters ? faEraser : faFilter}/>
+                            {showAdvancedFilters ? 'Clear Filters' : 'Advanced Filters'}
+                        </button>
+                    </div>
+
+                    <div
+                        className={`overflow-hidden transition-all duration-300 ${showAdvancedFilters ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+                    >
+                        <div className="border-t border-gray-200 pt-4 mt-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {['subject', 'exam', 'language', 'tags', 'created_by'].map((field) => (<input
+                                    key={field}
+                                    type="text"
+                                    placeholder={field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}
+                                    name={field}
+                                    value={localFilters[field]}
+                                    onChange={handleChangeFilters}
+                                    className="p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full text-gray-700 placeholder-gray-400 transition-all"
+                                />))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {loading ?
                     <p className="text-center text-gray-500">Loading question sets...</p>
-                ) : (
-                    questionSets.length > 0 ? (
-                        questionSets.map((set, index) => (
-                            <QuestionSetCard key={set.id} questionSet={set}
-                                             editDeleteButtons={userInfo.role === "owner" || userInfo.role === "admin" || userInfo.user_id === parseInt(set.created_by_id)}
-                                             setCurrentQuizCallback={setCurrentQuiz}
-                                             openEditModalCallback={() => {
-                                                 setShowEditModal(true)
-                                                 setCurrentQuiz(set)
-                                                 setSelectedQuestions(set.question_ids)
-                                             }}
-                                             openDeleteModalCallback={setDeleteConfirmModalOpen}
-                            />
-                        ))
-                    ) : (
+                    : questionSets.length > 0 ? (<div className={"w-full md:w-[70%] lg:w-[60%]"}>
+
+                            <div className={"w-full  flex flex-col gap-3"}>{
+                                questionSets.map((set, index) => (
+                                    <QuestionSetCard key={set.id} questionSet={set}
+                                                     editDeleteButtons={userInfo.role === "owner" || userInfo.role === "admin" || userInfo.user_id === parseInt(set.created_by_id)}
+                                                     setCurrentQuizCallback={setCurrentQuiz}
+                                                     openEditModalCallback={() => {
+                                                         setShowEditModal(true)
+                                                         setCurrentQuiz(set)
+                                                         setSelectedQuestions(set.question_ids)
+                                                     }}
+                                                     openDeleteModalCallback={setDeleteConfirmModalOpen}
+                                    />
+                                ))
+                            }</div>
+                            {totalNumberOfPages>1 && <div className="pagination-buttons-container w-full flex justify-center items-center gap-2">
+                                <Button className={"flex gap-2 w-28"} variant={"contained"}
+                                        disabled={currentPage <= 1}
+                                        onClick={prevPageHandler}
+                                >
+                                    <FontAwesomeIcon icon={faArrowLeft}/>Previous
+                                </Button>
+                                {`${currentPage}/${totalNumberOfPages}`}
+                                <Button className={"flex gap-2 w-28"} variant={"contained"}
+                                        disabled={currentPage >= totalNumberOfPages}
+                                        onClick={nextPageHandler}
+                                >
+                                    Next<FontAwesomeIcon icon={faArrowRight}/>
+                                </Button>
+                            </div>}
+                        </div>) :
                         <p className="text-center text-gray-500">No question sets found.</p>
-                    )
-                )}
+
+                }
             </main>
             <Dialog open={deleteConfirmModalOpen} onClose={() => setDeleteConfirmModalOpen(false)}
                     fullWidth
@@ -416,22 +539,22 @@ const EditQuizComponent = () => {
             <Dialog open={showQuestionsModal} onClose={() => {
                 setShowQuestionsModal(false)
             }}
-                                    fullWidth
-                                    sx={{
-                                        '& .MuiDialog-paper': {
-                                            minHeight: "15rem",
-                                            height: "100%",
-                                            minWidth: "98%",
-                                            width: "100%",
-                                            margin: "0"
-                                        }
-                                    }}>
+                    fullWidth
+                    sx={{
+                        '& .MuiDialog-paper': {
+                            minHeight: "15rem",
+                            height: "100%",
+                            minWidth: "98%",
+                            width: "100%",
+                            margin: "0"
+                        }
+                    }}>
                 <DialogTitle>Select Questions</DialogTitle>
                 <DialogContent className="flex flex-col gap-4 mt-2 py-4">
                     <QuestionShowSelect initialFetchIds={currentQuiz.question_ids}
                                         setSelectedQIdsCallback={setSelectedQuestions}
                                         mode={"edit"}
-                                      />
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button variant={"contained"} onClick={() => {
@@ -441,7 +564,7 @@ const EditQuizComponent = () => {
             </Dialog>
 
 
-        </>
+        </div>
     );
 };
 

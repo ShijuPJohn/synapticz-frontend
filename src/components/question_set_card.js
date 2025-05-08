@@ -19,7 +19,7 @@ function QuestionSetCard({
         if (!editDeleteButtons) {
             return (
                 <div
-                    className="w-full md:w-[70%] lg:w-[60%] mx-auto 4">
+                    className="w-full mx-auto 4">
                     <Link href={`/quizzes/${questionSet.id}`}
                           className={"w-full bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm transition p-4 block"}>
                         {child}
@@ -29,7 +29,7 @@ function QuestionSetCard({
         } else {
             return (
                 <div
-                    className="w-full md:w-[70%] lg:w-[60%] mx-auto px-4 bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm transition p-4 flex">
+                    className="w-full mx-auto px-4 bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm transition p-4 flex">
                     {child}
                 </div>);
 
