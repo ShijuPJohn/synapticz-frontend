@@ -70,7 +70,7 @@ function QuestionSetCard({
                         </p>
                         <p>
                             <span className="font-medium text-slate-500">Questions:</span>{" "}
-                            {questionSet.question_ids.length}
+                            {questionSet.question_ids?.length || 0}
                         </p>
                     </div>
                 </div>
@@ -81,7 +81,7 @@ function QuestionSetCard({
                     <FontAwesomeIcon icon={faEdit} size={"lg"} className={"cursor-pointer text-teal-600"}
                                      onClick={(e)=>{
                                          e.stopPropagation();
-                                         setCurrentQuizCallback(questionSet)
+                                         // setCurrentQuizCallback(questionSet)
                                          openEditModalCallback(true);
                                      }}/>
                     <FontAwesomeIcon icon={faTrash} size={"lg"} className={"cursor-pointer text-red-700"}

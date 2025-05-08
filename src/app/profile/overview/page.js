@@ -119,6 +119,7 @@ export default function UserActivityPage() {
                                         alt={"edit-profile picture"}
                                         fill
                                         priority
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         className="object-cover min-w-full min-h-full"
                                     />
                                     : <User className="w-6 h-6 text-cyan-700"/>}

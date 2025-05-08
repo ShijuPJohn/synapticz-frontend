@@ -10,11 +10,11 @@ import {useSelector} from "react-redux";
 import {enqueueSnackbar} from "notistack";
 import {Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faEdit, faListCheck} from "@fortawesome/free-solid-svg-icons";
+import {faEdit, faListCheck, faWarning} from "@fortawesome/free-solid-svg-icons";
 import QuestionShowSelect from "@/components/question_show_select";
 import Image from "next/image";
 
-import { Suspense } from 'react';
+import {Suspense} from 'react';
 
 const EditQuizComponent = () => {
     const searchParams = useSearchParams();
@@ -22,7 +22,7 @@ const EditQuizComponent = () => {
     const [fetched, setFetched] = useState(false);
     const [questionSets, setQuestionSets] = useState([]);
     const [deleteConfirmModalOpen, setDeleteConfirmModalOpen] = useState(false);
-    const [currentQuiz, setCurrentQuiz] = useState(null);
+    const [currentQuiz, setCurrentQuiz] = useState({});
     const userLogin = useSelector((state) => state.user);
     const {userInfo} = userLogin;
     const [showEditModal, setShowEditModal] = useState(false);
@@ -106,12 +106,13 @@ const EditQuizComponent = () => {
             setQuestionSets(prev => {
                 return prev.map(qSet =>
                     qSet.id === currentQuiz.id
-                        ? {...qSet, ...formData, coverImage: uploadedUrl?uploadedUrl:currentQuiz.coverImage}
+                        ? {...qSet, ...formData, coverImage: uploadedUrl ? uploadedUrl : currentQuiz.coverImage}
                         : qSet
                 );
             });
             setUploadedUrl(null);
             setShowEditModal(false);
+            setSelectedQuestions([])
             enqueueSnackbar("Question set updated successfully!", {variant: "success"});
         } catch (error) {
             console.error("Failed to update questionSet set:", error);
@@ -188,7 +189,11 @@ const EditQuizComponent = () => {
                             <QuestionSetCard key={set.id} questionSet={set}
                                              editDeleteButtons={userInfo.role === "owner" || userInfo.role === "admin" || userInfo.user_id === parseInt(set.created_by_id)}
                                              setCurrentQuizCallback={setCurrentQuiz}
-                                             openEditModalCallback={setShowEditModal}
+                                             openEditModalCallback={() => {
+                                                 setShowEditModal(true)
+                                                 setCurrentQuiz(set)
+                                                 setSelectedQuestions(set.question_ids)
+                                             }}
                                              openDeleteModalCallback={setDeleteConfirmModalOpen}
                             />
                         ))
@@ -200,11 +205,13 @@ const EditQuizComponent = () => {
             <Dialog open={deleteConfirmModalOpen} onClose={() => setDeleteConfirmModalOpen(false)}
                     fullWidth
                     sx={{'& .MuiDialog-paper': {minHeight: "15rem"}}}>
-                <DialogTitle>Confirm delete?</DialogTitle>
+                <DialogTitle><FontAwesomeIcon size={"xl"} className={"text-red-800"} icon={faWarning}/> Confirm delete?</DialogTitle>
                 <DialogContent className="flex flex-col gap-4 mt-2 py-4">
                     {currentQuiz && (<>
                         Question: {currentQuiz.name}
                     </>)}
+
+                    <p className={"text-red-800"}> Remember! This quiz will be permanently deleted.</p>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => {
@@ -217,7 +224,10 @@ const EditQuizComponent = () => {
             </Dialog>
 
 
-            <Dialog open={showEditModal} onClose={() => setShowEditModal(false)}
+            <Dialog open={showEditModal} onClose={() => {
+                setShowEditModal(false)
+                setSelectedQuestions([])
+            }}
                     fullWidth
                     sx={{
                         '& .MuiDialog-paper': {
@@ -370,16 +380,17 @@ const EditQuizComponent = () => {
                                 label="Question IDs"
                                 fullWidth
                                 margin="normal"
+                                disabled
                                 value={(selectedQuestions || []).join(", ")}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        question_ids: e.target.value
-                                            .split(",")
-                                            .map((id) => parseInt(id.trim()))
-                                            .filter((id) => !isNaN(id)),
-                                    })
-                                }
+                                // onChange={(e) =>
+                                //     setFormData({
+                                //         ...formData,
+                                //         question_ids: e.target.value
+                                //             .split(",")
+                                //             .map((id) => parseInt(id.trim()))
+                                //             .filter((id) => !isNaN(id)),
+                                //     })
+                                // }
                                 helperText="Comma-separated question IDs"
                             />}
                             <FontAwesomeIcon icon={faListCheck} size={"xl"}
@@ -402,7 +413,9 @@ const EditQuizComponent = () => {
                 </DialogActions>
             </Dialog>
 
-            {currentQuiz && <Dialog open={showQuestionsModal} onClose={() => setShowQuestionsModal(false)}
+            <Dialog open={showQuestionsModal} onClose={() => {
+                setShowQuestionsModal(false)
+            }}
                                     fullWidth
                                     sx={{
                                         '& .MuiDialog-paper': {
@@ -415,25 +428,29 @@ const EditQuizComponent = () => {
                                     }}>
                 <DialogTitle>Select Questions</DialogTitle>
                 <DialogContent className="flex flex-col gap-4 mt-2 py-4">
-                    <QuestionShowSelect initialFetchIds={currentQuiz.question_ids} selectedQIds={selectedQuestions}
-                                        setSelectedQIdsCallback={setSelectedQuestions} filters={filters} setFilters={setFilters}/>
+                    <QuestionShowSelect initialFetchIds={currentQuiz.question_ids}
+                                        setSelectedQIdsCallback={setSelectedQuestions}
+                                        mode={"edit"}
+                                      />
                 </DialogContent>
                 <DialogActions>
                     <Button variant={"contained"} onClick={() => {
                         setShowQuestionsModal(false);
                     }}>Done</Button>
                 </DialogActions>
-            </Dialog>}
+            </Dialog>
 
 
         </>
     );
 };
+
 function Page() {
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <EditQuizComponent />
+            <EditQuizComponent/>
         </Suspense>
     );
 }
+
 export default Page;
