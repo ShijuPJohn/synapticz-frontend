@@ -19,8 +19,7 @@ async function Page({searchParams}) {
             if (value && key !== 'page') params.append(key, value);
         });
 
-        console.log("fetching this", `${fetchURL}/questionsets?${params.toString()}&page=${currentPage}`);
-        const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&page=${currentPage}`);
+       const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&page=${currentPage}`);
 
         questionSets = res.data.data.map((item) => ({
             ...item,

@@ -63,7 +63,6 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
         if (initialFetchIds?.length > 0) {
             try {
                 const response = await axios.get(`${fetchURL}/questions?qids=${initialFetchIds.join()}`, {headers: getHeaders()});
-                console.log("fetch response", response);
                 setTotalNumberOfPages(response.data.pagination.total_pages)
                 setQuestions(response.data.questions);
                 setSelectedQuestions(response.data.questions.map((question) => {
@@ -92,10 +91,8 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
             if (value) params.append(key, value);
         });
         setLoading(true)
-        console.log("fetching this", `${fetchURL}/questions?${params.toString()}`)
         try {
             const response = await axios.get(`${fetchURL}/questions?${params.toString()}`, {headers: getHeaders()});
-            console.log("fetch response", response);
             setTotalNumberOfPages(response.data.pagination.total_pages)
             setQuestions(response.data.questions ? response.data.questions : []);
             setQuestionsCount(response.data.questions.length);

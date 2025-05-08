@@ -78,9 +78,7 @@ const EditQuizComponent = () => {
             if (value) params.append(key, value);
         });
         try {
-            console.log("fetching this url", `${fetchURL}/questionsets??${params.toString()}&uid=${userInfo.user_id}`)
-            const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&uid=${userInfo.user_id}`);
-            console.log("got this response", res.data);
+           const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&uid=${userInfo.user_id}`);
             const sets = res.data.data.map(item => ({
                 ...item,
                 coverImage: item.coverImage || "/images/placeholder_book.png",
