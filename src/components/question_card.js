@@ -1,12 +1,13 @@
 "use client"
 import React from "react";
+import MarkdownWithMath from "@/components/markdown_with_math";
 
-export default function QuestionCard({ question, onRemove }) {
-    const { id, question: qText, options, correct_options, explanation, question_type } = question;
+export default function QuestionCard({question, onRemove}) {
+    const {id, question: qText, options, correct_options, explanation, question_type} = question;
 
     return (
         <div className="bg-white shadow rounded-xl p-4 border border-gray-200 space-y-2">
-            <h3 className="font-semibold text-lg">Q{ id }: {qText}</h3>
+            <h3 className="font-semibold text-lg">Q{id}: <MarkdownWithMath content={qText}/></h3>
             <ul className="list-disc ml-6 space-y-1">
                 {options.map((opt, idx) => (
                     <li
@@ -17,13 +18,13 @@ export default function QuestionCard({ question, onRemove }) {
                                 : "text-gray-800"
                         }
                     >
-                        {opt}
+                        <MarkdownWithMath content={opt} key={idx} />
                     </li>
                 ))}
             </ul>
             <p className="text-sm text-gray-600 italic">Type: {question_type}</p>
             <p className="text-sm text-gray-700">
-                <strong>Explanation:</strong> {explanation}
+                <strong>Explanation:</strong> <MarkdownWithMath content={explanation}/>
             </p>
             <button
                 onClick={onRemove}
