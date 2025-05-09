@@ -10,5 +10,6 @@ export const protectedRoutePrefixes = [
     "/test",
     "/admin-dashboard",
     "/create-quizzes",
-    "/edit-quiz"
+    "/edit-quiz",
+    "/bulk-create-questions"
 ];
