@@ -70,6 +70,9 @@ function Page({params}) {
     const correctSound = new Audio("/audio_clips/correct.mp3")
     const wrongSound = new Audio("/audio_clips/wrong.mp3")
     const selectionSound = new Audio("/audio_clips/selection.mp3")
+    const [animationKey, setAnimationKey] = useState(0);
+    // const labelText = type === "single" ? "Single" : "Multi";
+    // const bgClass = currentQuestion.type === "single" ? "bg-blue-600" : "bg-purple-600"
     const handleClickOpen = () => {
         setDialogOpen(true);
     };
@@ -128,13 +131,14 @@ function Page({params}) {
                 setSecondsCount(prev => prev - 1);
             }, 1000);
         } else {
-            setSecondsCount(0);
+            // setSecondsCount(0);
+            clearInterval(countHandle);
         }
 
         return () => clearInterval(countHandle);
     }, [currentQuestionIndex, isCurrentQuestionAnswered, fetched]);
     useEffect(() => {
-        if (fetched && secondsCount <= 0) {
+        if (fetched && secondsCount <= 0 && !isCurrentQuestionAnswered) {
             setLockQuestion(false)
             clearInterval(countHandle)
             checkAndMarkAnswer()
@@ -143,8 +147,18 @@ function Page({params}) {
     useEffect(() => {
         setIsCurrentQuestionBookmarked(bookmarkedQuestionIds[currentQuestionId])
         setIsCurrentQuestionExplanationSaved(savedExplanationQuestionIds[currentQuestionId])
+        if (
+            fetched &&
+            mode === "q_timed" &&
+            isCurrentQuestionAnswered
+        ){
+            setSecondsCount(questionAnswerData[questionIdsOrdered[currentQuestionIndex]].time_taken?secondsPerQuestion - questionAnswerData[questionIdsOrdered[currentQuestionIndex]].time_taken:0)
+        }
     }, [currentQuestionId])
-
+    useEffect(() => {
+        // Update key to re-trigger animation
+        setAnimationKey((k) => k + 1);
+    }, [currentQuestion]);
 
     const triggerConfetti = () => {
         if (answerButtonRef.current) {
@@ -266,6 +280,9 @@ function Page({params}) {
         setQuestionAnswerData(prevState => {
             let prevCopy = {...prevState};
             prevCopy[questionIdsOrdered[currentQuestionIndex]].answered = true;
+            if (mode === "q_timed") {
+                prevCopy[questionIdsOrdered[currentQuestionIndex]].time_taken = secondsPerQuestion - secondsCount;
+            }
             prevCopy[questionIdsOrdered[currentQuestionIndex]].selected_answer_list = selectedOptions[currentQuestionIndex];
             return prevCopy;
         });
@@ -538,7 +555,8 @@ function Page({params}) {
                                 <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
 
                                 {currentQuestion && (
-                                    <h4 className="text-blue-300 uppercase">
+                                    <h4  key={animationKey}
+                                         className={`animate-popIn inline-block px-3 py-1 rounded-full text-red-500 text-md font-semibold uppercase`}>
                                         {currentQuestion.question_type === "m-select" ? "Multi" : "Single"}
                                     </h4>
                                 )}
@@ -595,12 +613,16 @@ function Page({params}) {
                                                 correctOptions[currentQuestionIndex]?.includes(index) ? "bg-green-300" : ""
                                             }`}
                                             style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
-                                        >{correctOptions[currentQuestionIndex].length > 1 ? <div
-                                                className={`w-[1rem] h-[1rem] border-[4px] border-gray-100 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div> :
-                                            <div
-                                                className={`w-[1rem] h-[1rem]  rounded-2xl border-[4px] border-slate-300 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div>}
-                                            <h4 className="quiz_box_option text-sm md:text-base"><MarkdownWithMath
-                                                content={option}/></h4>
+                                        >
+                                            <div className={"w-full flex justify-start items-center gap-2"}>
+
+                                                {correctOptions[currentQuestionIndex].length > 1 ? <div
+                                                        className={`w-[1rem] h-[1rem] border-[4px] border-gray-100 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div> :
+                                                    <div
+                                                        className={`w-[1rem] h-[1rem]  rounded-2xl border-[4px] border-slate-300 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div>}
+                                                <h4 className="quiz_box_option text-sm md:text-base"><MarkdownWithMath
+                                                    content={option}/></h4>
+                                            </div>
                                             {isCurrentQuestionAnswered &&
                                                 selectedOptions[currentQuestionIndex]?.includes(index) &&
                                                 correctOptions[currentQuestionIndex]?.includes(index) && (
