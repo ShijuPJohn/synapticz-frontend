@@ -241,10 +241,10 @@ const EditQuizComponent = () => {
         <div className="w-full">
             <main className="w-full">
                 <div
-                    className="w-full md:w-[70%] lg:w-[60%] bg-[rgba(255,255,255,.6)] shadow-lg  py-2 px-4 rounded-2xl mb-2 border-[1px] border-gray-400">
-                    <div className="flex flex-wrap items-center justify-start gap-4">
+                    className="w-full md:w-[80%] lg:w-[70%] xl:w-[60%] bg-[rgba(255,255,255,.6)] shadow-lg  p-2 md:p-4 rounded-2xl mb-2 border-[1px] border-gray-400">
+                    <div className="flex flex-wrap items-center justify-start gap-2">
                         <input
-                            className={"w-[40%] md:w-[60%] rounded-2xl outline-none border-[1px] border-gray-400 bg-[rgba(255,255,255,.2)] p-2"}
+                            className={"w-[60%] lg:w-[70%] rounded-2xl outline-none border-[1px] border-gray-400 bg-[rgba(255,255,255,.2)] p-2"}
                             placeholder={"Search..."}
                             name={"search"}
                             onChange={handleChangeFilters}
@@ -263,7 +263,7 @@ const EditQuizComponent = () => {
                             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-400 hover:bg-slate-500 transition-colors text-gray-700 font-medium"
                         >
                             <FontAwesomeIcon icon={showAdvancedFilters ? faEraser : faFilter}/>
-                            {showAdvancedFilters ? 'Clear Filters' : 'Advanced Filters'}
+                            <span className={"hidden md:block"}>{showAdvancedFilters ? 'Clear Filters' : 'Filters'}</span>
                         </button>
                     </div>
 
@@ -287,7 +287,7 @@ const EditQuizComponent = () => {
                 </div>
                 {loading ?
                     <p className="text-center text-gray-500">Loading question sets...</p>
-                    : questionSets.length > 0 ? (<div className={"w-full md:w-[70%] lg:w-[60%]"}>
+                    : questionSets.length > 0 ? (<div className={"w-full md:w-[80%] lg:w-[70%] xl:w-[60%]"}>
 
                             <div className={"w-full  flex flex-col gap-3"}>{
                                 questionSets.map((set, index) => (
@@ -325,7 +325,7 @@ const EditQuizComponent = () => {
             </main>
             <Dialog open={deleteConfirmModalOpen} onClose={() => setDeleteConfirmModalOpen(false)}
                     fullWidth
-                    sx={{'& .MuiDialog-paper': {minHeight: "15rem"}}}>
+                    sx={{'& .MuiDialog-paper': {minHeight: "15rem", minWidth: "80%", width: "100%", margin: "0"}}}>
                 <DialogTitle><FontAwesomeIcon size={"xl"} className={"text-red-800"} icon={faWarning}/> Confirm delete?</DialogTitle>
                 <DialogContent className="flex flex-col gap-4 mt-2 py-4">
                     {currentQuiz && (<>
@@ -354,14 +354,13 @@ const EditQuizComponent = () => {
                         '& .MuiDialog-paper': {
                             minHeight: "15rem",
                             height: "100%",
-                            minWidth: "50%",
-                            width: "65%",
+                            width: "100%",
                             margin: "0"
                         }
                     }}>
                 <DialogTitle>Edit the Quiz</DialogTitle>
-                <DialogContent className="flex flex-col gap-4 mt-2 py-4">
-                    <div className="p-2 max-w-3xl lg:mx-auto bg-white ">
+                <DialogContent className="w-full flex flex-col gap-4 mt-2 py-4">
+                    <div className="w-full lg:mx-auto bg-white ">
                         <TextField
                             label="Name"
                             fullWidth

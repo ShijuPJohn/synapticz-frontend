@@ -4,6 +4,7 @@ import {useSelector} from "react-redux";
 import axios from "axios";
 import {fetchURL} from "@/constants";
 import {
+    faCheck,
     faFlagCheckered,
     faPhoneVolume,
     faSave,
@@ -164,7 +165,6 @@ function Page({params}) {
     };
 
 
-
     async function fetchTestById(id) {
         const headers = {
             'Content-Type': 'application/json',
@@ -246,16 +246,17 @@ function Page({params}) {
             }
         }
     }
-    function playSound(status){
-       if (!muted){
-           if (status === 'right') {
-               correctSound.play();
-           } else if (status === 'wrong') {
-               wrongSound.play();
-           } else if (status === 'selection') {
-               selectionSound.play();
-           }
-       }
+
+    function playSound(status) {
+        if (!muted) {
+            if (status === 'right') {
+                correctSound.play();
+            } else if (status === 'wrong') {
+                wrongSound.play();
+            } else if (status === 'selection') {
+                // selectionSound.play();
+            }
+        }
     }
 
     function checkAndMarkAnswer() {
@@ -547,11 +548,11 @@ function Page({params}) {
                                 ) : (
                                     <div className={"flex justify-center items-center gap-4"}>
                                         <button
-                                        onClick={()=>{
-                                            setMuted(prev=>!prev);
-                                        }}
+                                            onClick={() => {
+                                                setMuted(prev => !prev);
+                                            }}
                                         >
-                                            <FontAwesomeIcon icon={muted?faVolumeMute:faVolumeUp} color={"brown"}/>
+                                            <FontAwesomeIcon icon={muted ? faVolumeMute : faVolumeUp} color={"brown"}/>
                                         </button>
                                         <button
                                             className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap px-2 py-[.3rem] border-[1px] border-amber-600"
@@ -594,7 +595,10 @@ function Page({params}) {
                                                 correctOptions[currentQuestionIndex]?.includes(index) ? "bg-green-300" : ""
                                             }`}
                                             style={isCurrentQuestionAnswered || finished ? {cursor: "default"} : {cursor: "pointer"}}
-                                        >
+                                        >{correctOptions[currentQuestionIndex].length > 1 ? <div
+                                                className={`w-[1rem] h-[1rem] border-[4px] border-gray-100 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div> :
+                                            <div
+                                                className={`w-[1rem] h-[1rem]  rounded-2xl border-[4px] border-slate-300 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div>}
                                             <h4 className="quiz_box_option text-sm md:text-base"><MarkdownWithMath
                                                 content={option}/></h4>
                                             {isCurrentQuestionAnswered &&
@@ -650,8 +654,8 @@ function Page({params}) {
 
                                 {(isCurrentQuestionAnswered || finished) && currentQuestion?.explanation && (
                                     <div
-                                        className={`quiz_box_explanation_box flex justify-between border-[1px] ${isCurrentQuestionExplanationSaved ? "bg-amber-100" : "bg-white"} border-amber-500 mt-4 max-h-40 overflow-y-auto text-md md:text-lg text-gray-700`}>
-                                        <p className={"m-2"}><MarkdownWithMath content={currentQuestion.explanation}/>
+                                        className={`flex justify-between  ${isCurrentQuestionExplanationSaved ? "bg-amber-100" : "bg-white"}  mt-4 overflow-y-auto text-[.85rem] md:text-[1rem] text-gray-700`}>
+                                        <p className={"p-1"}><MarkdownWithMath content={currentQuestion.explanation}/>
                                         </p>
                                         <div
                                             className="explanation-save-btn p-[.5rem] bg-amber-800x max-w-[2rem] max-h-[2rem] flex justify-center items-center border-[1px] cursor-pointer hover:bg-amber-100 shadow-md hover:shadow-lg"

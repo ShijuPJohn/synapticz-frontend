@@ -49,9 +49,9 @@ function StartSessionControlBox({qid}) {
     const {userInfo} = userLogin
     const router = useRouter();
     const pathname = usePathname(); // Get current path
-    const [timingEnabled, setTimingEnabled] = useState(false);
-    const [timingMode, setTimingMode] = useState(""); // "per-question" or "total"
-    const [secondsPerQuestion, setSecondsPerQuestion] = useState(10);
+    const [timingEnabled, setTimingEnabled] = useState(true);
+    const [timingMode, setTimingMode] = useState("per-question"); // "per-question" or "total"
+    const [secondsPerQuestion, setSecondsPerQuestion] = useState(20);
     const [totalTimeCapMinutes, setTotalTimeCapMinutes] = useState(60);
     return (<>
             <section className="mb-10">
@@ -70,7 +70,7 @@ function StartSessionControlBox({qid}) {
                         }}
                         color="primary"
                     />}
-                    label={timingEnabled ? "Timed" : "Not timed"}
+                    label={"Timed/Untimed"}
                 />
                 <Box className="mt-4 ml-4 p-4 border rounded-lg border-purple-200 bg-purple-50">
                     <FormControl component="fieldset">

@@ -88,7 +88,12 @@ const LoginPage = () => {
                     </h3>
                     <button
                         className={`w-full p-3 border border-gray-300 rounded-md bg-white text-slate-800 flex gap-2 justify-center items-center`}
-                        onClick={() => window.location.href = `${fetchURL}/auth/google-login`}
+                        onClick={() => {
+                            const params = new URLSearchParams(window.location.search);
+                            const retunUrl = params.get('returnUrl') || '/';
+                            localStorage.setItem("current_url", retunUrl)
+                            window.location.href = `${fetchURL}/auth/google-login`
+                        }}
                     >
                         <Image src={"/images/google_icon.png"} alt={"Google"} width={25} height={25}/>
                         Login with Google
