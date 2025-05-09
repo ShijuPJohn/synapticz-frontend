@@ -272,7 +272,7 @@ const EditQuizComponent = () => {
                     >
                         <div className="border-t border-gray-200 pt-4 mt-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {['subject', 'exam', 'language', 'tags', 'created_by'].map((field) => (<input
+                                {['subject', 'exam', 'language', 'tags', 'created_by','resource'].map((field) => (<input
                                     key={field}
                                     type="text"
                                     placeholder={field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}

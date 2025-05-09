@@ -106,7 +106,7 @@ export default function ImportQuestionsPage() {
 
             </div>
 
-            <div className="w-full h-[67vh] p-4 border-[1px] text-lg ">
+            <div className="w-full h-[67vh] p-2  md:p-4 border-[1px] text-lg ">
                 <Editor
                     height="100%"
                     defaultLanguage="json"
