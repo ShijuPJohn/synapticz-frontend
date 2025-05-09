@@ -10,6 +10,15 @@ module.exports = {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+      }, keyframes: {
+        popIn: {
+          '0%': { transform: 'scale(2.5)', opacity: '0' },
+          '50%': { transform: 'scale(1.2)', opacity: '1' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+      },
+      animation: {
+        popIn: 'popIn 0.6s ease-out',
       },
     },
   },
