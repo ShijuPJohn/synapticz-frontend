@@ -45,7 +45,7 @@ export default function QuestionSetSearch() {
 
         // Show advanced filters if any advanced filter is present
         setShowAdvancedFilters(
-            ['subject', 'exam', 'language', 'tags', 'created_by', 'self'].some(
+            ['subject', 'exam', 'language', 'tags', 'created_by', 'self', 'resource'].some(
                 param => searchParams.has(param))
         );
     }, [searchParams]);
@@ -69,6 +69,7 @@ export default function QuestionSetSearch() {
                 language: '',
                 tags: '',
                 created_by: '',
+                resource:'',
                 self: false
             }));
         } else{
@@ -129,7 +130,7 @@ export default function QuestionSetSearch() {
             >
                 <div className="border-t border-gray-200 pt-4 mt-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {['subject', 'exam', 'language', 'tags', 'created_by'].map((field) => (
+                        {['subject', 'exam', 'language', 'tags', 'created_by', 'resource'].map((field) => (
                             <input
                                 key={field}
                                 type="text"

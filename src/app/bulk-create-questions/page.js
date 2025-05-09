@@ -106,7 +106,7 @@ export default function ImportQuestionsPage() {
 
             </div>
 
-            <div className="w-full h-[67vh] p-4 border-[1px] text-lg ">
+            <div className="w-full h-[67vh] p-2  md:p-4 border-[1px] text-lg ">
                 <Editor
                     height="100%"
                     defaultLanguage="json"
@@ -169,19 +169,25 @@ export default function ImportQuestionsPage() {
                     ) : (
                         <pre className="bg-gray-100 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap">
 {`{
-  "title": "Sample Quiz",
-  "description": "This is a sample quiz",
-  "duration": 30,
-  "questions": ["questionId1", "questionId2", "questionId3"],
-  "isPublished": false,
-  "passingPercentage": 60
+  "name": "Organic Chemistry Practice Set - 1",
+  "mode": "practice",
+  "subject": "Organic Chemistry",
+  "exam": "General",
+  "language": "english",
+  "time_duration": 40,
+  "description": "A carefully curated set of questions from Organic Chemistry designed to help students strengthen their fundamentals and prepare for general competitive exams.",
+  "associated_resource": "https://example.com/organic-chemistry-practice-material",
+  "question_ids": [1,2,3],
+  "tags": ["science", "chemistry", "organic chemistry"]
 }
 `}
                         </pre>
                     )}
-                    If you're using an AI tool like ChatGPT/DeepSeek/Gemini/Grok/Claude/Perplexity etc. to generate
+                    {mode === 'questions' ? `If you're using an AI tool like ChatGPT/DeepSeek/Gemini/Grok/Claude/Perplexity etc. to generate
                     questions, copy and paste this question format, and prompt like this:
-                    "Generate a set of 10 questions in organic chemistry in this format"
+                    "Generate a set of 10 questions in organic chemistry in this format"`:`If you're using an AI tool like ChatGPT/DeepSeek/Gemini/Grok/Claude/Perplexity etc. to generate
+                    questions, copy and paste this question format, and prompt like this:
+                    "Generate the json for creating a quiz in this format". And, add details like subject, language, exam, tags, description etc."`}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleDialogToggle} variant="contained">

@@ -3,7 +3,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useSelector} from "react-redux";
 import axios from "axios";
 import {fetchURL} from "@/constants";
-import {faFlagCheckered, faSave, faStar} from "@fortawesome/free-solid-svg-icons";
+import {
+    faFlagCheckered,
+    faPhoneVolume,
+    faSave,
+    faStar,
+    faVolumeMute,
+    faVolumeUp
+} from "@fortawesome/free-solid-svg-icons";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import confetti from "canvas-confetti";
 import {
@@ -58,7 +65,10 @@ function Page({params}) {
     const [bookmarkedQuestionIds, setBookmarkedQuestionIds] = useState({});
     const [savedExplanationQuestionIds, setSavedExplanationQuestionIds] = useState({});
     const [isCurrentQuestionExplanationSaved, setIsCurrentQuestionExplanationSaved] = useState(false);
-
+    const [muted, setMuted] = useState(false);
+    const correctSound = new Audio("/audio_clips/correct.mp3")
+    const wrongSound = new Audio("/audio_clips/wrong.mp3")
+    const selectionSound = new Audio("/audio_clips/selection.mp3")
     const handleClickOpen = () => {
         setDialogOpen(true);
     };
@@ -154,6 +164,7 @@ function Page({params}) {
     };
 
 
+
     async function fetchTestById(id) {
         const headers = {
             'Content-Type': 'application/json',
@@ -235,6 +246,17 @@ function Page({params}) {
             }
         }
     }
+    function playSound(status){
+       if (!muted){
+           if (status === 'right') {
+               correctSound.play();
+           } else if (status === 'wrong') {
+               wrongSound.play();
+           } else if (status === 'selection') {
+               selectionSound.play();
+           }
+       }
+    }
 
     function checkAndMarkAnswer() {
         setLockQuestion(false)
@@ -249,11 +271,13 @@ function Page({params}) {
 
         if (questionAnswerData[currentQuestionId]?.question_type === "m-choice") {
             if (selectedOptions[currentQuestionIndex][0] === correctOptions[currentQuestionIndex][0]) {
+                playSound("right");
                 triggerConfetti();
                 setScoredMark(ts => {
                     return ts + (questionAnswerData[questionIdsOrdered[currentQuestionIndex]]?.questions_total_mark || 0);
                 });
             } else {
+                playSound("wrong");
                 setShowRedSplash(true);
                 setTimeout(() => setShowRedSplash(false), 300);
             }
@@ -266,6 +290,7 @@ function Page({params}) {
                     }
                 });
                 if (!answeredWrong) {
+                    playSound("right");
                     triggerConfetti();
                     setScoredMark(ts => {
                         const totalMark = questionAnswerData[questionIdsOrdered[currentQuestionIndex]]?.questions_total_mark || 0;
@@ -274,6 +299,7 @@ function Page({params}) {
                         return ts + (totalMark * selectedCount / correctCount);
                     });
                 } else {
+                    playSound("wrong")
                     setShowRedSplash(true);
                     setTimeout(() => setShowRedSplash(false), 300);
                 }
@@ -313,6 +339,7 @@ function Page({params}) {
     }
 
     function optionsClickHandler(index) {
+        playSound("selection");
         setTimeout(() => {
         }, 2000)
         hasInteracted.current = true;
@@ -518,12 +545,22 @@ function Page({params}) {
                                 {finished ? (
                                     <p>Finished</p>
                                 ) : (
-                                    <button
-                                        className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap px-2 py-[.3rem] border-[1px] border-amber-600"
-                                        onClick={handleClickOpen}
-                                    >
-                                        <FontAwesomeIcon icon={faFlagCheckered}/> Finish
-                                    </button>
+                                    <div className={"flex justify-center items-center gap-4"}>
+                                        <button
+                                        onClick={()=>{
+                                            setMuted(prev=>!prev);
+                                        }}
+                                        >
+                                            <FontAwesomeIcon icon={muted?faVolumeMute:faVolumeUp} color={"brown"}/>
+                                        </button>
+                                        <button
+                                            className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap px-2 py-[.3rem] border-[1px] border-amber-600"
+                                            onClick={handleClickOpen}
+                                        >
+                                            <FontAwesomeIcon icon={faFlagCheckered}/> Finish
+                                        </button>
+
+                                    </div>
                                 )}
                             </div>
 
