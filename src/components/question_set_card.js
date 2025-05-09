@@ -15,12 +15,21 @@ function QuestionSetCard({
                          }) {
     const router = useRouter();
 
+    function createSlug(input) {
+        return input
+            .trim() // remove leading/trailing whitespace
+            .replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '') // strip leading/trailing non-alphanumerics
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-') // replace all internal non-alphanumerics (incl. spaces, symbols) with '-'
+            .replace(/-+/g, '-') // collapse multiple dashes into one
+    }
+
     function conditionalWrapper(child) {
         if (!editDeleteButtons) {
             return (
                 <div
                     className="w-full mx-auto 4">
-                    <Link href={`/quizzes/${questionSet.id}`}
+                    <Link href={`/quizzes/${questionSet.id}/${createSlug(questionSet.name)}`}
                           className={"w-full bg-[rgba(0,0,0,.1)] rounded-lg border-gray-200 shadow-sm transition p-4 block"}>
                         {child}
                     </Link>
@@ -79,7 +88,7 @@ function QuestionSetCard({
                 editDeleteButtons &&
                 <div className={"ml-auto flex justify-around items-center gap-2 text-gray-700 min-w-16 "}>
                     <FontAwesomeIcon icon={faEdit} size={"lg"} className={"cursor-pointer text-teal-600"}
-                                     onClick={(e)=>{
+                                     onClick={(e) => {
                                          e.stopPropagation();
                                          // setCurrentQuizCallback(questionSet)
                                          openEditModalCallback(true);

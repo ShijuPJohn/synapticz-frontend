@@ -98,10 +98,10 @@ export default function QuestionSetSearch() {
     };
 
     return (
-        <div className="w-full flex flex-wrap items-center bg-[rgba(255,255,255,.6)] shadow-lg py-2 px-4 rounded-2xl mb-2 border-[1px] border-gray-400">
+        <div className={"w-full flex flex-wrap items-center bg-[rgba(255,255,255,.6)] shadow-lg p-1 md:p-2 rounded-2xl mb-2 border-[1px] border-gray-400"}>
             <div className="w-full flex flex-wrap items-center justify-start gap-4">
                 <input
-                    className="w-[40%] md:w-[60%] rounded-2xl outline-none border-[1px] border-gray-400 bg-[rgba(255,255,255,.2)] p-2"
+                    className={"w-[50%] md:w-[65%] xl:w-[75%] rounded-2xl outline-none border-[1px] border-gray-400 bg-[rgba(255,255,255,.2)] p-2"}
                     placeholder="Search..."
                     name="search"
                     defaultValue={localFilters.search}
@@ -122,7 +122,9 @@ export default function QuestionSetSearch() {
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-400 hover:bg-slate-500 transition-colors text-gray-700 font-medium"
                 >
                     <FontAwesomeIcon icon={showAdvancedFilters ? faEraser : faFilter} />
-                    {showAdvancedFilters ? 'Clear Filters' : 'Advanced Filters'}
+                   <span className={"text-sm hidden md:block"}>
+                        {showAdvancedFilters ? 'Clear Filters' : 'Filters'}
+                   </span>
                 </button>
             </div>
             <div

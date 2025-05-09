@@ -37,7 +37,12 @@ function Page() {
 
                 // Dispatch login info to Redux
                 dispatch(login(data));
-
+                const cUrl = localStorage.getItem("current_url");
+                console.log("this url", cUrl)
+                if (cUrl){
+                    router.push(cUrl);
+                    return null;
+                }
                 // Redirect accordingly
                 if (isNewUser) {
                     router.push('/edit-profile');

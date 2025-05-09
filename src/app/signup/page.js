@@ -43,9 +43,21 @@ const LoginPage = () => {
     const [emailForVerification, setEmailForVerification] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
+    const [returnUrl, setReturnUrl] = useState('/');
 
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
+    useEffect(() => {
+        // Client-side only URL parsing
+        const params = new URLSearchParams(window.location.search);
+        setReturnUrl(params.get('returnUrl') || '/');
+    }, []);
+
+    useEffect(() => {
+        if (userInfo && Object.keys(userInfo).length !== 0) {
+            router.replace(returnUrl);
+        }
+    }, [userInfo, returnUrl, router]);
     useEffect(() => {
         if (userInfo?.token) {
             router.push('/edit-profile');
