@@ -212,7 +212,10 @@ export default function QuestionsPage() {
             </Dialog>
             {/*{floatingMenu &&*/}
             {/*   }*/}
-
+            {loading &&
+                <div className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-center">
+                    <CircularProgress size={small} style={{ width: '2rem', height: '2rem' }} />
+                </div>}
 
             <div className="bg-white shadow-lg mb-1 relative">
                 <QuestionShowSelect setSelectedQIdsCallback={setSelectedQuestions} selectedQIds={selectedQuestions} initialFetchIds={[]} mode={"full_control"}
@@ -480,9 +483,6 @@ export default function QuestionsPage() {
                     <Button variant="contained" color="primary" onClick={handleCreateQuiz}>Create</Button>
                 </DialogActions>
             </Dialog>
-            {loading &&
-                <div className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-start">
-                    <CircularProgress style={{ width: '10rem', height: '10rem' }} />
-                </div>}
+
         </div>);
 }

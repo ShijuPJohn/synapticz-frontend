@@ -151,8 +151,8 @@ function Page({params}) {
             fetched &&
             mode === "q_timed" &&
             isCurrentQuestionAnswered
-        ){
-            setSecondsCount(questionAnswerData[questionIdsOrdered[currentQuestionIndex]].time_taken?secondsPerQuestion - questionAnswerData[questionIdsOrdered[currentQuestionIndex]].time_taken:0)
+        ) {
+            setSecondsCount(questionAnswerData[questionIdsOrdered[currentQuestionIndex]].time_taken ? secondsPerQuestion - questionAnswerData[questionIdsOrdered[currentQuestionIndex]].time_taken : 0)
         }
     }, [currentQuestionId])
     useEffect(() => {
@@ -553,33 +553,39 @@ function Page({params}) {
                                     </p>
                                 )}
                                 <h4 className="text-red-200">{currentQuestionIndex + 1}/{questionIdsOrdered.length}</h4>
-
-                                {currentQuestion && (
-                                    <h4  key={animationKey}
-                                         className={`animate-popIn inline-block px-3 py-1 rounded-full text-red-500 text-md font-semibold uppercase`}>
-                                        {currentQuestion.question_type === "m-select" ? "Multi" : "Single"}
-                                    </h4>
-                                )}
+                                <button
+                                    onClick={() => {
+                                        setMuted(prev => !prev);
+                                    }}
+                                >
+                                    <FontAwesomeIcon icon={muted ? faVolumeMute : faVolumeUp} color={"brown"}/>
+                                </button>
+                                {/*{currentQuestion && (*/}
+                                {/*    <div className="relative group inline-block ">*/}
+                                {/*        <h4 key={animationKey}*/}
+                                {/*            className={`animate-popIn inline-block px-3 py-1 rounded-full text-red-500 text-md font-semibold uppercase`}>*/}
+                                {/*            {currentQuestion.question_type === "m-select" ? "Multi" : "Single"}*/}
+                                {/*        </h4>*/}
+                                {/*        <div*/}
+                                {/*            className="absolute top-0 left-[200%] h-full mb-2 -translate-x-1/2 whitespace-nowrap bg-blue-700 text-white text-md px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10 flex justify-center items-center">*/}
+                                {/*            {currentQuestion.question_type === "m-select" ? "You can select multiple options" : "Choose only one option"}*/}
+                                {/*        </div>*/}
+                                {/*    </div>*/}
+                                {/*)}*/}
                                 {!finished && <h4>Score: {parseFloat(scoredMark.toFixed(2))}</h4>}
                                 {finished ? (
                                     <p>Finished</p>
                                 ) : (
-                                    <div className={"flex justify-center items-center gap-4"}>
+
+
                                         <button
-                                            onClick={() => {
-                                                setMuted(prev => !prev);
-                                            }}
-                                        >
-                                            <FontAwesomeIcon icon={muted ? faVolumeMute : faVolumeUp} color={"brown"}/>
-                                        </button>
-                                        <button
-                                            className="test-finish-btn text-red-400 hover:text-red-500 hover:cursor-pointer transition duration-300 whitespace-nowrap px-2 py-[.3rem] border-[1px] border-amber-600"
+                                            className="test-finish-btn text-white  bg-[#802f61] hover:bg-[#8a2463] bgred hover:cursor-pointer transition duration-300 whitespace-nowrap px-2 py-[.3rem] "
                                             onClick={handleClickOpen}
                                         >
                                             <FontAwesomeIcon icon={faFlagCheckered}/> Finish
                                         </button>
 
-                                    </div>
+
                                 )}
                             </div>
 

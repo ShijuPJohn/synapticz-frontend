@@ -36,13 +36,13 @@ export const userSlice = createSlice({
             state.loading = false
             state.pendingSignupEmail=null
             state.userInfo = action.payload
-            enqueueSnackbar('Logged In. Redirecting to home page.', {variant: "success"})
+            enqueueSnackbar('Logged In. Redirecting you back', {variant: "success"})
         },
         signup: (state, action) => {
             state.loading = false
             state.pendingSignupEmail=null
             state.userInfo = action.payload
-            enqueueSnackbar('Logged In. Add edit-profile details', {variant: "success"})
+            enqueueSnackbar('User created and logged in. Redirecting back.', {variant: "success"})
         },
         signupFail: (state, action) => {
             state.loading = false
@@ -115,7 +115,7 @@ export const signupThunk = (name, email, password) => async (dispatch) => {
         dispatch(setPendingSignup(email));
         enqueueSnackbar('Verification code sent to your email', {variant: "info"});
     } catch (e) {
-        enqueueSnackbar("Signup Error :", e.message)
+        enqueueSnackbar("Signup Error :"+ e.message,{variant: "error"})
         dispatch(signupFail(e.message || "Signup error"));
     }
 }
