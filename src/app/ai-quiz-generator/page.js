@@ -9,19 +9,19 @@ import {CircularProgress, Autocomplete, TextField, IconButton, Tooltip} from "@m
 import {router} from "next/client";
 import {useRouter} from "next/navigation";
 import {ExpandLess, ExpandMore, Language} from "@mui/icons-material";
+import { usePathname } from 'next/navigation';
 
 function Page(props) {
     const [videoUrl, setVideoUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [generationConfirm, setGenerationConfirm] = useState(false);
-    const [foundQuizIds, setFoundQuizIds] = useState([]);
-    const [openFoundModal, setOpenFoundModal] = useState(false);
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
     const [statusText, setStatusText] = useState("This is a sample status text");
     const [language, setLanguage] = useState("English");
     const router = useRouter();
     const [showLanguageInput, setShowLanguageInput] = useState(false);
+    const pathname = usePathname();
 
     const languages = [
         "English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean",
