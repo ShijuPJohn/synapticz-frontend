@@ -14,7 +14,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {protectedRoutePrefixes} from "@/constants";
 import {usePathname, useRouter} from "next/navigation";
-import {NoteAdd} from "@mui/icons-material";
+import {AutoFixHigh, NoteAdd} from "@mui/icons-material";
 
 function Header() {
     const drawerTimeout = useRef(null);
@@ -111,6 +111,10 @@ function Header() {
                 id: 'admin-dashboard', element: <li key="admin-dashboard" className="header-list-item">
                     <Link href="/admin">Admin Dashboard</Link>
                 </li>
+            },{
+                id: 'generator', element: <li key="generator" className="header-list-item">
+                    <Link href="/ai-quiz-generator">AI Quiz Generator</Link>
+                </li>
             },
             {
                 id: 'profile', element: <li key="profile" className="header-list-item">
@@ -161,7 +165,7 @@ function Header() {
                 {openDrawer && (
                     <div
                         ref={drawerRef}
-                        className={`absolute z-10 left-0 top-[calc(4vw+1.8rem)] bg-[rgba(2,18,34,.8)] h-[calc(100vh-4vw-1.8rem)] w-[40%] transition-transform duration-500 ease-in-out ${isAnimating ? 'menu-drawer hide' : 'menu-drawer'} flex items-center px-4 py-2`}
+                        className={`absolute z-10 left-0 top-[calc(4vw+1.8rem)] bg-[rgba(2,18,34,.8)] h-[calc(100vh-4vw-1.8rem)] w-[55%] transition-transform duration-500 ease-in-out ${isAnimating ? 'menu-drawer hide' : 'menu-drawer'} flex flex-col justify-around items-center px-4 py-2`}
                     >
                         <nav className="navLinks" onClick={handleCloseDrawer}>
                             <ul className="flex text-white flex-col items-start justify-center uppercase">
@@ -266,6 +270,12 @@ function Header() {
                                     <PersonIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Profile
+                            </MenuItem>,
+                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose} key="generator">
+                                <ListItemIcon>
+                                    <AutoFixHigh fontSize="small"/>
+                                </ListItemIcon>
+                                AI Quiz Generator
                             </MenuItem>,
                             <MenuItem component={Link} href="/edit-profile" onClick={handleMenuClose} key="edit-profile">
                                 <ListItemIcon>
