@@ -49,9 +49,9 @@ function StartSessionControlBox({qid}) {
     const {userInfo} = userLogin
     const router = useRouter();
     const pathname = usePathname(); // Get current path
-    const [timingEnabled, setTimingEnabled] = useState(true);
-    const [timingMode, setTimingMode] = useState("per-question"); // "per-question" or "total"
-    const [secondsPerQuestion, setSecondsPerQuestion] = useState(20);
+    const [timingEnabled, setTimingEnabled] = useState(false);
+    const [timingMode, setTimingMode] = useState(""); // "per-question" or "total"
+    const [secondsPerQuestion, setSecondsPerQuestion] = useState(10);
     const [totalTimeCapMinutes, setTotalTimeCapMinutes] = useState(60);
     return (<>
             <section className="mb-10">
@@ -134,7 +134,7 @@ function StartSessionControlBox({qid}) {
                     }
                 }}
             >
-                Start Test
+                Start Quiz
             </button>
         </>);
 }

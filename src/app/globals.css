@@ -122,7 +122,7 @@ main{
     min-height: 100%;
     width: 100%;
     color: #04203a;
-    padding: .8rem;
+    padding: .5rem;
     gap: .5rem;
 }
 @media (max-width: 768px) {

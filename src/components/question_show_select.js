@@ -402,7 +402,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                         setActiveQuestion(q);
                         setShowModal(true);
                     }}
-                    className={`w-full md:w-[25rem] h-[20rem] relative bg-white rounded-xl border shadow-sm p-6 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
+                    className={`w-full md:w-[25rem]  relative bg-white rounded-xl border shadow-sm p-6 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
                 >
                     <div className="absolute top-4 left-4">
                         <button
@@ -839,7 +839,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
         </Dialog>
         {loading && <div
             className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-start">
-            <CircularProgress style={{width: '10rem', height: '10rem'}}/>
+            <CircularProgress style={{width: '4rem', height: '4rem'}}/>
         </div>}
     </div>);
 }
