@@ -141,15 +141,18 @@ function Page(props) {
             return;
         }
 
+        // Restrict word count only for non-admin/owner users
         if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (wordCount < 1 || wordCount > 50)) {
-            enqueueSnackbar("Please enter between 1-50 words", {variant: "warning"});
+            enqueueSnackbar("Please enter between 1-50 words", { variant: "warning" });
             return;
         }
 
-        if (!questionCount || Number(questionCount) < 1 || ((userInfo.role === 'admin' || userInfo.role === 'owner') && Number(questionCount) > 20)) {
-            enqueueSnackbar("Please enter a valid number of questions (1-20)", {variant: "warning"});
+// Restrict question count only for non-admin/owner users
+        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 20)) {
+            enqueueSnackbar("Please enter a valid number of questions (1-20)", { variant: "warning" });
             return;
         }
+
 
         // Clear saved data on successful submission
 
