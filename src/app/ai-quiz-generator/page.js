@@ -5,20 +5,20 @@ import axios from 'axios';
 import {useSelector} from "react-redux";
 import {enqueueSnackbar} from "notistack";
 import {fetchURL} from "@/constants";
-import {Autocomplete, CircularProgress, IconButton, TextField} from "@mui/material";
 import {usePathname, useRouter} from "next/navigation";
-import {ExpandLess, ExpandMore, Language} from "@mui/icons-material";
+import {FiChevronDown, FiGlobe, FiLoader} from "react-icons/fi";
 
 function Page(props) {
-    const [videoUrl, setVideoUrl] = useState('');
+    const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [generationConfirm, setGenerationConfirm] = useState(false);
     const userLogin = useSelector(state => state.user);
     const {userInfo} = userLogin
-    const [statusText, setStatusText] = useState("This is a sample status text");
+    const [statusText, setStatusText] = useState("Generating your quiz...");
     const [language, setLanguage] = useState("English");
+    const [difficulty, setDifficulty] = useState("5");
+    const [questionType, setQuestionType] = useState("mixed");
+    const [questionCount, setQuestionCount] = useState("5");
     const router = useRouter();
-    const [showLanguageInput, setShowLanguageInput] = useState(false);
     const pathname = usePathname();
 
     const languages = [
@@ -44,6 +44,17 @@ function Page(props) {
         "Venda", "Tsonga", "Ndebele"
     ];
 
+    const difficulties = Array.from({length: 10}, (_, i) => ({
+        value: `${i + 1}`,
+        label: `${i + 1}`
+    }));
+
+    const questionTypes = [
+        {value: "mcq", label: "Multiple Choice"},
+        {value: "multi-select", label: "Multi-Select"},
+        {value: "mcq & multi-select", label: "Mixed"}
+    ];
+
     function getHeaders() {
         return {
             "Content-Type": "application/json",
@@ -51,45 +62,61 @@ function Page(props) {
         };
     }
 
-    function isValidYouTubeUrl(url) {
-        const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/(watch\?v=|shorts\/)|youtu\.be\/)[\w\-]{11}(&[\w=?\-]*)?$/;
-        return pattern.test(url);
-    }
+    const handleInputChange = (e) => {
+        const text = e.target.value;
+        setInput(text);
+    };
+
+    const wordCount = input.trim() ? input.trim().split(/\s+/).length : 0;
+
+    const handleQuestionCountChange = (e) => {
+        const value = e.target.value;
+        if (value === "" || (Number(value) >= 1 && Number(value) <= 20)) {
+            setQuestionCount(value);
+        }
+    };
 
     const handleSubmit = async () => {
         if (Object.keys(userInfo).length === 0) {
             enqueueSnackbar("Please sign in if you have an account. Sign up otherwise", {variant: "warning"})
             router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-        } else if (!videoUrl || !isValidYouTubeUrl(videoUrl)) {
-            enqueueSnackbar("Enter a valid youtube video URL", {variant: "warning"})
             return;
         }
 
-        setIsLoading(true);
-        try {
-            const response = await axios.post(`${fetchURL}/ai-gen/res`, {resource_url: videoUrl}, {headers: getHeaders()});
-            setGenerationConfirm(true);
-            setStatusText("Generating Questions with AI")
-            createQuizFromYouTubeUrl(videoUrl)
-        } catch (error) {
-            console.error('Error checking the URL:', error);
-            setIsLoading(false);
+        if (!input.trim()) {
+            enqueueSnackbar("Please enter the content based on which you want to generate your quiz.", {variant: "warning"});
+            return;
         }
-    };
 
-    async function createQuizFromYouTubeUrl(url) {
+        if (wordCount < 1 || wordCount > 50) {
+            enqueueSnackbar("Please enter between 1-50 words", {variant: "warning"});
+            return;
+        }
+
+        if (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 20) {
+            enqueueSnackbar("Please enter a valid number of questions (1-20)", {variant: "warning"});
+            return;
+        }
+        setIsLoading(true);
+        await createQuizFromText(input, language, difficulty, questionType, questionCount);
+    }
+
+    async function createQuizFromText(input, language, difficulty, question_type, question_count) {
         setIsLoading(true);
         try {
             const response = await axios.post(`${fetchURL}/ai-gen/quiz`, {
-                url: url,
-                language: language.toLowerCase()
+                prompt: input,
+                language: language.toLowerCase(),
+                difficulty: parseInt(difficulty),
+                question_type: questionType,
+                question_count: parseInt(questionCount)
             }, {headers: getHeaders()});
+
             setStatusText("Questions generated. Saving the questions now.")
-            createQuestions(response.data.data.questions.questions, response.data.data.questions.quiz)
+            await createQuestions(response.data.data.questions.questions, response.data.data.questions.quiz)
         } catch (error) {
             console.error('Error generating data:', error);
-        } finally {
-
+            setIsLoading(false);
         }
     }
 
@@ -99,11 +126,10 @@ function Page(props) {
             const response = await axios.post(`${fetchURL}/questions/`, data, {headers: getHeaders()});
             setStatusText("Questions saved. Now creating the Quiz")
             const qids = response.data.questions
-            createQuiz(quiz, qids);
+            await createQuiz(quiz, qids);
         } catch (error) {
             console.error('Error creating questions:', error);
             setIsLoading(false);
-        } finally {
         }
     }
 
@@ -120,83 +146,143 @@ function Page(props) {
         } catch (error) {
             console.error('Error creating quiz:', error);
             setIsLoading(false);
-        } finally {
         }
     }
 
     return (
-        <main className="min-h-[90vh] flex items-center justify-center p-4">
+        <main className="min-h-[90vh] flex items-center justify-center p-2">
             <div
-                className="w-full max-w-xl min-h-[20rem] bg-white rounded-2xl shadow-lg p-8 flex flex-col justify-start items-center">
-                <h2 className="text-xl text-slate-600 font-semibold text-center mb-6 border-b-[2px] border-b-[var(--secondary-color)]">
-                    Paste in a YouTube video URL
+                className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-8 flex flex-col space-y-6 border border-gray-100">
+                <h2 className="text-3xl font-bold text-center text-[var(--secondary-title)]">
+                    What do you want to test yourself with?
                 </h2>
 
-                <div className="w-full flex items-center mb-4 gap-1">
-                    <input
-                        type="text"
-                        value={videoUrl}
-                        onChange={(e) => setVideoUrl(e.target.value)}
-                        placeholder="https://www.youtube.com/watch?v=..."
-                        className="flex-grow w-full px-4 py-3 border-[2px] border-gray-300 rounded-l-full outline-none focus:outline-none focus:ring-2 focus:border-blue-500"
+                {/* Main textarea */}
+                <div className="relative">
+                    <textarea
+                        rows={4}
+                        value={input}
+                        onChange={handleInputChange}
+                        placeholder="Describe the topic in your language, in less than 50 words..."
+                        className="w-full px-5 py-4 text-gray-700 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
                     />
-                    <div className="relative">
-                        <IconButton
-                            onClick={() => setShowLanguageInput(!showLanguageInput)}
-                            sx={{
-                                height: '3.33rem',
-                                backgroundColor: 'rgb(243 244 246)',
-                                '&:hover': { backgroundColor: 'rgb(229 231 235)' },
-                                border: '2px solid rgb(209 213 219)',
-                                borderTopRightRadius: '9999px',
-                                borderBottomRightRadius: '9999px',
-                                padding: '0 12px',
-                            }}
-                            aria-label="toggle language selection"
-                        >
-                            {showLanguageInput ? <ExpandLess /> : <ExpandMore />}
-                            <Language className="ml-1" />
-                        </IconButton>
-                        {/*<Tooltip title="Select language" arrow>*/}
-                        {/*    <div className="absolute inset-0" />*/}
-                        {/*</Tooltip>*/}
+                    <div className="absolute bottom-3 right-3 text-gray-400 text-xs flex gap-1">
+                        <span className={wordCount > 50 ? "text-red-500" : ""}>
+                            {wordCount}
+                        </span>
+                        <span>/50 words</span>
                     </div>
                 </div>
 
-                {showLanguageInput && !isLoading && (
-                    <Autocomplete
-                        className="w-full mb-6"
-                        options={languages}
-                        value={language}
-                        onChange={(event, newValue) => {
-                            setLanguage(newValue || "English");
-                        }}
-                        renderInput={(params) => (
-                            <TextField
-                                {...params}
-                                variant="outlined"
-                                placeholder="Select language"
-                                InputProps={{
-                                    ...params.InputProps,
-                                    style: { borderRadius: '9999px' }
-                                }}
-                            />
-                        )}
-                    />
-                )}
+                {/* Controls row */}
+                <div className="flex flex-wrap gap-4">
+                    {/* Language Select */}
+                    <div className="relative flex-1 min-w-[120px]">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                <FiGlobe className="h-5 w-5"/>
+                            </div>
+                            <select
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
+                            >
+                                <option value="" disabled hidden>Select Language</option>
+                                {languages.map((lang) => (
+                                    <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                <FiChevronDown className="h-5 w-5"/>
+                            </div>
 
+                        </div>
+                    </div>
+
+                    {/* Difficulty Select */}
+                    <div className="relative flex-1 min-w-[120px]">
+                        <div className="relative">
+                            <select
+                                value={difficulty}
+                                onChange={(e) => setDifficulty(e.target.value)}
+                                className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
+                            >
+                                <option value="" disabled hidden>Select Level</option>
+                                {difficulties.map((diff) => (
+                                    <option key={diff.value} value={diff.value}>{diff.label}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                <FiChevronDown className="h-5 w-5"/>
+                            </div>
+                            <label className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">
+                                Difficulty
+                            </label>
+                        </div>
+                    </div>
+
+                    {/* Question Type Select */}
+                    <div className="relative flex-1 min-w-[120px]">
+                        <div className="relative">
+                            <select
+                                value={questionType}
+                                onChange={(e) => setQuestionType(e.target.value)}
+                                className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
+                            >
+                                <option value="" disabled hidden>Select Type</option>
+                                {questionTypes.map((type) => (
+                                    <option key={type.value} value={type.value}>{type.label}</option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                <FiChevronDown className="h-5 w-5"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Question Count Input */}
+                    <div className="relative flex-1 min-w-[120px]">
+                        <div className="relative">
+                            <input
+                                type="number"
+                                value={questionCount}
+                                onChange={handleQuestionCountChange}
+                                min="1"
+                                max="20"
+                                className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
+                                placeholder=" "
+                            />
+                            <label className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
+                                Questions
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                {/* Submit Button */}
                 <button
                     onClick={handleSubmit}
-                    disabled={isLoading || !videoUrl}
-                    className={`w-full py-3 px-4 rounded-full text-white font-medium transition-colors
-                    ${isLoading || !videoUrl ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
+                    disabled={isLoading || !input || wordCount > 50 || wordCount < 1}
+                    className={`w-full py-3.5 px-6 rounded-xl text-white font-semibold text-lg transition-all
+          ${isLoading || !input || wordCount > 50 || wordCount < 1
+                        ? 'bg-blue-300 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
+                    }`}
                 >
-                    {isLoading ? 'Generating Quiz...' : 'Generate Quiz'}
+                    {isLoading ? (
+                        <div className="flex items-center justify-center gap-2">
+                            <FiLoader className="animate-spin h-5 w-5"/>
+                            {statusText}
+                        </div>
+                    ) : (
+                        'Generate Quiz'
+                    )}
                 </button>
-                {isLoading ?
-                    <p className={"mt-4 text-gray-600"}>This will take a while to finish. Please hang on</p> : null}
-                {isLoading && <p className={"mt-4 mb-2 text-gray-500"}>{statusText}</p>}
-                {isLoading && <CircularProgress/>}
+
+                {isLoading && (
+                    <p className="text-center text-gray-500 text-sm mt-2">
+                        This might take a minute. Please don't close this page.
+                    </p>
+                )}
             </div>
         </main>
     );
