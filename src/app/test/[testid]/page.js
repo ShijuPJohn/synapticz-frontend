@@ -579,7 +579,7 @@ function Page({params}) {
 
 
                                         <button
-                                            className="test-finish-btn text-white  bg-[#802f61] hover:bg-[#8a2463] bgred hover:cursor-pointer transition duration-300 whitespace-nowrap px-2 py-[.3rem] "
+                                            className="test-finish-btn text-white rounded-lg  bg-[#ad3653] hover:bg-[#c74e6b] bgred hover:cursor-pointer transition duration-300 whitespace-nowrap px-3 py-[.3rem] "
                                             onClick={handleClickOpen}
                                         >
                                             <FontAwesomeIcon icon={faFlagCheckered}/> Finish
@@ -623,9 +623,9 @@ function Page({params}) {
                                             <div className={"w-full flex justify-start items-center gap-2"}>
 
                                                 {correctOptions[currentQuestionIndex].length > 1 ? <div
-                                                        className={`w-[1rem] h-[1rem] border-[4px] border-gray-100 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div> :
+                                                        className={`min-w-[1rem] w-[1rem] min-h-[1rem] h-[1rem] border-[4px] border-gray-100 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div> :
                                                     <div
-                                                        className={`w-[1rem] h-[1rem]  rounded-2xl border-[4px] border-slate-300 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div>}
+                                                        className={`min-w-[1rem] min-h-[1rem] w-[1rem] h-[1rem]  rounded-2xl border-[4px] border-slate-300 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-100"}`}></div>}
                                                 <h4 className="quiz_box_option text-sm md:text-base"><MarkdownWithMath
                                                     content={option}/></h4>
                                             </div>

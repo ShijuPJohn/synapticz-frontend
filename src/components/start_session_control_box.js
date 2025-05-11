@@ -123,19 +123,21 @@ function StartSessionControlBox({qid}) {
                         </Box>)}
                 </Box>
             </section>
-            <button
-                className="bg-[#167e82] uppercase text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-300"
-                onClick={() => {
-                    if (Object.keys(userInfo).length === 0) {
-                        enqueueSnackbar("Please sign in if you have an account. Sign up otherwise", {variant: "warning"})
-                        router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-                    } else {
-                        createTest(qid, userInfo.token, router, timingEnabled, timingMode, secondsPerQuestion, totalTimeCapMinutes);
-                    }
-                }}
-            >
-                Start Quiz
-            </button>
+           <div className={"w-full flex items-center justify-center mb-16"}>
+               <button
+                   className="bg-[#167e82] w-full max-w-md uppercase text-white px-8 py-3 rounded-lg font-semibold shadow-lg transition-all duration-300"
+                   onClick={() => {
+                       if (Object.keys(userInfo).length === 0) {
+                           enqueueSnackbar("Please sign in if you have an account. Sign up otherwise", {variant: "warning"})
+                           router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+                       } else {
+                           createTest(qid, userInfo.token, router, timingEnabled, timingMode, secondsPerQuestion, totalTimeCapMinutes);
+                       }
+                   }}
+               >
+                   Start Quiz
+               </button>
+           </div>
         </>);
 }
 
