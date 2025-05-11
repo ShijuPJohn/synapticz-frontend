@@ -337,7 +337,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
 
                     <button
                         className={"text-white bg-red-700 hover:bg-red-800 disabled:bg-red-300 disabled:cursor-auto border-[1px] p-3 rounded-md cursor-pointer flex justify-center items-center"}
-                        disabled={selectedQuestions.length === 0 || selectedQuestions.map(q => q.created_by_id).filter(cbid => cbid !== userInfo.user_id).length > 0}
+                        disabled={selectedQuestions.length === 0 || userInfo.role==="user" && selectedQuestions.map(q => q.created_by_id).filter(cbid => cbid !== userInfo.user_id).length > 0}
                         onClick={() => {
                             setMultipleDeleteConfirmModalOpen(true)
                         }}
@@ -402,7 +402,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                         setActiveQuestion(q);
                         setShowModal(true);
                     }}
-                    className={`w-full md:w-[25rem]  relative bg-white rounded-xl border shadow-sm p-6 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
+                    className={`w-full h-[27rem] md:w-[25rem]  relative bg-white rounded-xl border shadow-sm p-6 hover:shadow-xl ${isSelected ? 'border-indigo-500 border-2' : 'border-gray-200'}`}
                 >
                     <div className="absolute top-4 left-4">
                         <button

@@ -122,7 +122,7 @@ function Page(props) {
 
     const handleQuestionCountChange = (e) => {
         const value = e.target.value;
-        if ((userInfo.role==="admin" || userInfo.role==="owner")&&(Number(value) >= 1 && Number(value) <= 100)||(Number(value) >= 1 && Number(value) <= 20) ){
+        if ((userInfo.role === "admin" || userInfo.role === "owner") && (Number(value) >= 1 && Number(value) <= 100) || (Number(value) >= 1 && Number(value) <= 20)) {
             setQuestionCount(value);
         }
     };
@@ -311,7 +311,7 @@ function Page(props) {
                                 value={questionCount}
                                 onChange={handleQuestionCountChange}
                                 min="1"
-                                max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner')?"20":"100"}
+                                max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "20" : "100"}
                                 className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
                                 placeholder=" "
                             />
@@ -325,9 +325,9 @@ function Page(props) {
                 {/* Submit Button */}
                 <button
                     onClick={handleSubmit}
-                    disabled={isLoading || !input || wordCount > 50 || wordCount < 1}
+                    disabled={(isLoading || !input || wordCount < 1) || (!(userInfo.role === 'admin' || userInfo.role === 'owner') && wordCount > 50)}
                     className={`w-full py-3.5 px-6 rounded-xl text-white font-semibold text-sm md:text-lg transition-all
-          ${isLoading || !input || wordCount > 50 || wordCount < 1
+          ${isLoading || !input || (!(userInfo.role === 'admin' || userInfo.role === 'owner') && wordCount > 50) || wordCount < 1
                         ? 'bg-blue-300 cursor-not-allowed'
                         : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
                     }`}
