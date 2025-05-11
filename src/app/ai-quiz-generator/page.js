@@ -23,6 +23,7 @@ function Page(props) {
     const [questionCount, setQuestionCount] = useState("5");
     const router = useRouter();
     const pathname = usePathname();
+    const [hasMounted, setHasMounted] = useState(false);
 
     // Timer reference for debouncing input changes
     const inputTimerRef = React.useRef(null);
@@ -76,6 +77,7 @@ function Page(props) {
                 console.error('Failed to parse saved data', e);
             }
         }
+        setHasMounted(true);
     }, []);
 
     // Save data to localStorage whenever it changes
@@ -120,7 +122,7 @@ function Page(props) {
 
     const handleQuestionCountChange = (e) => {
         const value = e.target.value;
-        if (value === "" || (Number(value) >= 1 && Number(value) <= 20)) {
+        if ((userInfo.role==="admin" || userInfo.role==="owner")&&(Number(value) >= 1 && Number(value) <= 100)||(Number(value) >= 1 && Number(value) <= 20) ){
             setQuestionCount(value);
         }
     };
@@ -130,7 +132,7 @@ function Page(props) {
             enqueueSnackbar("Please sign in if you have an account. Sign up otherwise", {variant: "warning"})
             router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
             return;
-        } else{
+        } else {
             localStorage.removeItem(STORAGE_KEY);
         }
 
@@ -139,12 +141,12 @@ function Page(props) {
             return;
         }
 
-        if (wordCount < 1 || wordCount > 50) {
+        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (wordCount < 1 || wordCount > 50)) {
             enqueueSnackbar("Please enter between 1-50 words", {variant: "warning"});
             return;
         }
 
-        if (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 20) {
+        if (!questionCount || Number(questionCount) < 1 || ((userInfo.role === 'admin' || userInfo.role === 'owner') && Number(questionCount) > 20)) {
             enqueueSnackbar("Please enter a valid number of questions (1-20)", {variant: "warning"});
             return;
         }
@@ -218,15 +220,16 @@ function Page(props) {
                         value={input}
                         disabled={isLoading}
                         onChange={handleInputChange}
-                        placeholder="Describe the topic in your language, in less than 50 words..."
+                        placeholder={`Describe the topic in your language${hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? ", in less than or equal to 50 words." : "."}`}
                         className="w-full px-5 py-4 text-gray-700 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
                     />
-                    <div className="absolute bottom-3 right-3 text-gray-400 text-xs flex gap-1">
+                    {hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') &&
+                        <div className="absolute bottom-3 right-3 text-gray-400 text-xs flex gap-1">
                         <span className={wordCount > 50 ? "text-red-500" : ""}>
                             {wordCount}
                         </span>
-                        <span>/50 words</span>
-                    </div>
+                            <span>/50 words</span>
+                        </div>}
                 </div>
 
                 {/* Controls row */}
@@ -234,7 +237,8 @@ function Page(props) {
                     {/* Language Select */}
                     <div className="relative flex-1 min-w-[120px]">
                         <div className="relative">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                            <div
+                                className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
                                 <FiGlobe className="h-5 w-5"/>
                             </div>
                             <select
@@ -247,7 +251,8 @@ function Page(props) {
                                     <option key={lang} value={lang}>{lang}</option>
                                 ))}
                             </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                            <div
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
                                 <FiChevronDown className="h-5 w-5"/>
                             </div>
 
@@ -267,10 +272,12 @@ function Page(props) {
                                     <option key={diff.value} value={diff.value}>{diff.label}</option>
                                 ))}
                             </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                            <div
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
                                 <FiChevronDown className="h-5 w-5"/>
                             </div>
-                            <label className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">
+                            <label
+                                className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">
                                 Difficulty
                             </label>
                         </div>
@@ -289,7 +296,8 @@ function Page(props) {
                                     <option key={type.value} value={type.value}>{type.label}</option>
                                 ))}
                             </select>
-                            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                            <div
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
                                 <FiChevronDown className="h-5 w-5"/>
                             </div>
                         </div>
@@ -303,11 +311,12 @@ function Page(props) {
                                 value={questionCount}
                                 onChange={handleQuestionCountChange}
                                 min="1"
-                                max="20"
+                                max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner')?"20":"100"}
                                 className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
                                 placeholder=" "
                             />
-                            <label className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
+                            <label
+                                className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
                                 Questions
                             </label>
                         </div>

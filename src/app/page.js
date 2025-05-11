@@ -67,7 +67,7 @@ export default function Home() {
             <section className={"w-full z-[-1]"}>
                 <CardsCarousel cards={cardContentData}/>
             </section>
-            <div className="w-full flex justify-center py-4 gap-6">
+            <div className="w-full flex justify-center py-4 gap-2 md:gap-6">
                 <Link
                     href="/ai-quiz-generator"
                     className="relative bg-[#2a395c] hover:bg-[#1e293b] hover:opacity-[#0f172a]
