@@ -33,6 +33,11 @@ async function Page({params}) {
         );
     }
 
+    function capitalizeFirstLetter(str) {
+        if (!str) return '';
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
     return (
         <main>
             <div
@@ -68,11 +73,12 @@ async function Page({params}) {
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-700">
                             <Info label="📚 Subject" value={quiz.subject}/>
-                            <Info label="🎓 Exam" value={quiz.exam}/>
-                            <Info label="🗣 Language" value={quiz.language}/>
+                            <Info label="🎓 Exam" value={quiz.exam === "na" ? "Any" : quiz.exam}/>
+                            <Info label="🗣 Language" value={capitalizeFirstLetter(quiz.language)}/>
                             <Info label="🕒 Duration" value={`${quiz.time_duration} min`}/>
-                            <Info label="🎯 Mode" value={quiz.mode}/>
+                            <Info label="🎯 Mode" value={capitalizeFirstLetter(quiz.mode)}/>
                             <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`}/>
+                            <Info label="Number of Questions" value={`${quiz.question_ids.length}`}/>
                         </div>
                     </div>
                 </div>
@@ -86,7 +92,7 @@ async function Page({params}) {
                         <h3 className="text-lg font-semibold text-purple-800 mb-2">
                             📄 Description
                         </h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">
+                        <p className="text-gray-700 text-lg leading-relaxed">
                             {quiz.description}
                         </p>
                     </section>
@@ -112,7 +118,7 @@ async function Page({params}) {
                 )}
 
                 {/* Resource Link */}
-                {quiz.associated_resource && (
+                {quiz.associated_resource && quiz.associated_resource !== "N/A" && (
                     <section className="mb-10">
                         <h3 className="text-lg font-semibold text-purple-800 mb-2">
                             🔗 Resource
@@ -130,7 +136,7 @@ async function Page({params}) {
 
                 {/* Start Test Button */}
                 {quiz.can_start_test && (
-                        <StartSessionControlBox qid={params.quizzid}/>
+                    <StartSessionControlBox qid={params.quizzid}/>
                 )}
             </div>
         </main>

@@ -142,6 +142,11 @@ function Header() {
             }
         ] : [
             {
+                id: 'generator', element: <li key="generator" className="header-list-item">
+                    <Link href="/ai-quiz-generator">AI Quiz Generator</Link>
+                </li>
+            },
+            {
                 id: 'login', element: <li key="login" className="header-list-item">
                     <Link href="/login">Login</Link>
                 </li>
@@ -180,15 +185,15 @@ function Header() {
                 <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">
                     <Link href={"/"}>
                         <div className="logo-image-container w-[calc(8rem+7vw)] h-24 relative">
-                            {/*<Image*/}
-                            {/*    src="/images/logo.jpg"*/}
-                            {/*    alt="Logo"*/}
-                            {/*    fill*/}
-                            {/*    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"*/}
-                            {/*    priority*/}
-                            {/*    className="object-contain"*/}
-                            {/*/>*/}
-                            LOGO
+                            <Image
+                                src="/images/logo.jpg"
+                                alt="Logo"
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                priority
+                                className="object-contain"
+                            />
+                            {/*LOGO*/}
                         </div>
                     </Link>
                 </h1>
@@ -254,6 +259,12 @@ function Header() {
                         anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
                     >
                         {!userInfo || Object.keys(userInfo).length === 0 ? [
+                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose} key="generator">
+                                <ListItemIcon>
+                                    <AutoFixHigh fontSize="small"/>
+                                </ListItemIcon>
+                                AI Quiz Generator
+                            </MenuItem>,
                             <MenuItem component={Link} href="/login" onClick={handleMenuClose} key="login">
                                 <ListItemIcon>
                                     <LoginIcon fontSize="small"/>

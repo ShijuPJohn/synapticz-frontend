@@ -50,10 +50,10 @@ const cardContentData = [
 
 export default function Home() {
     return (
-        <main>
+        <main className={"gap-0"}>
             {/* Hero Section */}
             <section
-                className="hero-section px-6 py-8 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white w-full flex flex-col items-center text-center">
+                className="hero-section px-6 py-6 mb-2 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white w-full flex flex-col items-center text-center">
                 <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight">
                     Welcome to <span className="text-cyan-400">Synapticz</span>
                 </h1>
@@ -67,17 +67,17 @@ export default function Home() {
             <section className={"w-full z-[-1]"}>
                 <CardsCarousel cards={cardContentData}/>
             </section>
-            <div className="w-full flex justify-center py-6 gap-6">
+            <div className="w-full flex justify-center py-4 gap-6">
                 <Link
                     href="/ai-quiz-generator"
-                    className="relative bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500
-                  text-white font-medium py-4 px-10 rounded-full shadow-md hover:shadow-2xl
+                    className="relative bg-[#2a395c] hover:bg-[#1e293b] hover:opacity-[#0f172a]
+                  text-white py-4 px-10  shadow-md hover:shadow-2xl
                   text-lg tracking-wide transition-all duration-300 hover:scale-[1.03]
                   transform-gpu overflow-hidden group"
                 >
-        <span className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500 opacity-0
-                        group-hover:opacity-100 transition-opacity duration-300 rounded-full"></span>
-                    <span className="relative z-10 flex items-center justify-center gap-2">
+        <span className="absolute inset-0  opacity-0
+                        group-hover:opacity-100 transition-opacity duration-300"></span>
+                    <span className="relative z-10 flex items-center justify-center gap-2 text-[.8rem] md:text-[1rem]">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                  xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -89,14 +89,13 @@ export default function Home() {
 
                 <Link
                     href="/quizzes"
-                    className="relative bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500
-                  text-white font-medium py-4 px-10 rounded-full shadow-md over:shadow-2xl
+                    className="relative bg-[#2a395c] hover:bg-[#1e293b]  text-white py-4 px-10 rounded shadow-md over:shadow-2xl
                   text-lg tracking-wide transition-all duration-300 hover:scale-[1.03]
                   transform-gpu overflow-hidden group"
                 >
-        <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-blue-500 opacity-0
-                        group-hover:opacity-100 transition-opacity duration-300 rounded-full"></span>
-                    <span className="relative z-10 flex items-center justify-center gap-2">
+        <span className="absolute inset-0 opacity-0
+                        group-hover:opacity-100 transition-opacity duration-300"></span>
+                    <span className="relative z-10 flex items-center justify-center gap-2 text-[.8rem] md:text-[1rem]">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                  xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

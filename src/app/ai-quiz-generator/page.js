@@ -1,12 +1,15 @@
 "use client"
 
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import {useSelector} from "react-redux";
 import {enqueueSnackbar} from "notistack";
 import {fetchURL} from "@/constants";
 import {usePathname, useRouter} from "next/navigation";
 import {FiChevronDown, FiGlobe, FiLoader} from "react-icons/fi";
+
+// Local storage keys
+const STORAGE_KEY = 'quizGeneratorData';
 
 function Page(props) {
     const [input, setInput] = useState('');
@@ -16,10 +19,13 @@ function Page(props) {
     const [statusText, setStatusText] = useState("Generating your quiz...");
     const [language, setLanguage] = useState("English");
     const [difficulty, setDifficulty] = useState("5");
-    const [questionType, setQuestionType] = useState("mixed");
+    const [questionType, setQuestionType] = useState("mcq-multi-select");
     const [questionCount, setQuestionCount] = useState("5");
     const router = useRouter();
     const pathname = usePathname();
+
+    // Timer reference for debouncing input changes
+    const inputTimerRef = React.useRef(null);
 
     const languages = [
         "English", "Spanish", "French", "German", "Chinese", "Japanese", "Korean",
@@ -52,8 +58,37 @@ function Page(props) {
     const questionTypes = [
         {value: "mcq", label: "Multiple Choice"},
         {value: "multi-select", label: "Multi-Select"},
-        {value: "mcq & multi-select", label: "Mixed"}
+        {value: "mcq-multi-select", label: "Mixed"}
     ];
+
+    // Load saved data from localStorage on component mount
+    useEffect(() => {
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        if (savedData) {
+            try {
+                const parsedData = JSON.parse(savedData);
+                if (parsedData.input) setInput(parsedData.input);
+                if (parsedData.language) setLanguage(parsedData.language);
+                if (parsedData.difficulty) setDifficulty(parsedData.difficulty);
+                if (parsedData.questionType) setQuestionType(parsedData.questionType);
+                if (parsedData.questionCount) setQuestionCount(parsedData.questionCount);
+            } catch (e) {
+                console.error('Failed to parse saved data', e);
+            }
+        }
+    }, []);
+
+    // Save data to localStorage whenever it changes
+    useEffect(() => {
+        const dataToSave = {
+            input,
+            language,
+            difficulty,
+            questionType,
+            questionCount
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+    }, [language, difficulty, questionType, questionCount]);
 
     function getHeaders() {
         return {
@@ -65,6 +100,20 @@ function Page(props) {
     const handleInputChange = (e) => {
         const text = e.target.value;
         setInput(text);
+
+        // Debounce the localStorage save for input
+        if (inputTimerRef.current) {
+            clearTimeout(inputTimerRef.current);
+        }
+
+        inputTimerRef.current = setTimeout(() => {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            const currentData = savedData ? JSON.parse(savedData) : {};
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                ...currentData,
+                input: text
+            }));
+        }, 500); // 500ms delay
     };
 
     const wordCount = input.trim() ? input.trim().split(/\s+/).length : 0;
@@ -81,6 +130,8 @@ function Page(props) {
             enqueueSnackbar("Please sign in if you have an account. Sign up otherwise", {variant: "warning"})
             router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
             return;
+        } else{
+            localStorage.removeItem(STORAGE_KEY);
         }
 
         if (!input.trim()) {
@@ -97,6 +148,9 @@ function Page(props) {
             enqueueSnackbar("Please enter a valid number of questions (1-20)", {variant: "warning"});
             return;
         }
+
+        // Clear saved data on successful submission
+
         setIsLoading(true);
         await createQuizFromText(input, language, difficulty, questionType, questionCount);
     }
@@ -112,7 +166,7 @@ function Page(props) {
                 question_count: parseInt(questionCount)
             }, {headers: getHeaders()});
 
-            setStatusText("Questions generated. Saving the questions now.")
+            setStatusText("Saving the questions")
             await createQuestions(response.data.data.questions.questions, response.data.data.questions.quiz)
         } catch (error) {
             console.error('Error generating data:', error);
@@ -124,7 +178,7 @@ function Page(props) {
         setIsLoading(true);
         try {
             const response = await axios.post(`${fetchURL}/questions/`, data, {headers: getHeaders()});
-            setStatusText("Questions saved. Now creating the Quiz")
+            setStatusText("Creating the Quiz")
             const qids = response.data.questions
             await createQuiz(quiz, qids);
         } catch (error) {
@@ -162,6 +216,7 @@ function Page(props) {
                     <textarea
                         rows={4}
                         value={input}
+                        disabled={isLoading}
                         onChange={handleInputChange}
                         placeholder="Describe the topic in your language, in less than 50 words..."
                         className="w-full px-5 py-4 text-gray-700 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
@@ -262,7 +317,7 @@ function Page(props) {
                 <button
                     onClick={handleSubmit}
                     disabled={isLoading || !input || wordCount > 50 || wordCount < 1}
-                    className={`w-full py-3.5 px-6 rounded-xl text-white font-semibold text-lg transition-all
+                    className={`w-full py-3.5 px-6 rounded-xl text-white font-semibold text-sm md:text-lg transition-all
           ${isLoading || !input || wordCount > 50 || wordCount < 1
                         ? 'bg-blue-300 cursor-not-allowed'
                         : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
