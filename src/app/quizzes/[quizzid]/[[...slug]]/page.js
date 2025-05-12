@@ -76,9 +76,9 @@ async function Page({params}) {
                             <Info label="🕒 Duration" value={`${quiz.time_duration} min`}/>
                             <Info label="🎯 Mode" value={capitalizeFirstLetter(quiz.mode)}/>
                             <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`}/>
-                            <Info label="No. of Questions" value={`${quiz.question_ids.length}`}/>
+                            <Info label="No. of Questions" value={`${(quiz.question_ids)?quiz.question_ids.length:0}`}/>
                             <Info label="Availability"
-                                  value={`${capitalizeFirstLetter(quiz.access_level ? "quiz.access_level" : "free")}`}/>
+                                  value={`${capitalizeFirstLetter(quiz.access_level ? quiz.access_level : "free")}`}/>
                         </div>
                     </div>
                 </div>
