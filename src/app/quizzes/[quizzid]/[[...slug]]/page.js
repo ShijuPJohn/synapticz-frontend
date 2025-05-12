@@ -39,7 +39,7 @@ async function Page({params}) {
                 <title>Page Title</title>
                 <meta name="description" content={quiz.description}/>
 
-                {/* Open Graph / Facebook / WhatsApp meta tags */}
+                 {/*Open Graph / Facebook / WhatsApp meta tags */}
                 <meta property="og:title" content={quiz.name}/>
                 <meta property="og:description" content={quiz.description}/>
                 <meta property="og:image" content={quiz.cover_image}/>
@@ -58,7 +58,7 @@ async function Page({params}) {
                         <div
                             className="w-full lg:w-1/3 h-56  border-[1px] border-purple-300 rounded-xl relative">
                             <Image
-                                src={quiz.cover_image}
+                                src={quiz.cover_image?quiz.cover_image:"https://storage.googleapis.com/synapticz-storage/profile_pics/Shiju-P-John-818a221f-d51a-4793-8576-5567da6ff04b.jpg"}
                                 alt="Quiz Cover"
                                 className="w-full h-full object-cover"
                                 fill
