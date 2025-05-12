@@ -125,7 +125,7 @@ function Page(props) {
         // Allow empty value (for deletion) and validate based on user role
         if (value === '' ||
             ((userInfo.role === "admin" || userInfo.role === "owner") && Number(value) >= 1 && Number(value) <= 100) ||
-            (Number(value) >= 1 && Number(value) <= 20)) {
+            (Number(value) >= 1 && Number(value) <= 100)) {
             setQuestionCount(value);
         }
     };
@@ -145,14 +145,14 @@ function Page(props) {
         }
 
         // Restrict word count only for non-admin/owner users
-        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (wordCount < 1 || wordCount > 50)) {
-            enqueueSnackbar("Please enter between 1-50 words", {variant: "warning"});
+        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (wordCount < 1 || wordCount > 100)) {
+            enqueueSnackbar("Please enter between 1-100 words", {variant: "warning"});
             return;
         }
 
 // Restrict question count only for non-admin/owner users
-        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 20)) {
-            enqueueSnackbar("Please enter a valid number of questions (1-20)", {variant: "warning"});
+        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 50)) {
+            enqueueSnackbar("Please enter a valid number of questions (1-50)", {variant: "warning"});
             return;
         }
 
@@ -229,15 +229,15 @@ function Page(props) {
                         value={input}
                         disabled={isLoading}
                         onChange={handleInputChange}
-                        placeholder={`Describe the topic in your language${hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? ", in less than or equal to 50 words." : "."}`}
+                        placeholder={`Describe the topic in your language${hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? ", in less than or equal to 100 words." : "."}`}
                         className="w-full px-5 py-4 text-gray-700 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
                     />
                     {hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') &&
                         <div className="absolute bottom-3 right-3 text-gray-400 text-xs flex gap-1">
-                        <span className={wordCount > 50 ? "text-red-500" : ""}>
+                        <span className={wordCount > 100 ? "text-red-500" : ""}>
                             {wordCount}
                         </span>
-                            <span>/50 words</span>
+                            <span>/100 words</span>
                         </div>}
                 </div>
 
@@ -322,7 +322,7 @@ function Page(props) {
                                     value={questionCount}
                                     onChange={handleQuestionCountChange}
                                     min="1"
-                                    max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "20" : "100"}
+                                    max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "50" : "50"}
                                     className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
                                     placeholder=" "
                                 />
@@ -337,9 +337,9 @@ function Page(props) {
                 {/* Submit Button */}
                 <button
                     onClick={handleSubmit}
-                    disabled={(isLoading || !input || wordCount < 1) || (!(userInfo.role === 'admin' || userInfo.role === 'owner') && wordCount > 50)}
+                    disabled={(isLoading || !input || wordCount < 1) || (!(userInfo.role === 'admin' || userInfo.role === 'owner') && wordCount > 100)}
                     className={`w-full py-3.5 px-6 rounded-xl text-white font-semibold text-sm md:text-lg transition-all
-          ${isLoading || !input || (!(userInfo.role === 'admin' || userInfo.role === 'owner') && wordCount > 50) || wordCount < 1
+          ${isLoading || !input || (!(userInfo.role === 'admin' || userInfo.role === 'owner') && wordCount > 100) || wordCount < 1
                         ? 'bg-blue-300 cursor-not-allowed'
                         : 'bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-0.5'
                     }`}

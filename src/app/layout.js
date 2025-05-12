@@ -16,12 +16,14 @@ export default function RootLayout({children}) {
         <head>
             <title>Synapticz</title>
             <link rel="icon" href="/images/favicon.ico"/>
+            {/*<link rel="icon" href="/images/icon.svg" type="image/svg+xml" />*/}
             <link
                 rel="icon"
                 href="/images/icon.png"
                 type="image/<generated>"
                 sizes="<generated>"
             />
+            <link rel="apple-touch-icon" href="/images/icon.png" />
             <link rel="preconnect" href="https://fonts.googleapis.com"/>
             <link rel="preconnect" href="https://fonts.gstatic.com"/>
             <link
