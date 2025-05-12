@@ -202,7 +202,7 @@ function Header() {
                                                                                                    className={"flex justify-center items-center gap-2"}>
                         <Image className={"bg-[#3583a5]"} src={"/images/exam3.png"} alt={"exam icon"} width={35}
                                height={35}/>
-                        Start Learning
+                        Browse Quizzes
                     </Link>
                     </ul>
                     {/*{ (userInfo.role==='admin' || userInfo.role==='owner')&&*/}

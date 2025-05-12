@@ -56,7 +56,7 @@ function QuestionSetCard({
                 <div
                     className="w-[3rem] h-[3rem] md:w-[5rem] md:h-[5rem] relative rounded overflow-hidden border border-gray-300 flex-shrink-0">
                     <Image
-                        src={questionSet.coverImage || "/images/placeholder.png"}
+                        src={questionSet.coverImage || "https://storage.googleapis.com/synapticz-storage/profile_pics/Shiju-P-John-818a221f-d51a-4793-8576-5567da6ff04b.jpg"}
                         alt="Cover"
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
