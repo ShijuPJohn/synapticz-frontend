@@ -81,6 +81,7 @@ export default function QuestionsPage() {
             });
             enqueueSnackbar("Image uploaded successfully.", {variant: "success"});
             setUploadedUrl(res.data.url);
+            console.log("uploaded url",res.data.url)
         } catch (err) {
             console.error("Failed to upload image", err);
         } finally {
@@ -216,7 +217,7 @@ export default function QuestionsPage() {
             {loading &&
                 <div
                     className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-center">
-                    <CircularProgress size={small} style={{width: '2rem', height: '2rem'}}/>
+                    <CircularProgress style={{width: '2rem', height: '2rem'}}/>
                 </div>}
 
             <div className="bg-white shadow-lg mb-1 relative">
