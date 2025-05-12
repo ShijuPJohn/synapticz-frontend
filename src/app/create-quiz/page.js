@@ -1,29 +1,26 @@
 "use client"
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import axios from 'axios';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {
-    faEdit,
-    faTrash,
-    faFilter,
-    faChevronDown,
-    faChevronUp,
-    faCheckSquare,
-    faSquare,
-    faPlus,
-    faDeleteLeft,
-    faQuestion,
-    faHamburger, faBars, faListCheck
-} from '@fortawesome/free-solid-svg-icons';
+import {faBars, faEdit, faListCheck, faPlus, faQuestion} from '@fortawesome/free-solid-svg-icons';
 import {useSelector} from "react-redux";
 import {fetchURL} from "@/constants";
 import {
-    Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Chip, MenuItem
+    Button,
+    Chip,
+    CircularProgress,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    MenuItem,
+    TextField
 } from "@mui/material";
 import {enqueueSnackbar} from "notistack";
 import {useRouter} from "next/navigation";
 import Image from "next/image";
 import QuestionShowSelect from "@/components/question_show_select";
+import {FiChevronDown} from "react-icons/fi";
 
 export default function QuestionsPage() {
     const [selectedQuestions, setSelectedQuestions] = useState([]);
@@ -56,10 +53,9 @@ export default function QuestionsPage() {
     const [coverImagePreview, setCoverImagePreview] = useState(null);
     const [uploadedUrl, setUploadedUrl] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [slug, setSlug] = useState("");
+    const [accessLevel, setAccessLevel] = useState("premium");
 
-    // const [filters, setFilters] = useState({
-    //     subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false,
-    // });
 
     function getHeaders() {
         return {
@@ -101,6 +97,7 @@ export default function QuestionsPage() {
             difficulty: parseInt(difficulty.toString()),
             question_type: questionType,
             options: answerOptions,
+            slug: slug,
             correct_options: correctOptions,
             explanation,
             tags
@@ -138,6 +135,8 @@ export default function QuestionsPage() {
             question_ids: selectedQuestions,
             tags: qTags,
             cover_image: uploadedUrl,
+            slug: slug,
+            access_level: accessLevel,
         };
         setLoading(true);
         try {
@@ -168,60 +167,63 @@ export default function QuestionsPage() {
             >
                 <FontAwesomeIcon icon={faBars}/>
             </div>
-            <Dialog open={floatingMenu} onClose={()=>{setFloatingMenu(false)}}>
+            <Dialog open={floatingMenu} onClose={() => {
+                setFloatingMenu(false)
+            }}>
+                <div
+                    className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-40 w-56 bg-gray-200 shadow-md text-slate-700">
                     <div
-                        className="z-[1000] flex flex-col justify-center items-center fixed bottom-[6rem] right-5 h-40 w-56 bg-gray-200 shadow-md text-slate-700">
-                        <div
-                            className="h-full w-full flex justify-center gap-4 border-b   border-b-gray-300  items-center cursor-pointer hover:bg-cyan-300"
-                            onClick={() => {
-                                router.push("/bulk-create-questions")
-                            }}
-                        >
-                            <FontAwesomeIcon icon={faListCheck}/>
-                            Bulk Create Questions
-                        </div>
-                        <div
-                            className=" h-full w-full border-b gap-4  border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-cyan-300"
-                            onClick={() => {
-                                setNewQuestionDialogOpen(true)
-                            }}
-                        ><FontAwesomeIcon icon={faQuestion}/>
-
-                            New Question
-                        </div>
-                        <div
-                            className=" h-full w-full border-b   border-b-gray-300  flex justify-center gap-4 items-center cursor-pointer hover:bg-cyan-300"
-                            onClick={() => {
-                                setNewQuizDialogOpen(true)
-                            }}
-                        >
-                            <FontAwesomeIcon icon={faPlus}/>
-                            New Quiz
-                        </div>
-                        <div
-                            className="h-full w-full flex justify-center gap-4  items-center cursor-pointer hover:bg-cyan-300"
-                            onClick={() => {
-                                router.push("/edit-quiz")
-                            }}
-                        >
-                            <FontAwesomeIcon icon={faEdit}/>
-                            Edit Quizzes
-                        </div>
-
+                        className="h-full w-full flex justify-center gap-4 border-b   border-b-gray-300  items-center cursor-pointer hover:bg-cyan-300"
+                        onClick={() => {
+                            router.push("/bulk-create-questions")
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faListCheck}/>
+                        Bulk Create Questions
                     </div>
+                    <div
+                        className=" h-full w-full border-b gap-4  border-b-gray-300 flex justify-center items-center cursor-pointer hover:bg-cyan-300"
+                        onClick={() => {
+                            setNewQuestionDialogOpen(true)
+                        }}
+                    ><FontAwesomeIcon icon={faQuestion}/>
+
+                        New Question
+                    </div>
+                    <div
+                        className=" h-full w-full border-b   border-b-gray-300  flex justify-center gap-4 items-center cursor-pointer hover:bg-cyan-300"
+                        onClick={() => {
+                            setNewQuizDialogOpen(true)
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faPlus}/>
+                        New Quiz
+                    </div>
+                    <div
+                        className="h-full w-full flex justify-center gap-4  items-center cursor-pointer hover:bg-cyan-300"
+                        onClick={() => {
+                            router.push("/edit-quiz")
+                        }}
+                    >
+                        <FontAwesomeIcon icon={faEdit}/>
+                        Edit Quizzes
+                    </div>
+
+                </div>
             </Dialog>
             {/*{floatingMenu &&*/}
             {/*   }*/}
             {loading &&
-                <div className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-center">
-                    <CircularProgress size={small} style={{ width: '2rem', height: '2rem' }} />
+                <div
+                    className="loading-container absolute w-full h-full top-0 left-0 bg-[rgba(0,0,0,.2)] z-[1000] flex justify-center items-center">
+                    <CircularProgress size={small} style={{width: '2rem', height: '2rem'}}/>
                 </div>}
 
             <div className="bg-white shadow-lg mb-1 relative">
-                <QuestionShowSelect setSelectedQIdsCallback={setSelectedQuestions} selectedQIds={selectedQuestions} initialFetchIds={[]} mode={"full_control"}
+                <QuestionShowSelect setSelectedQIdsCallback={setSelectedQuestions} selectedQIds={selectedQuestions}
+                                    initialFetchIds={[]} mode={"full_control"}
                 />
             </div>
-
 
 
             <Dialog open={newQuestionDialogOpen} onClose={() => setNewQuestionDialogOpen(false)}
@@ -254,12 +256,11 @@ export default function QuestionsPage() {
                             value={language}
                             onChange={(e) => setLanguage(e.target.value)}
                             fullWidth
-                        >
-                        </TextField>
+                        ></TextField>
                         <TextField
                             label="Difficulty"
                             value={difficulty}
-                            onChange={(e) => setDifficulty(e.target.value)}
+                            onChange={(e) => setDifficulty(parseInt(e.target.value))}
                             fullWidth
                         >
                         </TextField>
@@ -360,6 +361,24 @@ export default function QuestionsPage() {
                         value={qName}
                         onChange={(e) => setQName(e.target.value)}
                     />
+                    <TextField
+                        label="URL Slug"
+                        value={slug}
+                        onChange={(e) => setSlug(e.target.value)}
+                        fullWidth>
+                    </TextField>
+                    <TextField
+                        select
+                        label="Access Type"
+                        fullWidth
+                        margin="normal"
+                        value={accessLevel}
+                        onChange={(e) => setAccessLevel(e.target.value)}
+                    >
+                        <MenuItem value="free">Free</MenuItem>
+                        <MenuItem value="premium">Premium</MenuItem>
+                        <MenuItem value="paid">Paid</MenuItem>
+                    </TextField>
                     <TextField
                         select
                         label="Mode"
@@ -484,5 +503,6 @@ export default function QuestionsPage() {
                 </DialogActions>
             </Dialog>
 
-        </div>);
+        </div>
+    );
 }

@@ -146,13 +146,13 @@ function Page(props) {
 
         // Restrict word count only for non-admin/owner users
         if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (wordCount < 1 || wordCount > 50)) {
-            enqueueSnackbar("Please enter between 1-50 words", { variant: "warning" });
+            enqueueSnackbar("Please enter between 1-50 words", {variant: "warning"});
             return;
         }
 
 // Restrict question count only for non-admin/owner users
         if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 20)) {
-            enqueueSnackbar("Please enter a valid number of questions (1-20)", { variant: "warning" });
+            enqueueSnackbar("Please enter a valid number of questions (1-20)", {variant: "warning"});
             return;
         }
 
@@ -214,7 +214,7 @@ function Page(props) {
     return (
         <main className="min-h-[90vh] flex items-center justify-center p-2">
             <div
-                className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-8 flex flex-col space-y-6 border border-gray-100">
+                className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-3 md:p-8 flex flex-col space-y-6 border border-gray-100">
                 <h2 className="text-3xl font-bold text-center text-[var(--secondary-title)]">
                     What do you want to test yourself with?
                 </h2>
@@ -239,92 +239,95 @@ function Page(props) {
                 </div>
 
                 {/* Controls row */}
-                <div className="flex flex-wrap gap-4">
+                <div className="flex flex-wrap gap-4 justify-center items-center p-2 rounded-xl">
                     {/* Language Select */}
-                    <div className="relative flex-1 min-w-[120px]">
-                        <div className="relative">
-                            <div
-                                className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                                <FiGlobe className="h-5 w-5"/>
-                            </div>
-                            <select
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value)}
-                                className="w-full pl-10 pr-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
-                            >
-                                <option value="" disabled hidden>Select Language</option>
-                                {languages.map((lang) => (
-                                    <option key={lang} value={lang}>{lang}</option>
-                                ))}
-                            </select>
-                            <div
-                                className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                                <FiChevronDown className="h-5 w-5"/>
-                            </div>
+                    <div className={"flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-4 flex-grow"}>
+                        <div className="relative flex-1 min-w-[120px]">
+                            <div className="relative">
+                                <div
+                                    className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                    <FiGlobe className="h-5 w-5"/>
+                                </div>
+                                <select
+                                    value={language}
+                                    onChange={(e) => setLanguage(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
+                                >
+                                    <option value="" disabled hidden>Select Language</option>
+                                    {languages.map((lang) => (
+                                        <option key={lang} value={lang}>{lang}</option>
+                                    ))}
+                                </select>
+                                <div
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                    <FiChevronDown className="h-5 w-5"/>
+                                </div>
 
+                            </div>
                         </div>
-                    </div>
 
-                    {/* Difficulty Select */}
-                    <div className="relative flex-1 min-w-[120px]">
-                        <div className="relative">
-                            <select
-                                value={difficulty}
-                                onChange={(e) => setDifficulty(e.target.value)}
-                                className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
-                            >
-                                <option value="" disabled hidden>Select Level</option>
-                                {difficulties.map((diff) => (
-                                    <option key={diff.value} value={diff.value}>{diff.label}</option>
-                                ))}
-                            </select>
-                            <div
-                                className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                                <FiChevronDown className="h-5 w-5"/>
-                            </div>
-                            <label
-                                className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">
-                                Difficulty
-                            </label>
-                        </div>
-                    </div>
-
-                    {/* Question Type Select */}
-                    <div className="relative flex-1 min-w-[120px]">
-                        <div className="relative">
-                            <select
-                                value={questionType}
-                                onChange={(e) => setQuestionType(e.target.value)}
-                                className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
-                            >
-                                <option value="" disabled hidden>Select Type</option>
-                                {questionTypes.map((type) => (
-                                    <option key={type.value} value={type.value}>{type.label}</option>
-                                ))}
-                            </select>
-                            <div
-                                className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                                <FiChevronDown className="h-5 w-5"/>
+                        {/* Difficulty Select */}
+                        <div className="relative flex-1 min-w-[120px]">
+                            <div className="relative">
+                                <select
+                                    value={difficulty}
+                                    onChange={(e) => setDifficulty(e.target.value)}
+                                    className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
+                                >
+                                    <option value="" disabled hidden>Select Level</option>
+                                    {difficulties.map((diff) => (
+                                        <option key={diff.value} value={diff.value}>{diff.label}</option>
+                                    ))}
+                                </select>
+                                <div
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                    <FiChevronDown className="h-5 w-5"/>
+                                </div>
+                                <label
+                                    className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">
+                                    Difficulty
+                                </label>
                             </div>
                         </div>
                     </div>
+                    <div className={"flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-4 flex-grow"}>
+                        {/* Question Type Select */}
+                        <div className="relative flex-1 min-w-[120px]">
+                            <div className="relative">
+                                <select
+                                    value={questionType}
+                                    onChange={(e) => setQuestionType(e.target.value)}
+                                    className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
+                                >
+                                    <option value="" disabled hidden>Select Type</option>
+                                    {questionTypes.map((type) => (
+                                        <option key={type.value} value={type.value}>{type.label}</option>
+                                    ))}
+                                </select>
+                                <div
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                    <FiChevronDown className="h-5 w-5"/>
+                                </div>
+                            </div>
+                        </div>
 
-                    {/* Question Count Input */}
-                    <div className="relative flex-1 min-w-[120px]">
-                        <div className="relative">
-                            <input
-                                type="number"
-                                value={questionCount}
-                                onChange={handleQuestionCountChange}
-                                min="1"
-                                max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "20" : "100"}
-                                className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
-                                placeholder=" "
-                            />
-                            <label
-                                className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
-                                Questions
-                            </label>
+                        {/* Question Count Input */}
+                        <div className="relative flex-1 min-w-[120px]">
+                            <div className="relative">
+                                <input
+                                    type="number"
+                                    value={questionCount}
+                                    onChange={handleQuestionCountChange}
+                                    min="1"
+                                    max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "20" : "100"}
+                                    className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
+                                    placeholder=" "
+                                />
+                                <label
+                                    className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
+                                    Questions
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>

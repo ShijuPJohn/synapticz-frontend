@@ -23,6 +23,10 @@ function QuestionSetCard({
             .replace(/[^a-z0-9]+/g, '-') // replace all internal non-alphanumerics (incl. spaces, symbols) with '-'
             .replace(/-+/g, '-') // collapse multiple dashes into one
     }
+    function capitalizeFirstLetter(str) {
+        if (!str) return '';
+        return str?.charAt(0).toUpperCase() + str.slice(1);
+    }
 
     function conditionalWrapper(child) {
         if (!editDeleteButtons) {
@@ -71,15 +75,19 @@ function QuestionSetCard({
                         className="text-slate-600 mt-1 text-[.7rem] md:text-[.9rem] flex gap-4 flex-wrap justify-start w-full  ">
                         <p>
                             <span className="font-medium text-slate-500">Sub:</span>{" "}
-                            {questionSet.subject}
+                            {capitalizeFirstLetter(questionSet.subject)}
                         </p>
                         <p>
                             <span className="font-medium text-slate-500">Lang:</span>{" "}
-                            {questionSet.language}
+                            {capitalizeFirstLetter(questionSet.language)}
                         </p>
                         <p>
                             <span className="font-medium text-slate-500">Questions:</span>{" "}
                             {questionSet.question_ids?.length || 0}
+                        </p>
+                        <p>
+                            <span className="font-medium text-slate-500">Access:</span>{" "}
+                            {capitalizeFirstLetter(questionSet.access_level)}
                         </p>
                     </div>
                 </div>

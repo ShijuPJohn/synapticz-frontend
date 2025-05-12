@@ -52,7 +52,8 @@ const EditQuizComponent = () => {
         associated_resource: "",
         tags: [],
         question_ids: [],
-        coverImage: ""
+        coverImage: "",
+        slug: ""
     });
 
     const [localFilters, setLocalFilters] = useState({
@@ -64,6 +65,7 @@ const EditQuizComponent = () => {
     const [totalNumberOfPages, setTotalNumberOfPages] = useState(0);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+    const [accessLevel, setAccessLevel] = useState("premium");
 
     function getHeaders() {
         return {
@@ -78,7 +80,7 @@ const EditQuizComponent = () => {
             if (value) params.append(key, value);
         });
         try {
-           const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&uid=${userInfo.user_id}`);
+            const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&uid=${userInfo.user_id}`);
             const sets = res.data.data.map(item => ({
                 ...item,
                 coverImage: item.coverImage || "/images/placeholder_book.png",
@@ -119,7 +121,7 @@ const EditQuizComponent = () => {
         try {
             const response = await axios.put(
                 `${fetchURL}/questionsets/${currentQuiz.id}`,
-                {...formData, cover_image: uploadedUrl},
+                {...formData, cover_image: uploadedUrl, access_level: accessLevel},
                 {headers: getHeaders()}
             );
 
@@ -127,7 +129,7 @@ const EditQuizComponent = () => {
             setQuestionSets(prev => {
                 return prev.map(qSet =>
                     qSet.id === currentQuiz.id
-                        ? {...qSet, ...formData, coverImage: uploadedUrl ? uploadedUrl : currentQuiz.coverImage}
+                        ? {...qSet, ...formData, coverImage: uploadedUrl ? uploadedUrl : currentQuiz.coverImage, access_level: accessLevel, slug: formData.slug}
                         : qSet
                 );
             });
@@ -182,6 +184,7 @@ const EditQuizComponent = () => {
                 tags: currentQuiz.tags || [],
                 question_ids: Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : [],
                 coverImage: currentQuiz.coverImage || "/images/placeholder_book.png",
+                slug: currentQuiz.slug || "",
             });
             setSelectedQuestions(Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : []);
             setCoverImagePreview(currentQuiz.coverImage);
@@ -203,7 +206,7 @@ const EditQuizComponent = () => {
             })
         } else {
             setLocalFilters(prevState => ({...prevState, search: ''}))
-            searchInputRef.current.value="";
+            searchInputRef.current.value = "";
         }
         setShowAdvancedFilters(!showAdvancedFilters);
     };
@@ -263,7 +266,8 @@ const EditQuizComponent = () => {
                             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-400 hover:bg-slate-500 transition-colors text-gray-700 font-medium"
                         >
                             <FontAwesomeIcon icon={showAdvancedFilters ? faEraser : faFilter}/>
-                            <span className={"hidden md:block"}>{showAdvancedFilters ? 'Clear Filters' : 'Filters'}</span>
+                            <span
+                                className={"hidden md:block"}>{showAdvancedFilters ? 'Clear Filters' : 'Filters'}</span>
                         </button>
                     </div>
 
@@ -272,15 +276,16 @@ const EditQuizComponent = () => {
                     >
                         <div className="border-t border-gray-200 pt-4 mt-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {['subject', 'exam', 'language', 'tags', 'created_by','resource'].map((field) => (<input
-                                    key={field}
-                                    type="text"
-                                    placeholder={field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}
-                                    name={field}
-                                    value={localFilters[field]}
-                                    onChange={handleChangeFilters}
-                                    className="p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full text-gray-700 placeholder-gray-400 transition-all"
-                                />))}
+                                {['subject', 'exam', 'language', 'tags', 'created_by', 'resource'].map((field) => (
+                                    <input
+                                        key={field}
+                                        type="text"
+                                        placeholder={field.charAt(0).toUpperCase() + field.slice(1).replace('_', ' ')}
+                                        name={field}
+                                        value={localFilters[field]}
+                                        onChange={handleChangeFilters}
+                                        className="p-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full text-gray-700 placeholder-gray-400 transition-all"
+                                    />))}
                             </div>
                         </div>
                     </div>
@@ -303,21 +308,22 @@ const EditQuizComponent = () => {
                                     />
                                 ))
                             }</div>
-                            {totalNumberOfPages>1 && <div className="pagination-buttons-container w-full flex justify-center items-center gap-2">
-                                <Button className={"flex gap-2 w-28"} variant={"contained"}
-                                        disabled={currentPage <= 1}
-                                        onClick={prevPageHandler}
-                                >
-                                    <FontAwesomeIcon icon={faArrowLeft}/>Previous
-                                </Button>
-                                {`${currentPage}/${totalNumberOfPages}`}
-                                <Button className={"flex gap-2 w-28"} variant={"contained"}
-                                        disabled={currentPage >= totalNumberOfPages}
-                                        onClick={nextPageHandler}
-                                >
-                                    Next<FontAwesomeIcon icon={faArrowRight}/>
-                                </Button>
-                            </div>}
+                            {totalNumberOfPages > 1 &&
+                                <div className="pagination-buttons-container w-full flex justify-center items-center gap-2">
+                                    <Button className={"flex gap-2 w-28"} variant={"contained"}
+                                            disabled={currentPage <= 1}
+                                            onClick={prevPageHandler}
+                                    >
+                                        <FontAwesomeIcon icon={faArrowLeft}/>Previous
+                                    </Button>
+                                    {`${currentPage}/${totalNumberOfPages}`}
+                                    <Button className={"flex gap-2 w-28"} variant={"contained"}
+                                            disabled={currentPage >= totalNumberOfPages}
+                                            onClick={nextPageHandler}
+                                    >
+                                        Next<FontAwesomeIcon icon={faArrowRight}/>
+                                    </Button>
+                                </div>}
                         </div>) :
                         <p className="text-center text-gray-500">No question sets found.</p>
 
@@ -400,8 +406,25 @@ const EditQuizComponent = () => {
                             value={formData.language}
                             onChange={(e) => setFormData({...formData, language: e.target.value})}
                         />
-
-
+                        <TextField
+                            label="URL Slug"
+                            fullWidth
+                            margin="normal"
+                            value={formData.slug}
+                            onChange={(e) => setFormData({...formData, slug: e.target.value})}
+                        />
+                        <TextField
+                            select
+                            label="Access Type"
+                            fullWidth
+                            margin="normal"
+                            value={accessLevel}
+                            onChange={(e) => setAccessLevel(e.target.value)}
+                        >
+                            <MenuItem value="free">Free</MenuItem>
+                            <MenuItem value="premium">Premium</MenuItem>
+                            <MenuItem value="paid">Paid</MenuItem>
+                        </TextField>
                         <div className="flex flex-col md:flex-row items-center gap-4">
                             <div className="w-36 h-36 rounded-full overflow-hidden border border-slate-200 shadow">
                                 {coverImagePreview ? (
