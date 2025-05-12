@@ -71,14 +71,15 @@ async function Page({params}) {
               </span>
                         </p>
 
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-700">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-md text-gray-700">
                             <Info label="📚 Subject" value={quiz.subject}/>
                             <Info label="🎓 Exam" value={quiz.exam === "na" ? "Any" : quiz.exam}/>
                             <Info label="🗣 Language" value={capitalizeFirstLetter(quiz.language)}/>
                             <Info label="🕒 Duration" value={`${quiz.time_duration} min`}/>
                             <Info label="🎯 Mode" value={capitalizeFirstLetter(quiz.mode)}/>
                             <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`}/>
-                            <Info label="Number of Questions" value={`${quiz.question_ids.length}`}/>
+                            <Info label="No. of Questions" value={`${quiz.question_ids.length}`}/>
+                            <Info label="Availability" value={`${capitalizeFirstLetter(quiz.access_level)}`}/>
                         </div>
                     </div>
                 </div>
