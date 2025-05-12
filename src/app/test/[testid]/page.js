@@ -605,7 +605,7 @@ function Page({params}) {
                                         <div
                                             key={index}
                                             onClick={() => optionsClickHandler(index)}
-                                            className={`quiz_box_option_box p-2 border-2 flex justify-between items-center min-h-10 ${
+                                            className={`quiz_box_option_box p-2 border-2 flex justify-between items-center min-h-[3.6rem] ${
                                                 selectedOptions[currentQuestionIndex]?.includes(index) ? "border-blue-500" : "border-gray-200"
                                             } ${
                                                 (isCurrentQuestionAnswered || finished) && correctOptions[currentQuestionIndex]?.includes(index) ? "border-green-500" : ""
