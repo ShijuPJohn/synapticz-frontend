@@ -606,7 +606,7 @@ function Page({params}) {
                                             key={index}
                                             onClick={() => optionsClickHandler(index)}
                                             className={`quiz_box_option_box p-2 border-2 flex justify-between items-center min-h-10 ${
-                                                selectedOptions[currentQuestionIndex]?.includes(index) ? "border-blue-500" : "border-gray-600"
+                                                selectedOptions[currentQuestionIndex]?.includes(index) ? "border-blue-500" : "border-gray-200"
                                             } ${
                                                 (isCurrentQuestionAnswered || finished) && correctOptions[currentQuestionIndex]?.includes(index) ? "border-green-500" : ""
                                             } ${
@@ -623,9 +623,9 @@ function Page({params}) {
                                             <div className={"w-full flex justify-start items-center gap-2"}>
 
                                                 {correctOptions[currentQuestionIndex].length > 1 ? <div
-                                                        className={`min-w-[1.1rem] w-[1.1rem] min-h-[1.1rem] h-[1.1rem] border-[4px] border-gray-400 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-200"}`}></div> :
+                                                        className={`min-w-[1.1rem] w-[1.1rem] min-h-[1.1rem] h-[1.1rem] border-[4px] border-gray-300 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-200"}`}></div> :
                                                     <div
-                                                        className={`min-w-[1.1rem] min-h-[1.1rem] w-[1.1rem] h-[1.1rem]  rounded-2xl border-[4px] border-gray-400 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-200"}`}></div>}
+                                                        className={`min-w-[1.1rem] min-h-[1.1rem] w-[1.1rem] h-[1.1rem]  rounded-2xl border-[4px] border-gray-300 ${selectedOptions[currentQuestionIndex]?.includes(index) ? "bg-blue-600" : "bg-gray-200"}`}></div>}
                                                 <h4 className="quiz_box_option text-sm md:text-base"><MarkdownWithMath
                                                     content={option}/></h4>
                                             </div>

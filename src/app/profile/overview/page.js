@@ -109,11 +109,11 @@ export default function UserActivityPage() {
                 </div>
 
                 {/* Profile and Summary */}
-                <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <section className="flex flex-wrap justify-center  gap-4 mb-8  w-full">
                     {/* Profile Card */}
-                    <div className="bg-white rounded-xl border border-cyan-300 shadow-sm p-5 flex flex-col gap-4">
-                        <div className="flex flex-col 2xl:flex-row items-start gap-4">
-                            <div className="bg-cyan-100 p-3 rounded-[200px] overflow-hidden relative w-28 min-w-[28] h-28 ">
+                    <div className="bg-white rounded-xl border border-cyan-300 shadow-sm p-5 flex flex-col gap-4 w-full md:w-[20rem] lg:w-[23rem]">
+                        <div className="flex flex-col items-start gap-4">
+                            <div className="bg-cyan-100 p-3 rounded-[200px] overflow-hidden relative w-28 min-w-28 h-28 min-h-28">
                                 {profile.profile_pic ? <Image
                                         src={profile.profile_pic}
                                         alt={"edit-profile picture"}
@@ -145,7 +145,7 @@ export default function UserActivityPage() {
                     </div>
 
                     {/* Summary Cards */}
-                    <div className="grid grid-cols-2 gap-4 md:col-span-2">
+                    <div className="grid grid-cols-2 gap-4 md:col-span-2 flex-grow">
                         {[
                             {
                                 label: "Questions",

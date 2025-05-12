@@ -8,11 +8,9 @@ async function fetchQuizById(qzid) {
     try {
         const response = await axios.get(`${fetchURL}/questionsets/${qzid}`);
         const data = response.data;
-
         if (!data.cover_image || data.cover_image.trim() === "") {
             data.cover_image = "/images/placeholder_book.png";
         }
-
         return data;
     } catch (err) {
         console.error("Error fetching quiz:", err);
@@ -79,7 +77,8 @@ async function Page({params}) {
                             <Info label="🎯 Mode" value={capitalizeFirstLetter(quiz.mode)}/>
                             <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`}/>
                             <Info label="No. of Questions" value={`${quiz.question_ids.length}`}/>
-                            <Info label="Availability" value={`${capitalizeFirstLetter(quiz.access_level)}`}/>
+                            <Info label="Availability"
+                                  value={`${capitalizeFirstLetter(quiz.access_level ? "quiz.access_level" : "free")}`}/>
                         </div>
                     </div>
                 </div>
