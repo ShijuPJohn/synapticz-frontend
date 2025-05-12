@@ -122,7 +122,10 @@ function Page(props) {
 
     const handleQuestionCountChange = (e) => {
         const value = e.target.value;
-        if ((userInfo.role === "admin" || userInfo.role === "owner") && (Number(value) >= 1 && Number(value) <= 100) || (Number(value) >= 1 && Number(value) <= 20)) {
+        // Allow empty value (for deletion) and validate based on user role
+        if (value === '' ||
+            ((userInfo.role === "admin" || userInfo.role === "owner") && Number(value) >= 1 && Number(value) <= 100) ||
+            (Number(value) >= 1 && Number(value) <= 20)) {
             setQuestionCount(value);
         }
     };
