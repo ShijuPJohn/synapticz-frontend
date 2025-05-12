@@ -177,6 +177,7 @@ function Page(props) {
             setStatusText("Saving the questions")
             await createQuestions(response.data.data.questions.questions, response.data.data.questions.quiz)
         } catch (error) {
+            enqueueSnackbar("Error generating questions. Try again",{variant: "error"});
             console.error('Error generating data:', error);
             setIsLoading(false);
         }
@@ -190,6 +191,7 @@ function Page(props) {
             const qids = response.data.questions
             await createQuiz(quiz, qids);
         } catch (error) {
+            enqueueSnackbar("Error creating questions. Try again",{variant: "error"});
             console.error('Error creating questions:', error);
             setIsLoading(false);
         }
@@ -206,15 +208,16 @@ function Page(props) {
             enqueueSnackbar("Quiz created successfully. Redirecting", {variant: 'success'});
             router.push(`/quizzes/${response.data.id}`);
         } catch (error) {
+            enqueueSnackbar("Error creating quiz. Try again",{variant: "error"});
             console.error('Error creating quiz:', error);
             setIsLoading(false);
         }
     }
 
     return (
-        <main className="min-h-[90vh] flex items-center justify-center p-2">
+        <main className="min-h-[88vh] flex items-center justify-center p-2">
             <div
-                className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-3 md:p-8 flex flex-col space-y-6 border border-gray-100">
+                className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-3 md:p-8 flex flex-col space-y-4 border border-gray-100">
                 <h2 className="text-3xl font-bold text-center text-[var(--secondary-title)]">
                     What do you want to test yourself with?
                 </h2>
@@ -239,7 +242,7 @@ function Page(props) {
                 </div>
 
                 {/* Controls row */}
-                <div className="flex flex-wrap gap-4 justify-center items-center p-2 rounded-xl">
+                <div className="flex flex-wrap gap-4 justify-center items-center py-2 rounded-xl">
                     {/* Language Select */}
                     <div className={"flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-4 flex-grow"}>
                         <div className="relative flex-1 min-w-[120px]">
