@@ -242,10 +242,15 @@ function Page(props) {
                 </div>
 
                 {/* Controls row */}
-                <div className="flex flex-wrap gap-4 justify-center items-center py-2 rounded-xl">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center py-2 rounded-xl">
                     {/* Language Select */}
-                    <div className={"flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-4 flex-grow"}>
-                        <div className="relative flex-1 min-w-[120px]">
+                    {/*<div className={"flex flex-col flex-grow"}>*/}
+
+                        <div className="flex-1 min-w-[120px] w-full flex flex-col gap-2 ">
+                            <label
+                                className="text-[#95497f] text-sm font-semibold  transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
+                                In which language?
+                            </label>
                             <div className="relative">
                                 <div
                                     className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
@@ -270,52 +275,57 @@ function Page(props) {
                         </div>
 
                         {/* Difficulty Select */}
-                        <div className="relative flex-1 min-w-[120px]">
-                            <div className="relative">
-                                <select
-                                    value={difficulty}
-                                    onChange={(e) => setDifficulty(e.target.value)}
-                                    className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
-                                >
-                                    <option value="" disabled hidden>Select Level</option>
-                                    {difficulties.map((diff) => (
-                                        <option key={diff.value} value={diff.value}>{diff.label}</option>
-                                    ))}
-                                </select>
-                                <div
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                                    <FiChevronDown className="h-5 w-5"/>
-                                </div>
-                                <label
-                                    className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">
-                                    Difficulty
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div className={"flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-4 flex-grow"}>
+                        {/*<div className="relative flex-1 min-w-[120px]">*/}
+                        {/*    <div className="relative">*/}
+                        {/*        <select*/}
+                        {/*            value={difficulty}*/}
+                        {/*            onChange={(e) => setDifficulty(e.target.value)}*/}
+                        {/*            className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"*/}
+                        {/*        >*/}
+                        {/*            <option value="" disabled hidden>Select Level</option>*/}
+                        {/*            {difficulties.map((diff) => (*/}
+                        {/*                <option key={diff.value} value={diff.value}>{diff.label}</option>*/}
+                        {/*            ))}*/}
+                        {/*        </select>*/}
+                        {/*        <div*/}
+                        {/*            className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">*/}
+                        {/*            <FiChevronDown className="h-5 w-5"/>*/}
+                        {/*        </div>*/}
+                        {/*        <label*/}
+                        {/*            className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">*/}
+                        {/*            Difficulty*/}
+                        {/*        </label>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
+                    {/*</div>*/}
+                    {/*<div className={"flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-4 flex-grow"}>*/}
                         {/* Question Type Select */}
-                        <div className="relative flex-1 min-w-[120px]">
-                            <div className="relative">
-                                <select
-                                    value={questionType}
-                                    onChange={(e) => setQuestionType(e.target.value)}
-                                    className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
-                                >
-                                    <option value="" disabled hidden>Select Type</option>
-                                    {questionTypes.map((type) => (
-                                        <option key={type.value} value={type.value}>{type.label}</option>
-                                    ))}
-                                </select>
-                                <div
-                                    className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
-                                    <FiChevronDown className="h-5 w-5"/>
-                                </div>
-                            </div>
-                        </div>
+                        {/*<div className="relative flex-1 min-w-[120px]">*/}
+                        {/*    <div className="relative">*/}
+                        {/*        <select*/}
+                        {/*            value={questionType}*/}
+                        {/*            onChange={(e) => setQuestionType(e.target.value)}*/}
+                        {/*            className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"*/}
+                        {/*        >*/}
+                        {/*            <option value="" disabled hidden>Select Type</option>*/}
+                        {/*            {questionTypes.map((type) => (*/}
+                        {/*                <option key={type.value} value={type.value}>{type.label}</option>*/}
+                        {/*            ))}*/}
+                        {/*        </select>*/}
+                        {/*        <div*/}
+                        {/*            className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">*/}
+                        {/*            <FiChevronDown className="h-5 w-5"/>*/}
+                        {/*        </div>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
 
                         {/* Question Count Input */}
-                        <div className="relative flex-1 min-w-[120px]">
+
+                        <div className="flex flex-col gap-2 flex-1 min-w-[120px] w-full">
+                            <label
+                                className="text-sm text-[#95497f] font-semibold  transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
+                                How many questions?
+                            </label>
                             <div className="relative">
                                 <input
                                     type="number"
@@ -326,13 +336,10 @@ function Page(props) {
                                     className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
                                     placeholder=" "
                                 />
-                                <label
-                                    className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
-                                    Questions
-                                </label>
+
                             </div>
                         </div>
-                    </div>
+                    {/*</div>*/}
                 </div>
                 {/* Submit Button */}
                 <button
