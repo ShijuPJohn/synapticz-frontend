@@ -3,6 +3,50 @@ import Link from "next/link";
 import CardsCarousel from "@/components/cards_carousel";
 import 'katex/dist/katex.min.css';
 
+export async function generateMetadata({params}) {
+
+    // Ensure cover image is absolute URL
+    const coverImage = 'https://synapticz.com/images/icon.png';
+
+    return {
+        title: "Synapticz",
+        description: "Think-Recall-Retain",
+        metadataBase: new URL('https://synapticz.com'),
+        openGraph: {
+            title: "Synapticz",
+            description: "The Quiz App. Think-Recall-Retain",
+            url: `/`,
+            siteName: 'Synapticz',
+            images: [
+                {
+                    url: coverImage,
+                    width: 1200,
+                    height: 630,
+                    alt: "Synapticz",
+                },
+            ],
+            locale: 'en_US',
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: "Synapticz",
+            description: "The Quiz App. Think-Recall-Retain\"",
+            images: [coverImage],
+        },
+        robots: {
+            index: true,
+            follow: true,
+            nocache: false,
+            googleBot: {
+                index: true,
+                follow: true,
+                noimageindex: false,
+            },
+        }
+    };
+}
+
 const cardContentData = [
     {
         image: "/images/active_recall.jpg",

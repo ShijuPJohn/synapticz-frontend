@@ -1,10 +1,10 @@
 import React from "react";
 import axios from "axios";
-import { fetchURL } from "@/constants";
+import {fetchURL} from "@/constants";
 import Image from "next/image";
 import StartSessionControlBox from "@/components/start_session_control_box";
 
-export async function generateMetadata({ params }) {
+export async function generateMetadata({params}) {
     const quiz = await fetchQuizById(params.quizzid);
 
     if (!quiz) {
@@ -14,11 +14,8 @@ export async function generateMetadata({ params }) {
     }
 
     // Ensure cover image is absolute URL
-    const coverImage = quiz.cover_image
-        ? quiz.cover_image.startsWith('http')
-            ? quiz.cover_image
-            : `https://synapticz.com${quiz.cover_image}`
-        : 'https://synapticz.com/default-og-image.jpg';
+    const coverImage = quiz.cover_image ? quiz.cover_image
+        : 'https://synapticz.com/images/icon.png';
 
     return {
         title: quiz.name,
@@ -46,6 +43,16 @@ export async function generateMetadata({ params }) {
             description: quiz.description,
             images: [coverImage],
         },
+        robots: {
+            index: true,
+            follow: true,
+            nocache: false,
+            googleBot: {
+                index: true,
+                follow: true,
+                noimageindex: false,
+            },
+        }
     };
 }
 
@@ -64,7 +71,7 @@ function capitalizeFirstLetter(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-function Info({ label, value }) {
+function Info({label, value}) {
     return (
         <div>
             <p className="text-gray-500 text-xs mb-0.5">{label}</p>
@@ -73,7 +80,7 @@ function Info({ label, value }) {
     );
 }
 
-export default async function Page({ params }) {
+export default async function Page({params}) {
     const quiz = await fetchQuizById(params.quizzid);
 
     if (!quiz) {
@@ -88,7 +95,8 @@ export default async function Page({ params }) {
 
     return (
         <main>
-            <div className="w-[98%] md:w-[80%] lg:w-[50%] mx-auto bg-white rounded-2xl p-4 md:p-12 border border-purple-100">
+            <div
+                className="w-[98%] md:w-[80%] lg:w-[50%] mx-auto bg-white rounded-2xl p-4 md:p-12 border border-purple-100">
                 {/* Top Section: Image + Metadata */}
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Cover Image */}
@@ -120,11 +128,11 @@ export default async function Page({ params }) {
                         </p>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-md text-gray-700">
-                            <Info label="📚 Subject" value={quiz.subject} />
-                            <Info label="🎓 Exam" value={quiz.exam === "na" ? "Any" : quiz.exam} />
-                            <Info label="🗣 Language" value={capitalizeFirstLetter(quiz.language)} />
-                            <Info label="🎯 Mode" value={capitalizeFirstLetter(quiz.mode)} />
-                            <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`} />
+                            <Info label="📚 Subject" value={quiz.subject}/>
+                            <Info label="🎓 Exam" value={quiz.exam === "na" ? "Any" : quiz.exam}/>
+                            <Info label="🗣 Language" value={capitalizeFirstLetter(quiz.language)}/>
+                            <Info label="🎯 Mode" value={capitalizeFirstLetter(quiz.mode)}/>
+                            <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`}/>
                             <Info
                                 label="No. of Questions"
                                 value={`${quiz.question_ids ? quiz.question_ids.length : 0}`}
@@ -138,7 +146,7 @@ export default async function Page({ params }) {
                 </div>
 
                 {/* Divider */}
-                <hr className="my-8 border-t border-purple-200" />
+                <hr className="my-8 border-t border-purple-200"/>
 
                 {/* Description */}
                 {quiz.description && (
@@ -190,7 +198,7 @@ export default async function Page({ params }) {
 
                 {/* Start Test Button */}
                 {quiz.can_start_test && (
-                    <StartSessionControlBox qid={params.quizzid} />
+                    <StartSessionControlBox qid={params.quizzid}/>
                 )}
             </div>
         </main>
