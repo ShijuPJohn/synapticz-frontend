@@ -219,7 +219,7 @@ function Page(props) {
             <div
                 className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-3 md:p-8 flex flex-col space-y-4 border border-gray-100">
                 <h2 className="text-3xl font-bold text-center text-[var(--secondary-title)]">
-                    What do you want to test yourself with?
+                    What do you want to learn?
                 </h2>
 
                 {/* Main textarea */}
@@ -229,7 +229,7 @@ function Page(props) {
                         value={input}
                         disabled={isLoading}
                         onChange={handleInputChange}
-                        placeholder={`Describe the topic${hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? " in less than or equal to 100 words." : " in less than or equal to 100 words."}`}
+                        placeholder={`Enter any subject, exam, or topic`}
                         className="w-full px-5 py-4 text-gray-700 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
                     />
                     {hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') &&

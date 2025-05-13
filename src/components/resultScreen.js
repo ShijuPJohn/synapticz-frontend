@@ -14,6 +14,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import Link from "next/link";
 import LeetCodeStylePercentileBar from "@/components/leetcode_style_percentile_bar";
+import MarkdownWithMath from "@/components/markdown_with_math";
 
 function ResultScreen({resObject, toggleResult}) {
     const router = useRouter();
@@ -21,15 +22,13 @@ function ResultScreen({resObject, toggleResult}) {
     const startedTime = new Date(resObject.test_session.started_time);
     const finishedTime = new Date(resObject.test_session.finished_time);
     const [showConfetti, setShowConfetti] = useState(true);
-    const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+    const [windowSize, setWindowSize] = useState({width: 0, height: 0});
     // Format time
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}m ${secs}s`;
     };
-
-
 
 
     // Get performance message based on percentage
@@ -48,10 +47,10 @@ function ResultScreen({resObject, toggleResult}) {
         hour12: true
     });
     useEffect(() => {
-        setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+        setWindowSize({width: window.innerWidth, height: window.innerHeight});
 
         const handleResize = () => {
-            setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+            setWindowSize({width: window.innerWidth, height: window.innerHeight});
         };
 
         window.addEventListener("resize", handleResize);
@@ -60,19 +59,21 @@ function ResultScreen({resObject, toggleResult}) {
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-6 bg-gray-50 rounded-lg shadow-lg flex flex-col">
-            {(resObject.test_session.scored_marks/resObject.test_session.total_marks)>=.6 && showConfetti && <Confetti
-                width={windowSize.width}
-                height={windowSize.height}
-                recycle={false}
-                numberOfPieces={600}
-                gravity={1}
-                onConfettiComplete={() => {
-                    setShowConfetti(false)
-                }}
-                style={{position: 'fixed', zIndex: 1000}}
-            />
+            {(resObject.test_session.scored_marks / resObject.test_session.total_marks) >= .6 && showConfetti &&
+                <Confetti
+                    width={windowSize.width}
+                    height={windowSize.height}
+                    recycle={false}
+                    numberOfPieces={600}
+                    gravity={1}
+                    onConfettiComplete={() => {
+                        setShowConfetti(false)
+                    }}
+                    style={{position: 'fixed', zIndex: 1000}}
+                />
             }
-            <div className="text-center flex flex-col md:flex-row justify-center items-center md:gap-2 text-lg md:text-2xl">
+            <div
+                className="text-center flex flex-col md:flex-row justify-center items-center md:gap-2 text-lg md:text-2xl">
                 <h2 className="text-indigo-800 uppercase">Results:</h2>
                 <h2 className="font-bold text-sky-700 uppercase"> {`${resObject.question_set.name}`}</h2>
                 {/*<p className="text-gray-600 mt-1">{resObject.question_set.description}</p>*/}
@@ -154,7 +155,8 @@ function ResultScreen({resObject, toggleResult}) {
                     <div className="space-y-3">
                         <div className="flex justify-between">
                             <span className="text-gray-600">Test Mode:</span>
-                            <span className="font-medium capitalize">{resObject.test_session.mode==="untimed"?"Not timed":(resObject.test_session.mode==="t_timed"?"Total Time Capped":"Per Question Timeout")}</span>
+                            <span
+                                className="font-medium capitalize">{resObject.test_session.mode === "untimed" ? "Not timed" : (resObject.test_session.mode === "t_timed" ? "Total Time Capped" : "Per Question Timeout")}</span>
                         </div>
                         <div className="flex justify-between">
                             <span className="text-gray-600">Time Started:</span>
@@ -217,19 +219,19 @@ function ResultScreen({resObject, toggleResult}) {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="font-medium text-gray-800">
-                                        Q{index + 1}: {question.question}
+                                        Q{index + 1}: <MarkdownWithMath content={question.question}/>
                                     </p>
                                     <p className="text-sm text-gray-600 mt-1">
-                                        <span className="font-medium">Your Answer:</span> {
+                                        <span className="font-medium">Your Answer:</span> <MarkdownWithMath content={
                                         question.selected_answer_list.length > 0
                                             ? question.selected_answer_list.map(ans => question.options[ans]).join(', ')
                                             : 'Not answered'
-                                    }
+                                    }/>
                                     </p>
                                     <p className="text-sm text-gray-600">
-                                        <span className="font-medium">Correct Answer:</span> {
+                                        <span className="font-medium">Correct Answer:</span> <MarkdownWithMath content={
                                         question.correct_options.map(ans => question.options[ans]).join(', ')
-                                    }
+                                    }/>
                                     </p>
                                 </div>
                                 <span className={`px-2 py-1 rounded text-xs font-bold ${
@@ -242,7 +244,8 @@ function ResultScreen({resObject, toggleResult}) {
                             {question.explanation && (
                                 <div className="mt-3 p-3 bg-blue-50 rounded border border-blue-100">
                                     <p className="text-sm font-medium text-blue-800">Explanation:</p>
-                                    <p className="text-sm text-blue-700">{question.explanation}</p>
+                                    <p className="text-sm text-blue-700"><MarkdownWithMath
+                                        content={question.explanation}/></p>
                                 </div>
                             )}
 
