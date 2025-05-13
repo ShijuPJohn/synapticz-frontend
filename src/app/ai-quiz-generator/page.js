@@ -124,8 +124,8 @@ function Page(props) {
         const value = e.target.value;
         // Allow empty value (for deletion) and validate based on user role
         if (value === '' ||
-            ((userInfo.role === "admin" || userInfo.role === "owner") && Number(value) >= 1 && Number(value) <= 100) ||
-            (Number(value) >= 1 && Number(value) <= 100)) {
+            ((userInfo.role === "admin" || userInfo.role === "owner") && Number(value) >= 1 && Number(value) <= 25) ||
+            (Number(value) >= 1 && Number(value) <= 25)) {
             setQuestionCount(value);
         }
     };
@@ -151,8 +151,8 @@ function Page(props) {
         }
 
 // Restrict question count only for non-admin/owner users
-        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 50)) {
-            enqueueSnackbar("Please enter a valid number of questions (1-50)", {variant: "warning"});
+        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 25)) {
+            enqueueSnackbar("Please enter a valid number of questions (1-25)", {variant: "warning"});
             return;
         }
 
@@ -229,7 +229,7 @@ function Page(props) {
                         value={input}
                         disabled={isLoading}
                         onChange={handleInputChange}
-                        placeholder={`Describe the topic in your language${hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? ", in less than or equal to 100 words." : "."}`}
+                        placeholder={`Describe the topic${hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? " in less than or equal to 100 words." : " in less than or equal to 100 words."}`}
                         className="w-full px-5 py-4 text-gray-700 bg-gray-50 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
                     />
                     {hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') &&
@@ -322,7 +322,7 @@ function Page(props) {
                                     value={questionCount}
                                     onChange={handleQuestionCountChange}
                                     min="1"
-                                    max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "50" : "50"}
+                                    max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "25" : "25"}
                                     className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
                                     placeholder=" "
                                 />
