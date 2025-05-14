@@ -127,8 +127,8 @@ function Page(props) {
         const value = e.target.value;
         // Allow empty value (for deletion) and validate based on user role
         if (value === '' ||
-            ((userInfo.role === "admin" || userInfo.role === "owner") && Number(value) >= 1 && Number(value) <= 25) ||
-            (Number(value) >= 1 && Number(value) <= 25)) {
+            ((userInfo.role === "admin" || userInfo.role === "owner") && Number(value) >= 1 && Number(value) <= 30) ||
+            (Number(value) >= 1 && Number(value) <= 20)) {
             setQuestionCount(value);
         }
     };
@@ -154,8 +154,12 @@ function Page(props) {
         }
 
         // Restrict question count only for non-admin/owner users
-        if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 25)) {
-            enqueueSnackbar("Please enter a valid number of questions (1-25)", {variant: "warning"});
+        const isAdminOrOwner = userInfo.role === 'admin' || userInfo.role === 'owner';
+        const minQuestions = 1;
+        const maxQuestions = isAdminOrOwner ? 30 : 20;
+
+        if (!questionCount || Number(questionCount) < minQuestions || Number(questionCount) > maxQuestions) {
+            enqueueSnackbar(`Please enter a valid number of questions (${minQuestions}-${maxQuestions})`, { variant: "warning" });
             return;
         }
 
@@ -178,7 +182,7 @@ function Page(props) {
             setStatusText("Saving the questions")
             await createQuestions(response.data.data.questions.questions, response.data.data.questions.quiz)
         } catch (error) {
-            enqueueSnackbar("Error generating questions. Try again", {variant: "error"});
+            enqueueSnackbar("Uh oh! That didn't go well. Try again with fewer number of questions", {variant: "error"});
             console.error('Error generating data:', error);
             setIsLoading(false);
         }
@@ -286,7 +290,7 @@ function Page(props) {
                                 value={questionCount}
                                 onChange={handleQuestionCountChange}
                                 min="1"
-                                max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "25" : "25"}
+                                max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "20" : "30"}
                                 className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
                             />
                         </div>
