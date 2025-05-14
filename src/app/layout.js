@@ -7,9 +7,11 @@ import React from "react";
 
 export const metadata = {
     title: "Synapticz",
-    description: "Think Recall Retain",
+    description: "Think-Recall-Retain",
+    openGraph: {
+        images: "https://synapticz.com/images/icon.png",
+    },
 };
-
 export default function RootLayout({children}) {
     return (
         <html lang="en">
