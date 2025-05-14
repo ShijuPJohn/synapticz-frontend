@@ -1,6 +1,6 @@
 "use client"
 
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
 import {useSelector} from "react-redux";
 import {enqueueSnackbar} from "notistack";
@@ -159,7 +159,7 @@ function Page(props) {
         const maxQuestions = isAdminOrOwner ? 30 : 20;
 
         if (!questionCount || Number(questionCount) < minQuestions || Number(questionCount) > maxQuestions) {
-            enqueueSnackbar(`Please enter a valid number of questions (${minQuestions}-${maxQuestions})`, { variant: "warning" });
+            enqueueSnackbar(`Please enter a valid number of questions (${minQuestions}-${maxQuestions})`, {variant: "warning"});
             return;
         }
 
@@ -223,6 +223,7 @@ function Page(props) {
         setShowAdvanced(!showAdvanced);
     };
 
+
     return (
         <main className="min-h-[88vh] flex items-center justify-center p-2">
             <div
@@ -282,7 +283,7 @@ function Page(props) {
                     {/* Question Count Input */}
                     <div className="flex flex-col gap-2 flex-1 min-w-[120px] w-full">
                         <label className="text-sm text-[#95497f] font-semibold">
-                            How many questions?
+                            How many questions? (1-20)
                         </label>
                         <div className="relative">
                             <input

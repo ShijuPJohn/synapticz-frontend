@@ -129,7 +129,12 @@ const EditQuizComponent = () => {
             setQuestionSets(prev => {
                 return prev.map(qSet =>
                     qSet.id === currentQuiz.id
-                        ? {...qSet, ...formData, coverImage: uploadedUrl ? uploadedUrl : currentQuiz.coverImage, access_level: accessLevel, slug: formData.slug}
+                        ? {
+                            ...qSet, ...formData,
+                            coverImage: uploadedUrl ? uploadedUrl : currentQuiz.coverImage,
+                            access_level: accessLevel,
+                            slug: formData.slug
+                        }
                         : qSet
                 );
             });
@@ -571,9 +576,11 @@ const EditQuizComponent = () => {
                     }}>
                 <DialogTitle>Select Questions</DialogTitle>
                 <DialogContent className="flex flex-col gap-4 mt-2 py-4">
-                    <QuestionShowSelect initialFetchIds={currentQuiz.question_ids}
-                                        setSelectedQIdsCallback={setSelectedQuestions}
-                                        mode={"edit"}
+                    <QuestionShowSelect
+                        mode={"edit"}
+                        initialFetchIds={currentQuiz.question_ids}
+                        setSelectedQIdsCallback={setSelectedQuestions}
+
                     />
                 </DialogContent>
                 <DialogActions>
