@@ -3,19 +3,8 @@ import React, {useEffect, useRef, useState} from 'react';
 import {useSelector} from "react-redux";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
-    faArrowLeft,
-    faArrowRight,
-    faCheckSquare,
-    faChevronDown,
-    faChevronUp,
-    faCircleXmark,
-    faClose,
-    faEdit,
-    faFilter,
-    faListCheck,
-    faSquare,
-    faTrash,
-    faWarning
+    faArrowLeft, faArrowRight,
+    faCheckSquare, faChevronDown, faChevronUp, faClose, faEdit, faFilter, faListCheck, faSquare, faTrash, faWarning
 } from "@fortawesome/free-solid-svg-icons";
 import {
     Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField
@@ -40,7 +29,6 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
     const [multipleDeleteConfirmModalOpen, setMultipleDeleteConfirmModalOpen] = useState(false);
     const [selectedQuestionsModalOpen, setSelectedQuestionsModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [modeInternal, setModeInternal] = useState("edit");
     const [localFilters, setLocalFilters] = useState({
         subject: '', exam: '', language: '', tags: '', hours: '', created_by: '', self: false, noQs: 10, page: 1,
     });
@@ -73,11 +61,9 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
     };
 
     async function fetchQuestionsInitial() {
-        console.log("doing initial fetch with ids", initialFetchIds.join())
         if (initialFetchIds?.length > 0) {
             try {
                 const response = await axios.get(`${fetchURL}/questions?qids=${initialFetchIds.join()}`, {headers: getHeaders()});
-                console.log("response of initialfetch", response.data)
                 // setTotalNumberOfPages(response.data.pagination.total_pages)
                 setQuestions(response.data.questions);
                 setSelectedQuestions(response.data.questions.map((question) => {
@@ -90,7 +76,6 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                     }
                 }));
                 setQuestionsCount(response.data.questions.length);
-                setModeInternal("full_control");
             } catch (error) {
                 console.error('Error fetching questions:', error);
             } finally {
@@ -102,25 +87,21 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
     }
 
     const fetchQuestions = async (fltrs = localFilters) => {       //TODO
-        if (modeInternal==="full_control") {
-            console.log("fetching without question ids")
-            const params = new URLSearchParams();
-            Object.entries(fltrs).forEach(([key, value]) => {
-                if (value) params.append(key, value);
-            });
-            setLoading(true)
-            try {
-                const response = await axios.get(`${fetchURL}/questions?${params.toString()}`, {headers: getHeaders()});
-                console.log("response of questions fetching2", response.data)
-                setTotalNumberOfPages(response.data.pagination.total_pages)
-                setQuestions(response.data.questions ? response.data.questions : []);
-                setQuestionsCount(response.data.questions.length);
-                setSelectedAll(false)
-            } catch (error) {
-                console.error('Error fetching questions:', error);
-            } finally {
-                setLoading(false);
-            }
+        const params = new URLSearchParams();
+        Object.entries(fltrs).forEach(([key, value]) => {
+            if (value) params.append(key, value);
+        });
+        setLoading(true)
+        try {
+            const response = await axios.get(`${fetchURL}/questions?${params.toString()}`, {headers: getHeaders()});
+            setTotalNumberOfPages(response.data.pagination.total_pages)
+            setQuestions(response.data.questions ? response.data.questions : []);
+            setQuestionsCount(response.data.questions.length);
+            setSelectedAll(false)
+        } catch (error) {
+            console.error('Error fetching questions:', error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -134,7 +115,6 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
 
     useEffect(() => {
         if (hasFetched.current) return;
-        setModeInternal(mode);
         if (mode === "edit") {
             fetchQuestionsInitial();
         } else {
@@ -323,24 +303,6 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                     <span className="text-gray-700">My Questions</span>
                 </label>
                 <div className={"ml-auto flex gap-2"}>
-                    {mode==="edit" &&
-                        <button
-                            onClick={()=>{
-                                fetchQuestionsInitial()
-                            }}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                        >
-                            <FontAwesomeIcon icon={faCircleXmark}/>
-                            Existing Questions
-                        </button>
-                    }
-                    <button
-                        onClick={applyFilters}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                    >
-                        <FontAwesomeIcon icon={faFilter}/>
-                        Apply Filters
-                    </button>
                     <button
                         className={" text-white bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 disabled:cursor-auto border-[1px] p-3 rounded-md cursor-pointer flex justify-center items-center"}
                         onClick={() => {
@@ -375,7 +337,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
 
                     <button
                         className={"text-white bg-red-700 hover:bg-red-800 disabled:bg-red-300 disabled:cursor-auto border-[1px] p-3 rounded-md cursor-pointer flex justify-center items-center"}
-                        disabled={selectedQuestions.length === 0 || userInfo.role === "user" && selectedQuestions.map(q => q.created_by_id).filter(cbid => cbid !== userInfo.user_id).length > 0}
+                        disabled={selectedQuestions.length === 0 || userInfo.role==="user" && selectedQuestions.map(q => q.created_by_id).filter(cbid => cbid !== userInfo.user_id).length > 0}
                         onClick={() => {
                             setMultipleDeleteConfirmModalOpen(true)
                         }}
@@ -390,7 +352,13 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
 
                 </div>
 
-
+                <button
+                    onClick={applyFilters}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                    <FontAwesomeIcon icon={faFilter}/>
+                    Apply Filters
+                </button>
 
                 <div className="cursor-pointer border-[1px] border-blue-900 rounded-lg p-2 text-blue-800"
                      onClick={() => {
@@ -472,8 +440,7 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
                     </div>)}
 
                     <div className="mt-8">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2"><MarkdownWithMath
-                            content={q.question}/></h3>
+                        <h3 className="text-lg font-semibold text-gray-800 mb-3 line-clamp-2"><MarkdownWithMath content={q.question}/> </h3>
 
                         {q.tags?.length > 0 && (<div className="flex flex-wrap gap-2 mb-4">
                             {q.tags.map((tag, index) => (<span
@@ -501,22 +468,21 @@ function QuestionShowSelect({initialFetchIds, mode, setSelectedQIdsCallback}) {
             })}
 
         </div>
-        {questions?.length > 0 &&
-            <div className="pagination-buttons-container w-full flex justify-center items-center gap-2">
-                <Button className={"flex gap-2 w-28"} variant={"contained"}
-                        disabled={currentPage <= 1}
-                        onClick={prevPageHandler}
-                >
-                    <FontAwesomeIcon icon={faArrowLeft}/>Previous
-                </Button>
-                {`${currentPage}/${totalNumberOfPages}`}
-                <Button className={"flex gap-2 w-28"} variant={"contained"}
-                        disabled={currentPage >= totalNumberOfPages}
-                        onClick={nextPageHandler}
-                >
-                    Next<FontAwesomeIcon icon={faArrowRight}/>
-                </Button>
-            </div>}
+        {questions?.length>0 &&  <div className="pagination-buttons-container w-full flex justify-center items-center gap-2">
+            <Button className={"flex gap-2 w-28"} variant={"contained"}
+                    disabled={currentPage <= 1}
+                    onClick={prevPageHandler}
+            >
+                <FontAwesomeIcon icon={faArrowLeft}/>Previous
+            </Button>
+            {`${currentPage}/${totalNumberOfPages}`}
+            <Button className={"flex gap-2 w-28"} variant={"contained"}
+                    disabled={currentPage >= totalNumberOfPages}
+                    onClick={nextPageHandler}
+            >
+                Next<FontAwesomeIcon icon={faArrowRight}/>
+            </Button>
+        </div>}
         {(!questions || questions.length === 0) && (
             <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-sm mt-8">
                 <p className="text-gray-500 text-lg font-medium">
