@@ -6,7 +6,7 @@ import {useSelector} from "react-redux";
 import {enqueueSnackbar} from "notistack";
 import {fetchURL} from "@/constants";
 import {usePathname, useRouter} from "next/navigation";
-import {FiChevronDown, FiGlobe, FiLoader} from "react-icons/fi";
+import {FiChevronDown, FiGlobe, FiLoader, FiSettings} from "react-icons/fi";
 
 // Local storage keys
 const STORAGE_KEY = 'quizGeneratorData';
@@ -18,12 +18,13 @@ function Page(props) {
     const {userInfo} = userLogin
     const [statusText, setStatusText] = useState("Generating your quiz...");
     const [language, setLanguage] = useState("English");
-    const [difficulty, setDifficulty] = useState("5");
-    const [questionType, setQuestionType] = useState("mcq-multi-select");
-    const [questionCount, setQuestionCount] = useState("5");
+    const [difficulty, setDifficulty] = useState("0");
+    const [questionType, setQuestionType] = useState("mcq");
+    const [questionCount, setQuestionCount] = useState("10");
     const router = useRouter();
     const pathname = usePathname();
     const [hasMounted, setHasMounted] = useState(false);
+    const [showAdvanced, setShowAdvanced] = useState(false);
 
     // Timer reference for debouncing input changes
     const inputTimerRef = React.useRef(null);
@@ -51,10 +52,10 @@ function Page(props) {
         "Venda", "Tsonga", "Ndebele"
     ];
 
-    const difficulties = Array.from({length: 10}, (_, i) => ({
-        value: `${i + 1}`,
-        label: `${i + 1}`
-    }));
+    const difficulties = [{value: 0, label: "All Difficulties"}];
+    for (let i = 1; i <= 10; i++) {
+        difficulties.push({value: i, label: i})
+    }
 
     const questionTypes = [
         {value: "mcq", label: "Multiple Choice"},
@@ -73,6 +74,7 @@ function Page(props) {
                 if (parsedData.difficulty) setDifficulty(parsedData.difficulty);
                 if (parsedData.questionType) setQuestionType(parsedData.questionType);
                 if (parsedData.questionCount) setQuestionCount(parsedData.questionCount);
+                if (parsedData.showAdvanced) setShowAdvanced(parsedData.showAdvanced);
             } catch (e) {
                 console.error('Failed to parse saved data', e);
             }
@@ -87,10 +89,11 @@ function Page(props) {
             language,
             difficulty,
             questionType,
-            questionCount
+            questionCount,
+            showAdvanced
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-    }, [language, difficulty, questionType, questionCount]);
+    }, [input, language, difficulty, questionType, questionCount, showAdvanced]);
 
     function getHeaders() {
         return {
@@ -150,15 +153,13 @@ function Page(props) {
             return;
         }
 
-// Restrict question count only for non-admin/owner users
+        // Restrict question count only for non-admin/owner users
         if (!(userInfo.role === 'admin' || userInfo.role === 'owner') && (!questionCount || Number(questionCount) < 1 || Number(questionCount) > 25)) {
             enqueueSnackbar("Please enter a valid number of questions (1-25)", {variant: "warning"});
             return;
         }
 
-
         // Clear saved data on successful submission
-
         setIsLoading(true);
         await createQuizFromText(input, language, difficulty, questionType, questionCount);
     }
@@ -177,7 +178,7 @@ function Page(props) {
             setStatusText("Saving the questions")
             await createQuestions(response.data.data.questions.questions, response.data.data.questions.quiz)
         } catch (error) {
-            enqueueSnackbar("Error generating questions. Try again",{variant: "error"});
+            enqueueSnackbar("Error generating questions. Try again", {variant: "error"});
             console.error('Error generating data:', error);
             setIsLoading(false);
         }
@@ -191,7 +192,7 @@ function Page(props) {
             const qids = response.data.questions
             await createQuiz(quiz, qids);
         } catch (error) {
-            enqueueSnackbar("Error creating questions. Try again",{variant: "error"});
+            enqueueSnackbar("Error creating questions. Try again", {variant: "error"});
             console.error('Error creating questions:', error);
             setIsLoading(false);
         }
@@ -208,11 +209,15 @@ function Page(props) {
             enqueueSnackbar("Quiz created successfully. Redirecting", {variant: 'success'});
             router.push(`/quizzes/${response.data.id}`);
         } catch (error) {
-            enqueueSnackbar("Error creating quiz. Try again",{variant: "error"});
+            enqueueSnackbar("Error creating quiz. Try again", {variant: "error"});
             console.error('Error creating quiz:', error);
             setIsLoading(false);
         }
     }
+
+    const toggleAdvancedSettings = () => {
+        setShowAdvanced(!showAdvanced);
+    };
 
     return (
         <main className="min-h-[88vh] flex items-center justify-center p-2">
@@ -241,106 +246,114 @@ function Page(props) {
                         </div>}
                 </div>
 
-                {/* Controls row */}
+                {/* Basic Controls row */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center py-2 rounded-xl">
                     {/* Language Select */}
-                    {/*<div className={"flex flex-col flex-grow"}>*/}
+                    <div className="flex-1 min-w-[120px] w-full flex flex-col gap-2">
+                        <label className="text-[#95497f] text-sm font-semibold">
+                            In which language?
+                        </label>
+                        <div className="relative">
+                            <div
+                                className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
+                                <FiGlobe className="h-5 w-5"/>
+                            </div>
+                            <select
+                                value={language}
+                                onChange={(e) => setLanguage(e.target.value)}
+                                className="w-full pl-10 pr-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none"
+                            >
+                                <option value="" disabled hidden>Select Language</option>
+                                {languages.map((lang) => (
+                                    <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                            </select>
+                            <div
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                <FiChevronDown className="h-5 w-5"/>
+                            </div>
+                        </div>
+                    </div>
 
-                        <div className="flex-1 min-w-[120px] w-full flex flex-col gap-2 ">
-                            <label
-                                className="text-[#95497f] text-sm font-semibold  transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
-                                In which language?
+                    {/* Question Count Input */}
+                    <div className="flex flex-col gap-2 flex-1 min-w-[120px] w-full">
+                        <label className="text-sm text-[#95497f] font-semibold">
+                            How many questions?
+                        </label>
+                        <div className="relative">
+                            <input
+                                type="number"
+                                value={questionCount}
+                                onChange={handleQuestionCountChange}
+                                min="1"
+                                max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "25" : "25"}
+                                className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Advanced Settings Button */}
+                <button
+                    onClick={toggleAdvancedSettings}
+                    className="flex items-center justify-center gap-2 text-blue-600 hover:text-blue-800 text-sm font-medium py-2"
+                >
+                    <FiSettings className="h-4 w-4"/>
+                    {showAdvanced ? 'Hide Advanced Settings' : 'Advanced Settings'}
+                </button>
+
+                {/* Advanced Settings Section */}
+                {showAdvanced && (
+                    <div
+                        className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        {/* Difficulty Select */}
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm text-gray-700 font-medium">
+                                Difficulty Level
                             </label>
                             <div className="relative">
-                                <div
-                                    className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-500">
-                                    <FiGlobe className="h-5 w-5"/>
-                                </div>
                                 <select
-                                    value={language}
-                                    onChange={(e) => setLanguage(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"
+                                    value={difficulty}
+                                    onChange={(e) => setDifficulty(e.target.value)}
+                                    className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none"
                                 >
-                                    <option value="" disabled hidden>Select Language</option>
-                                    {languages.map((lang) => (
-                                        <option key={lang} value={lang}>{lang}</option>
+                                    <option value="" disabled hidden>Select Difficulty</option>
+                                    {difficulties.map((diff) => (
+                                        <option key={diff.value} value={diff.value}>{diff.label}</option>
                                     ))}
                                 </select>
                                 <div
                                     className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
                                     <FiChevronDown className="h-5 w-5"/>
                                 </div>
-
                             </div>
                         </div>
 
-                        {/* Difficulty Select */}
-                        {/*<div className="relative flex-1 min-w-[120px]">*/}
-                        {/*    <div className="relative">*/}
-                        {/*        <select*/}
-                        {/*            value={difficulty}*/}
-                        {/*            onChange={(e) => setDifficulty(e.target.value)}*/}
-                        {/*            className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"*/}
-                        {/*        >*/}
-                        {/*            <option value="" disabled hidden>Select Level</option>*/}
-                        {/*            {difficulties.map((diff) => (*/}
-                        {/*                <option key={diff.value} value={diff.value}>{diff.label}</option>*/}
-                        {/*            ))}*/}
-                        {/*        </select>*/}
-                        {/*        <div*/}
-                        {/*            className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">*/}
-                        {/*            <FiChevronDown className="h-5 w-5"/>*/}
-                        {/*        </div>*/}
-                        {/*        <label*/}
-                        {/*            className="absolute left-2 top-[1px] text-xs text-gray-500 transition-all peer-focus:text-xs peer-focus:top-1 peer-focus:text-blue-500">*/}
-                        {/*            Difficulty*/}
-                        {/*        </label>*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
-                    {/*</div>*/}
-                    {/*<div className={"flex flex-col md:flex-row gap-4 md:gap-2 lg:gap-4 flex-grow"}>*/}
                         {/* Question Type Select */}
-                        {/*<div className="relative flex-1 min-w-[120px]">*/}
-                        {/*    <div className="relative">*/}
-                        {/*        <select*/}
-                        {/*            value={questionType}*/}
-                        {/*            onChange={(e) => setQuestionType(e.target.value)}*/}
-                        {/*            className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none peer"*/}
-                        {/*        >*/}
-                        {/*            <option value="" disabled hidden>Select Type</option>*/}
-                        {/*            {questionTypes.map((type) => (*/}
-                        {/*                <option key={type.value} value={type.value}>{type.label}</option>*/}
-                        {/*            ))}*/}
-                        {/*        </select>*/}
-                        {/*        <div*/}
-                        {/*            className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">*/}
-                        {/*            <FiChevronDown className="h-5 w-5"/>*/}
-                        {/*        </div>*/}
-                        {/*    </div>*/}
-                        {/*</div>*/}
-
-                        {/* Question Count Input */}
-
-                        <div className="flex flex-col gap-2 flex-1 min-w-[120px] w-full">
-                            <label
-                                className="text-sm text-[#95497f] font-semibold  transition-all peer-focus:text-[10px] peer-focus:top-1 peer-focus:text-blue-500 peer-placeholder-shown:text-base peer-placeholder-shown:top-3">
-                                How many questions?
+                        <div className="flex flex-col gap-2">
+                            <label className="text-sm text-gray-700 font-medium">
+                                Question Type
                             </label>
                             <div className="relative">
-                                <input
-                                    type="number"
-                                    value={questionCount}
-                                    onChange={handleQuestionCountChange}
-                                    min="1"
-                                    max={hasMounted && !(userInfo.role === 'admin' || userInfo.role === 'owner') ? "25" : "25"}
-                                    className="w-full px-4 py-3 text-gray-700 bg-gray-50 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none peer"
-                                    placeholder=" "
-                                />
-
+                                <select
+                                    value={questionType}
+                                    onChange={(e) => setQuestionType(e.target.value)}
+                                    className="w-full px-4 py-3 text-gray-700 bg-white rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none appearance-none"
+                                >
+                                    <option value="" disabled hidden>Select Type</option>
+                                    {questionTypes.map((type) => (
+                                        <option key={type.value} value={type.value}>{type.label}</option>
+                                    ))}
+                                </select>
+                                <div
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-500">
+                                    <FiChevronDown className="h-5 w-5"/>
+                                </div>
                             </div>
                         </div>
-                    {/*</div>*/}
-                </div>
+                    </div>
+                )}
+
                 {/* Submit Button */}
                 <button
                     onClick={handleSubmit}
