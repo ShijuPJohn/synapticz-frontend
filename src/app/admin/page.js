@@ -1,5 +1,5 @@
 'use client'
-import React, {useEffect, useState} from 'react'
+import React, {Suspense, useEffect, useState} from 'react'
 import {useRouter, useSearchParams} from 'next/navigation'
 import {
     Avatar,
@@ -49,7 +49,7 @@ import {useSelector} from "react-redux";
 import UserInfoEditScreen from "@/components/userInfoEditScreen";
 
 
-export default function UsersDashboard() {
+function UsersDashboard() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const [users, setUsers] = useState([])
@@ -362,3 +362,12 @@ export default function UsersDashboard() {
         </>
     )
 }
+function Page() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <UsersDashboard/>
+        </Suspense>
+    );
+}
+
+export default Page;
