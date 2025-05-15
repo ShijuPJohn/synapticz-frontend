@@ -185,15 +185,15 @@ function Header() {
                 <h1 className="logo text-[calc(1vw+1rem)] font-[600] text-white">
                     <Link href={"/"}>
                         <div className="logo-image-container w-[calc(8rem+7vw)] h-24 relative">
-                            {/*<Image*/}
-                            {/*    src="/images/logo.jpg"*/}
-                            {/*    alt="Logo"*/}
-                            {/*    fill*/}
-                            {/*    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"*/}
-                            {/*    priority*/}
-                            {/*    className="object-contain"*/}
-                            {/*/>*/}
-                            LOGO
+                            <Image
+                                src="/images/logo.jpg"
+                                alt="Logo"
+                                fill
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                priority
+                                className="object-contain"
+                            />
+                            {/*LOGO*/}
                         </div>
                     </Link>
                 </h1>

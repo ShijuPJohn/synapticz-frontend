@@ -81,6 +81,11 @@ function UsersDashboard() {
     useEffect(() => {
         fetchUsers()
     }, [pagination.page, filters])
+    useEffect(()=>{
+        if (!(userInfo.role === 'admin' || userInfo.role === 'owner')) {
+            router.push('/quizzes')
+        }
+    },[])
 
     const fetchUsers = async () => {
         try {

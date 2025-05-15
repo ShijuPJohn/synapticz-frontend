@@ -54,7 +54,7 @@ export default function QuestionsPage() {
     const [uploadedUrl, setUploadedUrl] = useState(null);
     const [loading, setLoading] = useState(false);
     const [slug, setSlug] = useState("");
-    const [accessLevel, setAccessLevel] = useState("premium");
+    const [accessLevel, setAccessLevel] = useState("free");
 
 
     function getHeaders() {
