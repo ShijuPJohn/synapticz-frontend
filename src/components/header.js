@@ -102,7 +102,7 @@ function Header() {
 
     const navElements = [
         {
-            id: 'quizzes', element: <li key="quizzes" className="header-list-item">
+            id: 'verified_quizzes', element: <li key="verified_quizzes" className="header-list-item">
                 <Link href="/verified-quizzes">Verified Quizzes</Link>
             </li>
         },{
@@ -272,8 +272,8 @@ function Header() {
                                 </ListItemIcon>
                                 AI Quiz Generator
                             </MenuItem>,
-                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose}
-                                      key="generator">
+                            <MenuItem component={Link} href="/quizzes" onClick={handleMenuClose}
+                                      key="user_generated">
                                 <ListItemIcon>
                                     <AutoFixHigh fontSize="small"/>
                                 </ListItemIcon>
@@ -292,8 +292,8 @@ function Header() {
                                 Sign Up
                             </MenuItem>
                         ] : [
-                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose}
-                                      key="generator">
+                            <MenuItem component={Link} href="/quizzes" onClick={handleMenuClose}
+                                      key="user_generated">
                                 <ListItemIcon>
                                     <Diversity1 fontSize="small"/>
                                 </ListItemIcon>
