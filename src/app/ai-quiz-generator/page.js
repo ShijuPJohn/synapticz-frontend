@@ -207,7 +207,9 @@ function Page(props) {
         try {
             const response = await axios.post(`${fetchURL}/questionsets/`, {
                 ...quiz,
-                question_ids: qids
+                question_ids: qids,
+                creator_type:userInfo.role,
+                verified:false,
             }, {headers: getHeaders()});
             setStatusText("Quiz created. Redirecting")
             enqueueSnackbar("Quiz created successfully. Redirecting", {variant: 'success'});
