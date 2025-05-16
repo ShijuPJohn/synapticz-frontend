@@ -142,6 +142,7 @@ export default function QuestionsPage() {
             cover_image: uploadedUrl,
             slug: slug,
             access_level: accessLevel,
+            creator_type: creatorType,
         };
         setLoading(true);
         try {
