@@ -9,7 +9,7 @@ export const protectedRoutePrefixes = [
     "/history",
     "/test",
     "/admin-dashboard",
-    "/create-quizzes",
+    "/create-quiz",
     "/edit-quiz",
     "/bulk-create-questions",
     "/ai-quiz-generator",
