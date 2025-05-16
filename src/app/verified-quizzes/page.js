@@ -72,7 +72,7 @@ async function Page({ searchParams }) {
             if (value && key !== 'page') params.append(key, value);
         });
 
-        const res = await axios.get(`${fetchURL}/questionsets?${params.toString()}&page=${currentPage}`);
+        const res = await axios.get(`${fetchURL}/questionsets/verified?${params.toString()}&page=${currentPage}`);
         questionSets = res.data.data.map((item) => ({
             ...item,
             coverImage: item.coverImage || "https://synapticz.com/images/icon.png",
@@ -92,7 +92,7 @@ async function Page({ searchParams }) {
     return (
         <main>
             <div className={"w-full md:w-[70%] lg:w-[60%] flex flex-col gap-2"}>
-                <QuestionSetSearch searchParams={searchParams} />
+                <QuestionSetSearch searchParams={searchParams} verified={true} />
                 {questionSets.length > 0 ? (
                     questionSets.map(set => (
                         <QuestionSetCard key={set.id} questionSet={set} />

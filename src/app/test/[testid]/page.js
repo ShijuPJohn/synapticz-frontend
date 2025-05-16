@@ -87,6 +87,18 @@ function Page({params}) {
     const handleClose = () => {
         setDialogOpen(false);
     };
+    useEffect(() => {
+        if (localStorage.getItem("muted")==="true") {
+            setMuted(true);
+        }
+    }, [])
+    useEffect(() => {
+        if (muted) {
+            localStorage.setItem("muted", "true")
+        } else {
+            localStorage.removeItem("muted");
+        }
+    }, [muted])
 
     useEffect(() => {
         if (!didFetch.current && params.testid) {
@@ -578,12 +590,12 @@ function Page({params}) {
                                 ) : (
 
 
-                                        <button
-                                            className="test-finish-btn text-white rounded-lg  bg-[#ad3653] hover:bg-[#c74e6b] bgred hover:cursor-pointer transition duration-300 whitespace-nowrap px-3 py-[.3rem] "
-                                            onClick={handleClickOpen}
-                                        >
-                                            <FontAwesomeIcon icon={faFlagCheckered}/> Finish
-                                        </button>
+                                    <button
+                                        className="test-finish-btn text-white rounded-lg  bg-[#ad3653] hover:bg-[#c74e6b] bgred hover:cursor-pointer transition duration-300 whitespace-nowrap px-3 py-[.3rem] "
+                                        onClick={handleClickOpen}
+                                    >
+                                        <FontAwesomeIcon icon={faFlagCheckered}/> Finish
+                                    </button>
 
 
                                 )}
