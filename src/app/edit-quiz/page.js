@@ -8,7 +8,17 @@ import QuestionSetCard from "@/components/question_set_card";
 import QuestionSetSearch from "@/components/question_set_search";
 import {useSelector} from "react-redux";
 import {enqueueSnackbar} from "notistack";
-import {Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField} from "@mui/material";
+import {
+    Button, Checkbox,
+    Chip,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    FormControlLabel,
+    MenuItem,
+    TextField
+} from "@mui/material";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {
     faArrowLeft, faArrowRight,
@@ -65,7 +75,8 @@ const EditQuizComponent = () => {
     const [totalNumberOfPages, setTotalNumberOfPages] = useState(0);
     const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    const [accessLevel, setAccessLevel] = useState("premium");
+
+    // const [accessLevel, setAccessLevel] = useState("premium");
 
     function getHeaders() {
         return {
@@ -121,7 +132,7 @@ const EditQuizComponent = () => {
         try {
             const response = await axios.put(
                 `${fetchURL}/questionsets/${currentQuiz.id}`,
-                {...formData, cover_image: uploadedUrl, access_level: accessLevel},
+                {...formData, cover_image: uploadedUrl},
                 {headers: getHeaders()}
             );
 
@@ -132,7 +143,6 @@ const EditQuizComponent = () => {
                         ? {
                             ...qSet, ...formData,
                             coverImage: uploadedUrl ? uploadedUrl : currentQuiz.coverImage,
-                            access_level: accessLevel,
                             slug: formData.slug
                         }
                         : qSet
@@ -190,6 +200,9 @@ const EditQuizComponent = () => {
                 question_ids: Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : [],
                 coverImage: currentQuiz.coverImage || "/images/placeholder_book.png",
                 slug: currentQuiz.slug || "",
+                verified: currentQuiz.verified || false,
+                creator_type: currentQuiz.creator_type || "",
+                access_level: currentQuiz.access_level || "",
             });
             setSelectedQuestions(Array.isArray(currentQuiz.question_ids) ? currentQuiz.question_ids : []);
             setCoverImagePreview(currentQuiz.coverImage);
@@ -423,13 +436,44 @@ const EditQuizComponent = () => {
                             label="Access Type"
                             fullWidth
                             margin="normal"
-                            value={accessLevel}
-                            onChange={(e) => setAccessLevel(e.target.value)}
+                            value={formData.access_level}
+                            onChange={e => {
+                                setFormData({...formData, access_level: e.target.value})
+                            }}
                         >
                             <MenuItem value="free">Free</MenuItem>
                             <MenuItem value="premium">Premium</MenuItem>
                             <MenuItem value="paid">Paid</MenuItem>
                         </TextField>
+                        {userInfo.role === "admin" || userInfo.role === "owner" &&
+                            <div>
+                                <TextField
+                                    select
+                                    label="Creator Type"
+                                    fullWidth
+                                    margin="normal"
+                                    value={formData.creator_type}
+                                    onChange={(e) => {
+                                        setFormData({...formData, creatorType: e.target.value});
+                                    }}
+                                >
+                                    <MenuItem value="admin">Admin</MenuItem>
+                                    <MenuItem value="community">Community</MenuItem>
+                                    <MenuItem value="owner">Owner</MenuItem>
+                                </TextField>
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            checked={formData.verified}
+                                            onChange={(e) => {
+                                                setFormData({...formData, verified: e.target.checked});
+                                            }}
+                                            color="primary"
+                                        />
+                                    }
+                                    label="Verified"
+                                /></div>
+                        }
                         <div className="flex flex-col md:flex-row items-center gap-4">
                             <div className="w-36 h-36 rounded-full overflow-hidden border border-slate-200 shadow">
                                 {coverImagePreview ? (

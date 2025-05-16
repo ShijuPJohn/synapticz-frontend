@@ -6,13 +6,13 @@ import {faBars, faEdit, faListCheck, faPlus, faQuestion} from '@fortawesome/free
 import {useSelector} from "react-redux";
 import {fetchURL} from "@/constants";
 import {
-    Button,
+    Button, Checkbox,
     Chip,
     CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle,
+    DialogTitle, FormControlLabel, FormGroup,
     MenuItem,
     TextField
 } from "@mui/material";
@@ -55,6 +55,8 @@ export default function QuestionsPage() {
     const [loading, setLoading] = useState(false);
     const [slug, setSlug] = useState("");
     const [accessLevel, setAccessLevel] = useState("free");
+    const [creatorType, setCreatorType] = useState("admin");
+    const [quizVerified, setQuizVerified] = useState(false);
 
 
     function getHeaders() {
@@ -101,7 +103,9 @@ export default function QuestionsPage() {
             slug: slug,
             correct_options: correctOptions,
             explanation,
-            tags
+            tags,
+            verified: quizVerified,
+            creator_type: creatorType,
         }
         setLoading(true)
         try {
@@ -376,23 +380,36 @@ export default function QuestionsPage() {
                         value={accessLevel}
                         onChange={(e) => setAccessLevel(e.target.value)}
                     >
-                        <MenuItem value="admin">Free</MenuItem>
-                        <MenuItem value="admin-verified">Premium</MenuItem>
-                        <MenuItem value="community">Paid</MenuItem>
-                        <MenuItem value="community-verified">Paid</MenuItem>
-                    </TextField>
-                    {userInfo.role ==="admin" || userInfo.role === "admin" && <TextField
-                        select
-                        label="Access Type"
-                        fullWidth
-                        margin="normal"
-                        value={accessLevel}
-                        onChange={(e) => setAccessLevel(e.target.value)}
-                    >
-                        <MenuItem value="admin">Free</MenuItem>
-                        <MenuItem value="community">Premium</MenuItem>
+                        <MenuItem value="free">Free</MenuItem>
+                        <MenuItem value="premium">Premium</MenuItem>
                         <MenuItem value="paid">Paid</MenuItem>
-                    </TextField>}
+                    </TextField>
+                    {userInfo.role === "admin" || userInfo.role === "owner" &&
+                        <div>
+                            <TextField
+                                select
+                                label="Creator Type"
+                                fullWidth
+                                margin="normal"
+                                value={creatorType}
+                                onChange={(e) => setAccessLevel(e.target.value)}
+                            >
+                                <MenuItem value="admin">Admin</MenuItem>
+                                <MenuItem value="community">Community</MenuItem>
+                                <MenuItem value="owner">Owner</MenuItem>
+                            </TextField>
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={quizVerified}
+                                        onChange={(e) => setQuizVerified(e.target.checked)}
+                                        color="primary"
+                                    />
+                                }
+                                label="Verified"
+                            /></div>
+                    }
+
                     <TextField
                         select
                         label="Mode"
