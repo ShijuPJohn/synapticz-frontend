@@ -14,7 +14,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {protectedRoutePrefixes} from "@/constants";
 import {usePathname, useRouter} from "next/navigation";
-import {AutoFixHigh, NoteAdd} from "@mui/icons-material";
+import {AutoFixHigh, Diversity1, NoteAdd, PeopleOutline} from "@mui/icons-material";
 
 function Header() {
     const drawerTimeout = useRef(null);
@@ -103,7 +103,11 @@ function Header() {
     const navElements = [
         {
             id: 'quizzes', element: <li key="quizzes" className="header-list-item">
-                <Link href="/quizzes">Quizzes</Link>
+                <Link href="/verified-quizzes">Verified Quizzes</Link>
+            </li>
+        },{
+            id: 'quizzes', element: <li key="quizzes" className="header-list-item">
+                <Link href="/quizzes">User Generated</Link>
             </li>
         },
         ...(userInfo && Object.keys(userInfo).length ? [
@@ -198,15 +202,17 @@ function Header() {
                     </Link>
                 </h1>
                 <nav className="navLinks hidden md:flex md:gap-2 uppercase  justify-center">
-                    <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link href={"/quizzes"}
-                                                                                                   className={"flex justify-center items-center gap-2"}>
+                    <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link
+                        href={"/verified-quizzes"}
+                        className={"flex justify-center items-center gap-2"}>
                         <Image className={"bg-[#3583a5]"} src={"/images/exam3.png"} alt={"exam icon"} width={35}
                                height={35}/>
-                        Browse Quizzes
+                        Verified Quizzes
                     </Link>
                     </ul>
-                    { (userInfo.role==='admin' || userInfo.role==='owner')&&
-                        <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link href={"/admin"} className={"flex justify-center items-center gap-2"}>
+                    {(userInfo.role === 'admin' || userInfo.role === 'owner') &&
+                        <ul className="flex items-center text-white border border-[#3583a5] p-2"><Link href={"/admin"}
+                                                                                                       className={"flex justify-center items-center gap-2"}>
                             Admin Dashboard
                         </Link>
                         </ul>
@@ -259,11 +265,19 @@ function Header() {
                         anchorOrigin={{horizontal: 'right', vertical: 'bottom'}}
                     >
                         {!userInfo || Object.keys(userInfo).length === 0 ? [
-                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose} key="generator">
+                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose}
+                                      key="generator">
                                 <ListItemIcon>
                                     <AutoFixHigh fontSize="small"/>
                                 </ListItemIcon>
                                 AI Quiz Generator
+                            </MenuItem>,
+                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose}
+                                      key="generator">
+                                <ListItemIcon>
+                                    <AutoFixHigh fontSize="small"/>
+                                </ListItemIcon>
+                                User Generated
                             </MenuItem>,
                             <MenuItem component={Link} href="/login" onClick={handleMenuClose} key="login">
                                 <ListItemIcon>
@@ -278,19 +292,28 @@ function Header() {
                                 Sign Up
                             </MenuItem>
                         ] : [
+                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose}
+                                      key="generator">
+                                <ListItemIcon>
+                                    <Diversity1 fontSize="small"/>
+                                </ListItemIcon>
+                                User Generated
+                            </MenuItem>,
                             <MenuItem component={Link} href="/profile" onClick={handleMenuClose} key="profile">
                                 <ListItemIcon>
                                     <PersonIcon fontSize="small"/>
                                 </ListItemIcon>
                                 Profile
                             </MenuItem>,
-                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose} key="generator">
+                            <MenuItem component={Link} href="/ai-quiz-generator" onClick={handleMenuClose}
+                                      key="generator">
                                 <ListItemIcon>
                                     <AutoFixHigh fontSize="small"/>
                                 </ListItemIcon>
                                 AI Quiz Generator
                             </MenuItem>,
-                            <MenuItem component={Link} href="/edit-profile" onClick={handleMenuClose} key="edit-profile">
+                            <MenuItem component={Link} href="/edit-profile" onClick={handleMenuClose}
+                                      key="edit-profile">
                                 <ListItemIcon>
                                     <EditIcon fontSize="small"/>
                                 </ListItemIcon>

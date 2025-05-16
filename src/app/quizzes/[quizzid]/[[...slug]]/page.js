@@ -4,6 +4,7 @@ import {fetchURL} from "@/constants";
 import Image from "next/image";
 import StartSessionControlBox from "@/components/start_session_control_box";
 import {CircularProgress} from "@mui/material";
+import {DoNotDisturb, Verified as VerifiedIcon} from "@mui/icons-material";
 
 export async function generateMetadata({params}) {
     const quiz = await fetchQuizById(params.quizzid);
@@ -125,6 +126,12 @@ export default async function Page({params}) {
                             <Info label="🗣 Language" value={capitalizeFirstLetter(quiz.language)}/>
                             <Info label="🎯 Mode" value={capitalizeFirstLetter(quiz.mode)}/>
                             <Info label="🚀 Taken" value={`${quiz.test_sessions_taken} times`}/>
+
+
+                                <span title="Verified">Verified:
+                                    {quiz.verified? <VerifiedIcon className="text-green-500" />:<DoNotDisturb className="text-red-800" />}
+                                                        </span>
+
                             <Info
                                 label="No. of Questions"
                                 value={`${quiz.question_ids ? quiz.question_ids.length : 0}`}
