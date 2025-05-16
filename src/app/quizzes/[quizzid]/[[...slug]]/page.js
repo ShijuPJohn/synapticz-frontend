@@ -3,6 +3,7 @@ import axios from "axios";
 import {fetchURL} from "@/constants";
 import Image from "next/image";
 import StartSessionControlBox from "@/components/start_session_control_box";
+import {CircularProgress} from "@mui/material";
 
 export async function generateMetadata({params}) {
     const quiz = await fetchQuizById(params.quizzid);
@@ -57,13 +58,15 @@ export async function generateMetadata({params}) {
 }
 
 async function fetchQuizById(qzid) {
-    try {
-        const response = await axios.get(`${fetchURL}/questionsets/${qzid}`);
-        return response.data;
-    } catch (err) {
-        console.error("Error fetching quiz:", err);
-        return null;
+    for (let i = 0; i < 5; i++) {
+        try {
+            const response = await axios.get(`${fetchURL}/questionsets/${qzid}`);
+            return response.data;
+        } catch (err) {
+            console.error("Error fetching quiz. Retrying ", i);
+        }
     }
+    return null;
 }
 
 function capitalizeFirstLetter(str) {
@@ -82,20 +85,9 @@ function Info({label, value}) {
 
 export default async function Page({params}) {
     const quiz = await fetchQuizById(params.quizzid);
-
-    if (!quiz) {
-        return (
-            <main>
-                <p className="text-blue-600 text-lg font-medium animate-pulse">
-                    Loading quiz details...
-                </p>
-            </main>
-        );
-    }
-
     return (
         <main>
-            <div
+            {quiz ? <div
                 className="w-[98%] md:w-[80%] lg:w-[50%] mx-auto bg-white rounded-2xl p-4 md:p-12 border border-purple-100">
                 {/* Top Section: Image + Metadata */}
                 <div className="flex flex-col lg:flex-row gap-8">
@@ -200,7 +192,10 @@ export default async function Page({params}) {
                 {quiz.can_start_test && (
                     <StartSessionControlBox qid={params.quizzid}/>
                 )}
-            </div>
+            </div> : <p className="text-blue-600 text-lg font-medium animate-pulse">
+                <CircularProgress size={10}/>
+            </p>
+            }
         </main>
     );
 }

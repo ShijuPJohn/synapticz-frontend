@@ -100,7 +100,7 @@ function UserInfoEditScreen({userId}) {
     }
 
     return (
-            <Card sx={{maxWidth: "100%", mx: 'auto', my: 4, boxShadow: 3, marginTop:"5rem"}}>
+            <Card sx={{maxWidth: "100%", height:"100%", mx: 'auto', border:"none", outline:'none'}}>
                 <CardHeader
                     avatar={
                         <Avatar

@@ -81,7 +81,7 @@ export default function QuestionsPage() {
             });
             enqueueSnackbar("Image uploaded successfully.", {variant: "success"});
             setUploadedUrl(res.data.url);
-            console.log("uploaded url",res.data.url)
+            console.log("uploaded url", res.data.url)
         } catch (err) {
             console.error("Failed to upload image", err);
         } finally {
@@ -376,10 +376,23 @@ export default function QuestionsPage() {
                         value={accessLevel}
                         onChange={(e) => setAccessLevel(e.target.value)}
                     >
-                        <MenuItem value="free">Free</MenuItem>
-                        <MenuItem value="premium">Premium</MenuItem>
-                        <MenuItem value="paid">Paid</MenuItem>
+                        <MenuItem value="admin">Free</MenuItem>
+                        <MenuItem value="admin-verified">Premium</MenuItem>
+                        <MenuItem value="community">Paid</MenuItem>
+                        <MenuItem value="community-verified">Paid</MenuItem>
                     </TextField>
+                    {userInfo.role ==="admin" || userInfo.role === "admin" && <TextField
+                        select
+                        label="Access Type"
+                        fullWidth
+                        margin="normal"
+                        value={accessLevel}
+                        onChange={(e) => setAccessLevel(e.target.value)}
+                    >
+                        <MenuItem value="admin">Free</MenuItem>
+                        <MenuItem value="community">Premium</MenuItem>
+                        <MenuItem value="paid">Paid</MenuItem>
+                    </TextField>}
                     <TextField
                         select
                         label="Mode"

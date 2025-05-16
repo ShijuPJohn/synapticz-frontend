@@ -2,30 +2,12 @@
 import React, {Suspense, useEffect, useState} from 'react'
 import {useRouter, useSearchParams} from 'next/navigation'
 import {
-    Avatar,
-    Box,
-    Button,
-    Card,
-    CardContent,
-    CardHeader,
-    Chip,
-    CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle,
-    FormControl,
-    IconButton,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
-    Pagination,
-    Paper,
-    Select,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    TextField,
-    Tooltip
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    CircularProgress,
+    Pagination
 } from '@mui/material'
 import {
     FilterList as FilterIcon,
@@ -36,18 +18,15 @@ import {
 } from '@mui/icons-material'
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {
-    faCrown, faEdit,
+    faCrown,
     faEnvelope,
     faGlobe,
-    faListCheck, faPlus,
-    faQuestion,
     faShieldAlt,
     faUser
 } from '@fortawesome/free-solid-svg-icons'
 import {fetchURL} from "@/constants";
 import {useSelector} from "react-redux";
 import UserInfoEditScreen from "@/components/userInfoEditScreen";
-
 
 function UsersDashboard() {
     const router = useRouter()
@@ -74,18 +53,20 @@ function UsersDashboard() {
 
     function getHeaders() {
         return {
-            "Content-Type": "application/json", Authorization: `Bearer ${userInfo.token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${userInfo.token}`,
         };
     }
 
     useEffect(() => {
         fetchUsers()
     }, [pagination.page, filters])
-    useEffect(()=>{
+
+    useEffect(() => {
         if (!(userInfo.role === 'admin' || userInfo.role === 'owner')) {
             router.push('/quizzes')
         }
-    },[])
+    }, [])
 
     const fetchUsers = async () => {
         try {
@@ -98,7 +79,6 @@ function UsersDashboard() {
 
             const response = await fetch(`${fetchURL}/admin/users?${params}`, {headers: getHeaders()})
             const data = await response.json()
-            console.log("data", data)
             setUsers(data.data.users)
             setPagination(prev => ({
                 ...prev,
@@ -119,7 +99,7 @@ function UsersDashboard() {
     const handleFilterChange = (e) => {
         const {name, value} = e.target
         setFilters(prev => ({...prev, [name]: value}))
-        setPagination(prev => ({...prev, page: 1})) // Reset to first page when filters change
+        setPagination(prev => ({...prev, page: 1}))
     }
 
     const resetFilters = () => {
@@ -131,245 +111,248 @@ function UsersDashboard() {
             verified: ''
         })
     }
-    useEffect(()=>{
-        if (currentUserId){
+
+    useEffect(() => {
+        if (currentUserId) {
             setInfoEditModalShow(true);
         }
-    },[currentUserId])
+    }, [currentUserId])
 
     return (
-        <>
-        <Card sx={{boxShadow: 3}}>
-            <CardHeader
-                title="User Management"
-                action={
-                    <div className={"flex items-center justify-center"}>
-                        <div>
-                            {pagination.total} Total Users
-                        </div>
-                        <Tooltip title="Refresh">
-                            <IconButton onClick={fetchUsers}>
-                                <RefreshIcon/>
-                            </IconButton>
-                        </Tooltip>
-
+        <main>
+            <div className="bg-white rounded-lg shadow-md mx-auto w-full md:w-[80%] xl:w-[70%] my-4">
+                <div className="bg-blue-600 text-white p-4 rounded-t-lg w-full flex flex-col sm:flex-row justify-between items-center">
+                    <h1 className="text-xl font-bold">User Management</h1>
+                    <div className="flex items-center mt-2 sm:mt-0">
+                        <span className="mr-4 hidden sm:block">{pagination.total} Total Users</span>
+                        <button
+                            onClick={fetchUsers}
+                            className="text-white hover:bg-blue-700 p-2 rounded-full"
+                            title="Refresh"
+                        >
+                            <RefreshIcon />
+                        </button>
                     </div>
-                }
-                sx={{
-                    backgroundColor: (theme) => theme.palette.primary.main,
-                    color: 'white'
-                }}
-            />
+                </div>
 
-            <CardContent>
-                <Box sx={{display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap'}}>
-                    <TextField
-                        placeholder="Search users..."
-                        variant="outlined"
-                        size="small"
-                        name="search"
-                        value={filters.search}
-                        onChange={handleFilterChange}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon/>
-                                </InputAdornment>
-                            ),
-                        }}
-                        sx={{flexGrow: 1, maxWidth: 400}}
-                    />
+                <div className="p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <SearchIcon className="text-gray-400" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                                name="search"
+                                value={filters.search}
+                                onChange={handleFilterChange}
+                            />
+                        </div>
 
-                    <FormControl size="small" sx={{minWidth: 120}}>
-                        <InputLabel>Role</InputLabel>
-                        <Select
+                        <select
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             name="role"
                             value={filters.role}
                             onChange={handleFilterChange}
-                            label="Role"
                         >
-                            <MenuItem value=""><em>All Roles</em></MenuItem>
-                            <MenuItem value="user">User</MenuItem>
-                            <MenuItem value="admin">Admin</MenuItem>
-                            <MenuItem value="owner">Owner</MenuItem>
-                        </Select>
-                    </FormControl>
+                            <option value="">All Roles</option>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                            <option value="owner">Owner</option>
+                        </select>
 
-                    <FormControl size="small" sx={{minWidth: 120}}>
-                        <InputLabel>Premium</InputLabel>
-                        <Select
+                        <select
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             name="isPremium"
                             value={filters.isPremium}
                             onChange={handleFilterChange}
-                            label="Premium"
                         >
-                            <MenuItem value=""><em>All</em></MenuItem>
-                            <MenuItem value="true">Premium</MenuItem>
-                            <MenuItem value="false">Regular</MenuItem>
-                        </Select>
-                    </FormControl>
+                            <option value="">All</option>
+                            <option value="true">Premium</option>
+                            <option value="false">Regular</option>
+                        </select>
 
-                    <FormControl size="small" sx={{minWidth: 120}}>
-                        <InputLabel>Verified</InputLabel>
-                        <Select
+                        <select
+                            className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                             name="verified"
                             value={filters.verified}
                             onChange={handleFilterChange}
-                            label="Verified"
                         >
-                            <MenuItem value=""><em>All</em></MenuItem>
-                            <MenuItem value="true">Verified</MenuItem>
-                            <MenuItem value="false">Not Verified</MenuItem>
-                        </Select>
-                    </FormControl>
+                            <option value="">All</option>
+                            <option value="true">Verified</option>
+                            <option value="false">Not Verified</option>
+                        </select>
 
-                    <Button
-                        variant="outlined"
-                        startIcon={<FilterIcon/>}
-                        onClick={resetFilters}
-                    >
-                        Reset
-                    </Button>
-                </Box>
+                        <button
+                            onClick={resetFilters}
+                            className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                            <FilterIcon className="mr-2" />
+                            Reset
+                        </button>
+                    </div>
 
-                {loading ? (
-                    <Box sx={{display: 'flex', justifyContent: 'center', py: 4}}>
-                        <CircularProgress/>
-                    </Box>
-                ) : (
-                    <>
-                        <TableContainer component={Paper} sx={{mb: 2}}>
-                            <Table>
-                                <TableHead>
-                                    <TableRow sx={{backgroundColor: (theme) => theme.palette.grey[100]}}>
-                                        <TableCell>User</TableCell>
-                                        <TableCell>Email</TableCell>
-                                        <TableCell>Role</TableCell>
-                                        <TableCell>Country</TableCell>
-                                        <TableCell>Status</TableCell>
-                                        <TableCell>Joined</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
+                    {loading ? (
+                        <div className="flex justify-center py-8">
+                            <CircularProgress />
+                        </div>
+                    ) : (
+                        <>
+                            <div className="overflow-x-auto mb-4">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                    <tr>
+                                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            User
+                                        </th>
+                                        <th scope="col" className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Email
+                                        </th>
+                                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Role
+                                        </th>
+                                        <th scope="col" className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Country
+                                        </th>
+                                        <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th scope="col" className="hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Joined
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
                                     {users.map((user) => (
-                                        <TableRow key={user.id} hover onClick={()=>{
-                                            setCurrentUserId(user.id);
-
-                                        }}>
-                                            <TableCell>
-                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                                                    <Avatar src={user.profile_pic || undefined}>
-                                                        {user.name.charAt(0)}
-                                                    </Avatar>
-                                                    {user.name}
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                    <FontAwesomeIcon icon={faEnvelope} style={{opacity: 0.6}}/>
+                                        <tr
+                                            key={user.id}
+                                            className="hover:bg-gray-50 cursor-pointer"
+                                            onClick={() => setCurrentUserId(user.id)}
+                                        >
+                                            <td className="px-4 py-4">
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 h-10 w-10">
+                                                        {user.profile_pic ? (
+                                                            <img className="h-10 w-10 rounded-full" src={user.profile_pic} alt="" />
+                                                        ) : (
+                                                            <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
+                                                                {user.name.charAt(0)}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="ml-4">
+                                                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                                        <div className="lg:hidden text-sm text-gray-500">{user.email}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="hidden lg:table-cell px-4 py-4">
+                                                <div className="flex items-center text-sm text-gray-500">
+                                                    <FontAwesomeIcon icon={faEnvelope} className="mr-2 opacity-60" />
                                                     {user.email}
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-4">
                                                 {user.role === 'admin' ? (
-                                                    <Chip
-                                                        icon={<FontAwesomeIcon icon={faShieldAlt}/>}
-                                                        label="Admin"
-                                                        color="warning"
-                                                        size="small"
-                                                    />
+                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                        <FontAwesomeIcon icon={faShieldAlt} className="mr-1" />
+                                                        <span className="hidden sm:inline">Admin</span>
+                                                    </span>
                                                 ) : user.role === 'owner' ? (
-                                                    <Chip
-                                                        icon={<FontAwesomeIcon icon={faCrown}/>}
-                                                        label="Owner"
-                                                        color="secondary"
-                                                        size="small"
-                                                    />
+                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                                        <FontAwesomeIcon icon={faCrown} className="mr-1" />
+                                                        <span className="hidden sm:inline">Owner</span>
+                                                    </span>
                                                 ) : (
-                                                    <Chip
-                                                        icon={<FontAwesomeIcon icon={faUser}/>}
-                                                        label="User"
-                                                        color="primary"
-                                                        size="small"
-                                                        style={{padding:".4rem"}}
-                                                    />
+                                                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                                                        <FontAwesomeIcon icon={faUser} className="mr-1" />
+                                                        <span className="hidden sm:inline">User</span>
+                                                    </span>
                                                 )}
-                                            </TableCell>
-                                            <TableCell>
+                                            </td>
+                                            <td className="hidden lg:table-cell px-4 py-4">
                                                 {user.country ? (
-                                                    <Box sx={{display: 'flex', alignItems: 'center', gap: 1}}>
-                                                        <FontAwesomeIcon icon={faGlobe}/>
+                                                    <div className="flex items-center text-sm text-gray-500">
+                                                        <FontAwesomeIcon icon={faGlobe} className="mr-2" />
                                                         {user.country}
-                                                    </Box>
+                                                    </div>
                                                 ) : '-'}
-                                            </TableCell>
-                                            <TableCell>
-                                                <Box sx={{display: 'flex', gap: 1}}>
+                                            </td>
+                                            <td className="px-4 py-4">
+                                                <div className="flex space-x-2">
                                                     {user.is_premium && (
-                                                        <Tooltip title="Premium User">
-                                                            <PremiumIcon color="primary"/>
-                                                        </Tooltip>
+                                                        <span title="Premium User">
+                                                            <PremiumIcon className="text-blue-500" />
+                                                        </span>
                                                     )}
                                                     {user.verified && (
-                                                        <Tooltip title="Verified">
-                                                            <VerifiedIcon color="success"/>
-                                                        </Tooltip>
+                                                        <span title="Verified">
+                                                            <VerifiedIcon className="text-green-500" />
+                                                        </span>
                                                     )}
-                                                </Box>
-                                            </TableCell>
-                                            <TableCell>
+                                                </div>
+                                            </td>
+                                            <td className="hidden lg:table-cell px-4 py-4 text-sm text-gray-500">
                                                 {new Date(user.created_at).toLocaleDateString()}
-                                            </TableCell>
-                                        </TableRow>
+                                            </td>
+                                        </tr>
                                     ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                            <Box>
-                                Showing {users.length} of {pagination.total} users
-                            </Box>
-                            <Pagination
-                                count={pagination.totalPages}
-                                page={pagination.page}
-                                onChange={handlePageChange}
-                                color="primary"
-                                shape="rounded"
-                                showFirstButton
-                                showLastButton
-                            />
-                        </Box>
-                    </>
-                )}
-            </CardContent>
-        </Card>
-            <Dialog open={infoEditModalShow} onClose={() => {
-                setInfoEditModalShow(false)
-            }}
-                    sx={{'& .MuiDialog-paper': {minHeight: "15rem", minWidth: "80%", width: "100%", margin: "0"}}}
+                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                <div className="text-sm text-gray-700">
+                                    Showing {users.length} of {pagination.total} users
+                                </div>
+                                <Pagination
+                                    count={pagination.totalPages}
+                                    page={pagination.page}
+                                    onChange={handlePageChange}
+                                    color="primary"
+                                    shape="rounded"
+                                    showFirstButton
+                                    showLastButton
+                                    size="small"
+                                    className="flex-shrink-0"
+                                />
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            <Dialog
+                open={infoEditModalShow}
+                onClose={() => setInfoEditModalShow(false)}
+                fullWidth
+                maxWidth="lg"
+                classes={{ paper: 'm-2' }}
             >
                 <DialogTitle>User Details</DialogTitle>
-                <DialogContent className="flex flex-col lg:flex-row items-center justify-center gap-4 mt-2 border p-2 ">
-                    <div className="w-full flex flex-col gap-2 lg:gap-4 mt-4 ">
+                <DialogContent className="p-4 border-none shadow-none">
+                    <div className="w-full">
                         <UserInfoEditScreen userId={currentUserId}/>
                     </div>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => {
-                        setInfoEditModalShow(false)
-                    }}>Close</Button>
-                    {/*<Button onClick={handleCreateQuestion} variant="contained" color="primary">*/}
-                    {/*    Save*/}
-                    {/*</Button>*/}
+                <DialogActions className={"border-none"}>
+                    <button
+                        onClick={() => setInfoEditModalShow(false)}
+                        className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md"
+                    >
+                        Close
+                    </button>
                 </DialogActions>
             </Dialog>
-        </>
+        </main>
     )
 }
+
 function Page() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="flex justify-center items-center h-screen">Loading...</div>}>
             <UsersDashboard/>
         </Suspense>
     );
