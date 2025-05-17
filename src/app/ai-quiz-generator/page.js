@@ -204,12 +204,18 @@ function Page(props) {
 
     async function createQuiz(quiz, qids) {
         setIsLoading(true);
+        let creatorType = ""
+        if (userInfo.role === "user") {
+            creatorType = "community"
+        } else {
+            creatorType = userInfo.role
+        }
         try {
             const response = await axios.post(`${fetchURL}/questionsets/`, {
                 ...quiz,
                 question_ids: qids,
-                creator_type:userInfo.role,
-                verified:false,
+                creator_type: creatorType,
+                verified: false,
             }, {headers: getHeaders()});
             setStatusText("Quiz created. Redirecting")
             enqueueSnackbar("Quiz created successfully. Redirecting", {variant: 'success'});

@@ -64,7 +64,7 @@ export default function ImportQuestionsPage() {
     async function handleCreateQuiz() {
         setLoading(true);
         try {
-            await axios.post(`${fetchURL}/questionsets`, JSON.parse(json), {headers: getHeaders()});
+            await axios.post(`${fetchURL}/questionsets`, {...JSON.parse(json),creator_type:userInfo.role, verified:false}, {headers: getHeaders()});
             enqueueSnackbar("Quiz created successfully", {variant: 'success'});
         } catch (error) {
             enqueueSnackbar("Quiz creation failed", {variant: 'error'});
